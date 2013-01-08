@@ -1,4 +1,4 @@
-library CanvasTools;
+library BlendFunctions;
 
 import 'dart:math';
 
