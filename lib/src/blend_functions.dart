@@ -1,33 +1,32 @@
-library BlendFunctions;
-
-import 'dart:math';
+part of canvas_tools;
 
 typedef int BlendFunction(int a, int b);
+typedef List<int> SpecialBlendFunction(List<int> a, List<int> b);
 
 class BlendFunctions {
   static int normal(int a, int b) => b;
-  
+
   static int overlay(int a, int b) {
     a ~/= 255;
     b ~/= 255;
     var result = 0;
-  
+
     if(a < 128) result = 2 * a * b;
     else result = 1 - 2 * (1 - a) * (1 - b);
-  
+
     return min(255, max(0, result * 255 | 0));
   }
-  
+
   static int hardLight(int a, int b) => BlendFunctions.overlay(b, a);
-  
+
   static int softLight(int a, int b) {
     a ~/= 255;
     b ~/= 255;
-  
+
     var v = (1 - 2 * b) * (a * a) + 2 * b * a;
     return limitValue(v * 255, 0, 255);
   }
-  
+
   static int dodge(int a, int b) => 256 * a ~/ (255 - b + 1);
   static int burn(int a, int b) => 255 - 256 * (255 - a) ~/ (b + 1);
   static int multiply(int a, int b) => b * a ~/ 255;
@@ -40,33 +39,36 @@ class BlendFunctions {
   static int substract(int a, int b) => max(a - b, 0);
   static int darkenOnly(int a, int b) => min(a, b);
   static int lightenOnly(int a, int b) => max(a, b);
-  
+}
+
+class SpecialBlendFunctions {
+
   static List<int> color(List<int> a, List<int> b) {
     var aHSL = rgbListToHsl(a);
     var bHSL = rgbListToHsl(b);
-  
+
     return hslToRgb(bHSL[0], bHSL[1], aHSL[2]);
   }
-  
+
   static List<int> hue(List<int> a, List<int> b) {
     var aHSV = rgbListToHsv(a);
     var bHSV = rgbListToHsv(b);
-  
+
     if(bHSV[1] == 0) return hsvToRgb(aHSV[0], aHSV[1], aHSV[2]);
     else return hsvToRgb(bHSV[0], aHSV[1], aHSV[2]);
   }
-  
+
   static List<int> value(List<int> a, List<int> b) {
     var aHSV = rgbListToHsv(a);
     var bHSV = rgbListToHsv(b);
-  
+
     return hsvToRgb(aHSV[0], aHSV[1], bHSV[2]);
   }
-  
+
   static List<int> saturation(List<int> a, List<int> b) {
     var aHSV = rgbListToHsv(a);
     var bHSV = rgbListToHsv(b);
-  
+
     return hsvToRgb(aHSV[0], bHSV[1], aHSV[2]);
   }
 }
