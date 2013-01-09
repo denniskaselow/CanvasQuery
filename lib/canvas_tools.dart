@@ -62,4 +62,25 @@ class CanvasTools {
   static ImageData createImageData(int width, int height) {
     return new CanvasElement().context2d.createImageData(width, height);
   }
+
+  static num wrapValue(num value, num min, num max) {
+    if(value < min) {
+      value = max + (value - min);
+    } else if(value > max) {
+      value = min + (value - max);
+    }
+    return value;
+  }
+
+  static num mix(num a, num b, num ammount) {
+    return a + (b - a) * ammount;
+  }
+
+  static List<int> hexToRgb(String hex) {
+    return [int.parse('0x${hex[1]}${hex[2]}'), int.parse('0x${hex[3]}${hex[4]}'), int.parse('0x${hex[5]}${hex[6]}')];
+  }
+
+  static String rgbToHex(int r, int g, int b) {
+    return '#${((1 << 24) + (r << 16) + (g << 8) + b).toRadixString(16).substring(1, 7)}';
+  }
 }
