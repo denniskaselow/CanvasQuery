@@ -1,3 +1,5 @@
+library canvas_tools;
+
 import 'dart:html';
 import 'dart:math';
 
@@ -57,6 +59,12 @@ class CanvasTools {
 
       pixels[i + 3] = belowPixels[i + 3];
     }
+  }
+
+  static CanvasElement createCanvas(ImageElement img) {
+    var result = new CanvasElement(width: img.width, height: img.height);
+    result.context2d.drawImage(img, 0, 0);
+    return result;
   }
 
   static ImageData createImageData(int width, int height) {
