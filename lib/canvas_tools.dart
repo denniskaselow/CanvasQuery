@@ -37,9 +37,9 @@ class CanvasTools {
     for(int i = 0; i < belowPixels.length; i += 4) {
       var rgb = blendingFunction([belowPixels[i + 0], belowPixels[i + 1], belowPixels[i + 2]], [abovePixels[i + 0], abovePixels[i + 1], abovePixels[i + 2]]);
 
-      pixels[i + 0] = belowPixels[i + 0] + (rgb[0] - belowPixels[i + 0]) * mix;
-      pixels[i + 1] = belowPixels[i + 1] + (rgb[1] - belowPixels[i + 1]) * mix;
-      pixels[i + 2] = belowPixels[i + 2] + (rgb[2] - belowPixels[i + 2]) * mix;
+      pixels[i + 0] = belowPixels[i + 0] + ((rgb[0] - belowPixels[i + 0]) * mix).toInt();
+      pixels[i + 1] = belowPixels[i + 1] + ((rgb[1] - belowPixels[i + 1]) * mix).toInt();
+      pixels[i + 2] = belowPixels[i + 2] + ((rgb[2] - belowPixels[i + 2]) * mix).toInt();
 
       pixels[i + 3] = belowPixels[i + 3];
     }
@@ -51,9 +51,9 @@ class CanvasTools {
       int g = blendingFunction(belowPixels[i + 1], abovePixels[i + 1]);
       int b = blendingFunction(belowPixels[i + 2], abovePixels[i + 2]);
 
-      pixels[i + 0] = belowPixels[i + 0] + (r - belowPixels[i + 0]) * mix;
-      pixels[i + 1] = belowPixels[i + 1] + (g - belowPixels[i + 1]) * mix;
-      pixels[i + 2] = belowPixels[i + 2] + (b - belowPixels[i + 2]) * mix;
+      pixels[i + 0] = belowPixels[i + 0] + ((r - belowPixels[i + 0]) * mix).toInt();
+      pixels[i + 1] = belowPixels[i + 1] + ((g - belowPixels[i + 1]) * mix).toInt();
+      pixels[i + 2] = belowPixels[i + 2] + ((b - belowPixels[i + 2]) * mix).toInt();
 
       pixels[i + 3] = belowPixels[i + 3];
     }
