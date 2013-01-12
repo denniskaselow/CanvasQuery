@@ -2,8 +2,8 @@ library canvas_tools;
 
 import 'dart:html';
 import 'dart:math';
-
-part 'src/blend_functions.dart';
+import 'blend_functions.dart';
+export 'blend_functions.dart';
 
 class CanvasTools {
 

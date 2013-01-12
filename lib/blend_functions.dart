@@ -1,4 +1,4 @@
-part of canvas_tools;
+library blend_functions;
 
 typedef int BlendFunction(int a, int b);
 typedef List<int> SpecialBlendFunction(List<int> a, List<int> b);
