@@ -19,7 +19,5 @@ class CanvasWrapper implements CanvasElement {
   CanvasWrapper.forSize(int width, int height) : _canvas = new CanvasElement(width: width, height: height);
   CanvasWrapper.forImage(ImageElement img) : _canvas = CanvasTools.createCanvas(img);
 
-  dynamic noSuchMethod(InvocationMirror im) {
-    im.invokeOn(_canvas);
-  }
+  dynamic noSuchMethod(InvocationMirror im) => im.invokeOn(_canvas);
 }
