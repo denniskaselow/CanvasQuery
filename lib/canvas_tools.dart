@@ -7,13 +7,13 @@ part 'src/blend_functions.dart';
 
 class CanvasTools {
 
-  static CanvasElement blend(CanvasElement below, CanvasElement above, BlendFunction blendingFunction, [num mix = 1]) {
+  static void blend(CanvasElement below, CanvasElement above, BlendFunction blendingFunction, [num mix = 1]) {
     _initBlend(below, above, mix, (pixels, belowPixels, abovePixels, mix) {
       _blend(pixels, belowPixels, abovePixels, mix, blendingFunction);
     });
   }
 
-  static CanvasElement blendSpecial(CanvasElement below, CanvasElement above, SpecialBlendFunction blendingFunction, [num mix = 1]) {
+  static void blendSpecial(CanvasElement below, CanvasElement above, SpecialBlendFunction blendingFunction, [num mix = 1]) {
     _initBlend(below, above, mix, (pixels, belowPixels, abovePixels, mix) {
       _blendSpecial(pixels, belowPixels, abovePixels, mix, blendingFunction);
     });
@@ -31,12 +31,10 @@ class CanvasTools {
     blendingFunction(imageData.data, belowData.data, aboveData.data, mix);
 
     below.context2d.putImageData(imageData, 0, 0);
-
-    return below;
   }
 
   static _blendSpecial(Uint8ClampedArray pixels, Uint8ClampedArray belowPixels, Uint8ClampedArray abovePixels, num mix, SpecialBlendFunction blendingFunction) {
-    for(var i = 0, len = belowPixels.length; i < len; i += 4) {
+    for(int i = 0; i < belowPixels.length; i += 4) {
       var rgb = blendingFunction([belowPixels[i + 0], belowPixels[i + 1], belowPixels[i + 2]], [abovePixels[i + 0], abovePixels[i + 1], abovePixels[i + 2]]);
 
       pixels[i + 0] = belowPixels[i + 0] + (rgb[0] - belowPixels[i + 0]) * mix;
@@ -48,10 +46,10 @@ class CanvasTools {
   }
 
   static _blend(Uint8ClampedArray pixels, Uint8ClampedArray belowPixels, Uint8ClampedArray abovePixels, num mix, BlendFunction blendingFunction) {
-    for(var i = 0, len = belowPixels.length; i < len; i += 4) {
-      var r = blendingFunction(belowPixels[i + 0], abovePixels[i + 0]);
-      var g = blendingFunction(belowPixels[i + 1], abovePixels[i + 1]);
-      var b = blendingFunction(belowPixels[i + 2], abovePixels[i + 2]);
+    for(int i = 0; i < belowPixels.length; i += 4) {
+      int r = blendingFunction(belowPixels[i + 0], abovePixels[i + 0]);
+      int g = blendingFunction(belowPixels[i + 1], abovePixels[i + 1]);
+      int b = blendingFunction(belowPixels[i + 2], abovePixels[i + 2]);
 
       pixels[i + 0] = belowPixels[i + 0] + (r - belowPixels[i + 0]) * mix;
       pixels[i + 1] = belowPixels[i + 1] + (g - belowPixels[i + 1]) * mix;
