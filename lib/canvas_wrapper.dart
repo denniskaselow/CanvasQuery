@@ -52,6 +52,7 @@ class CanvasWrapper implements CanvasElement {
   }
 
   void pixelize([int size = 4]) {
+    if (_canvas.width < size) size = _canvas.width;
     var webkitImageSmoothingEnabled = _context.webkitImageSmoothingEnabled;
     _context.webkitImageSmoothingEnabled = false;
 
