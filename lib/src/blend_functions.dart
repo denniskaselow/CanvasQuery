@@ -76,28 +76,28 @@ class SpecialBlendFunctions {
 int limitValue(int value, int min, int max) => value < min ? min : value > max ? max : value;
 
 /* author: http://mjijackson.com/ */
-List<int> rgbListToHsl(List<int> rgb) => rgbToHsl(rgb[0], rgb[1], rgb[2]);
-List<int> rgbToHsl(int r, int g, int b) {
-  r ~/= 255;
-  g ~/= 255;
-  b ~/= 255;
-  int maxv = max(max(r, g), b),
-      minv = min(min(r, g), b);
-  num h, s, l = (maxv + minv) / 2;
+List<double> rgbListToHsl(List<int> rgb) => rgbToHsl(rgb[0], rgb[1], rgb[2]);
+List<double> rgbToHsl(int red, int green, int blue) {
+  double r = red / 255;
+  double g = green / 255;
+  double b = blue / 255;
+  double maxv = max(max(r, g), b),
+         minv = min(min(r, g), b);
+  double h, s, l = (maxv + minv) / 2;
 
   if(maxv == minv) {
-    h = s = 0; // achromatic
+    h = s = 0.0; // achromatic
   } else {
     num d = maxv - minv;
     s = l > 0.5 ? d / (2 - maxv - minv) : d / (maxv + minv);
-    switch(maxv) {
-      case r:
+    switch(max(max(red, green), blue)) {
+      case red:
         h = (g - b) / d + (g < b ? 6 : 0);
         break;
-      case g:
+      case green:
         h = (b - r) / d + 2;
         break;
-      case b:
+      case blue:
         h = (r - g) / d + 4;
         break;
     }
@@ -107,13 +107,18 @@ List<int> rgbToHsl(int r, int g, int b) {
   return [h, s, l];
 }
 /* author: http://mjijackson.com/ */
-List<int> hslToRgb(int h, int s, int l) {
-  int r, g, b;
+List<int> hslToRgb(num hue, num saturation, num lightness) {
+  double h = hue.toDouble();
+  double s = saturation.toDouble();
+  double l = lightness.toDouble();
+  double r;
+  double g;
+  double b;
 
   if(s == 0) {
-    r = g = b = l; // achromatic
+    r = g = b = 1.0; // achromatic
   } else {
-    Function hue2rgb = (p, q, t) {
+    Function hue2rgb = (num p, num q, num t) {
       if(t < 0) t += 1;
       if(t > 1) t -= 1;
       if(t < 1 / 6) return p + (q - p) * 6 * t;
@@ -129,24 +134,24 @@ List<int> hslToRgb(int h, int s, int l) {
     b = hue2rgb(p, q, h - 1 / 3);
   }
 
-  return [r * 255 | 0, g * 255 | 0, b * 255 | 0];
+  return [(r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt()];
 }
 
 
-List<int> rgbListToHsv(List<int> rgb) => rgbToHsv(rgb[0], rgb[1], rgb[2]);
-List<int> rgbToHsv(int r, int g, int b) {
+List<double> rgbListToHsv(List<int> rgb) => rgbToHsv(rgb[0], rgb[1], rgb[2]);
+List<double> rgbToHsv(int r, int g, int b) {
   r = r ~/ 255;
   g = g ~/ 255;
   b = b ~/ 255;
-  var maxv = max(max(r, g), b),
-      minv = min(min(r, g), b);
-  var h, s, v = maxv;
+  int maxv = max(max(r, g), b),
+         minv = min(min(r, g), b);
+  double h, s, v = maxv.toDouble();
 
   var d = maxv - minv;
   s = maxv == 0 ? 0 : d / maxv;
 
   if(maxv == minv) {
-    h = 0; // achromatic
+    h = 0.0; // achromatic
   } else {
     switch(maxv) {
       case r:
@@ -165,14 +170,17 @@ List<int> rgbToHsv(int r, int g, int b) {
   return [h, s, v];
 }
 
-List<int> hsvToRgb(int h, int s, int v) {
-  int r, g, b;
+List<int> hsvToRgb(num hue, num saturation, num value) {
+  double h = hue.toDouble();
+  double s = saturation.toDouble();
+  double v = value.toDouble();
+  double r, g, b;
 
-  int i = (h * 6).floor();
-  int f = h * 6 - i;
-  int p = v * (1 - s);
-  int q = v * (1 - f * s);
-  int t = v * (1 - (1 - f) * s);
+  int i = (h * 6).toInt();
+  double f = h * 6 - i;
+  double p = v * (1 - s);
+  double q = v * (1 - f * s);
+  double t = v * (1 - (1 - f) * s);
 
   switch(i % 6) {
     case 0:
@@ -195,5 +203,5 @@ List<int> hsvToRgb(int h, int s, int v) {
       break;
   }
 
-  return [r * 255, g * 255, b * 255];
+  return [(r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt()];
 }
