@@ -1,5 +1,7 @@
 library blend_functions;
 
+import 'dart:math';
+
 typedef int BlendFunction(int a, int b);
 typedef List<int> SpecialBlendFunction(List<int> a, List<int> b);
 
@@ -90,14 +92,14 @@ List<double> rgbToHsl(int red, int green, int blue) {
   } else {
     num d = maxv - minv;
     s = l > 0.5 ? d / (2 - maxv - minv) : d / (maxv + minv);
-    switch(max(max(red, green), blue)) {
-      case red:
+    switch(maxv) {
+      case r:
         h = (g - b) / d + (g < b ? 6 : 0);
         break;
-      case green:
+      case g:
         h = (b - r) / d + 2;
         break;
-      case blue:
+      case b:
         h = (r - g) / d + 4;
         break;
     }
@@ -107,6 +109,7 @@ List<double> rgbToHsl(int red, int green, int blue) {
   return [h, s, l];
 }
 /* author: http://mjijackson.com/ */
+List<int> hslListToRgb(List<num> hsl) => hslToRgb(hsl[0], hsl[1], hsl[2]);
 List<int> hslToRgb(num hue, num saturation, num lightness) {
   double h = hue.toDouble();
   double s = saturation.toDouble();
@@ -134,21 +137,21 @@ List<int> hslToRgb(num hue, num saturation, num lightness) {
     b = hue2rgb(p, q, h - 1 / 3);
   }
 
-  return [(r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt()];
+  return [(r * 255 + 0.5).toInt(), (g * 255 + 0.5).toInt(), (b * 255 + 0.5).toInt()];
 }
 
 
 List<double> rgbListToHsv(List<int> rgb) => rgbToHsv(rgb[0], rgb[1], rgb[2]);
-List<double> rgbToHsv(int r, int g, int b) {
-  r = r ~/ 255;
-  g = g ~/ 255;
-  b = b ~/ 255;
-  int maxv = max(max(r, g), b),
+List<double> rgbToHsv(int red, int green, int blue) {
+  double r = red / 255;
+  double g = green / 255;
+  double b = blue / 255;
+  double maxv = max(max(r, g), b),
          minv = min(min(r, g), b);
   double h, s, v = maxv.toDouble();
 
   var d = maxv - minv;
-  s = maxv == 0 ? 0 : d / maxv;
+  s = maxv == 0.0 ? 0.0 : d / maxv;
 
   if(maxv == minv) {
     h = 0.0; // achromatic
@@ -170,6 +173,7 @@ List<double> rgbToHsv(int r, int g, int b) {
   return [h, s, v];
 }
 
+List<int> hsvListToRgb(List<num> hsv) => hsvToRgb(hsv[0], hsv[1], hsv[2]);
 List<int> hsvToRgb(num hue, num saturation, num value) {
   double h = hue.toDouble();
   double s = saturation.toDouble();
@@ -203,5 +207,5 @@ List<int> hsvToRgb(num hue, num saturation, num value) {
       break;
   }
 
-  return [(r * 255).toInt(), (g * 255).toInt(), (b * 255).toInt()];
+  return [(r * 255 + 0.5).toInt(), (g * 255 + 0.5).toInt(), (b * 255 + 0.5).toInt()];
 }

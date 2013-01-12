@@ -3,3 +3,5 @@ description: A library for the HTML5 Canvas element which adds a lot of common u
 version: 0.0.1-dev
 author: Dennis Kaselow <Dennis.Kaselow+canvasquery@gmail.com>
 homepage: https://github.com/denniskaselow/CanvasQuery.git
+dependencies:
+  unittest: any
