@@ -8,31 +8,31 @@ typedef List<int> SpecialBlendFunction(List<int> a, List<int> b);
 class BlendFunctions {
   static int normal(int a, int b) => b;
 
-  static int overlay(int a, int b) {
-    a ~/= 255;
-    b ~/= 255;
+  static int overlay(num a, num b) {
+    a /= 255;
+    b /= 255;
     var result = 0;
 
-    if(a < 128) result = 2 * a * b;
+    if (a < 0.5) result = 2 * a * b;
     else result = 1 - 2 * (1 - a) * (1 - b);
 
-    return min(255, max(0, result * 255 | 0));
+    return min(255, max(0, result * 255)).toInt();
   }
 
   static int hardLight(int a, int b) => BlendFunctions.overlay(b, a);
 
-  static int softLight(int a, int b) {
-    a ~/= 255;
-    b ~/= 255;
+  static int softLight(num a, num b) {
+    a /= 255;
+    b /= 255;
 
-    var v = (1 - 2 * b) * (a * a) + 2 * b * a;
-    return limitValue(v * 255, 0, 255);
+    var v = ((1 - 2 * b) * a + 2 * b) * a;
+    return limitValue((v * 255).toInt(), 0, 255);
   }
 
-  static int dodge(int a, int b) => 256 * a ~/ (255 - b + 1);
-  static int burn(int a, int b) => 255 - 256 * (255 - a) ~/ (b + 1);
+  static int dodge(int a, int b) => min(256 * a ~/ (255 - b + 1), 255);
+  static int burn(int a, int b) => 255 - min(256 * (255 - a) ~/ (b + 1), 255);
   static int multiply(int a, int b) => b * a ~/ 255;
-  static int divide(int a, int b) => limitValue(256 * a ~/ (b + 1), 0, 255);
+  static int divide(int a, int b) => min(256 * a ~/ (b + 1), 255);
   static int screen(int a, int b) => 255 - (255 - b) * (255 - a) ~/ 255;
   static int grainExtract(int a, int b) => limitValue(a - b + 128, 0, 255);
   static int grainMerge(int a, int b) => limitValue(a + b - 128, 0, 255);
