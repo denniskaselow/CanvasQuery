@@ -77,11 +77,38 @@ class CanvasTools {
     return a + (b - a) * ammount;
   }
 
-  static List<int> hexToRgb(String hex) {
-    return [int.parse('0x${hex[1]}${hex[2]}'), int.parse('0x${hex[3]}${hex[4]}'), int.parse('0x${hex[5]}${hex[6]}')];
-  }
+  /* https://gist.github.com/3781251 */
 
-  static String rgbToHex(int r, int g, int b) {
-    return '#${((1 << 24) + (r << 16) + (g << 8) + b).toRadixString(16).substring(1, 7)}';
+  static List<int> mousePosition(MouseEvent event) {
+    var totalOffsetX = 0,
+        totalOffsetY = 0,
+        coordX = 0,
+        coordY = 0,
+        mouseX = 0,
+        mouseY = 0;
+
+    Element currentElement = event.currentTarget;
+
+    // Traversing the parents to get the total offset
+    do {
+      totalOffsetX += currentElement.offsetLeft;
+      totalOffsetY += currentElement.offsetTop;
+    }
+    while (null != (currentElement = currentElement.offsetParent));
+    // Use pageX to get the mouse coordinates
+    if(null != event.pageX || null != event.pageY) {
+      mouseX = event.pageX;
+      mouseY = event.pageY;
+    }
+    // IE8 and below doesn't support event.pageX
+    else if(null != event.clientX || null != event.clientY) {
+      mouseX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+      mouseY = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+    }
+    // Subtract the offset from the mouse coordinates
+    coordX = mouseX - totalOffsetX;
+    coordY = mouseY - totalOffsetY;
+
+    return [coordX, coordY];
   }
 }
