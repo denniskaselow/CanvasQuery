@@ -1,9 +1,4 @@
-library canvas_wrapper;
-
-import 'dart:html';
-
-import 'package:canvas_tools/canvas_tools.dart';
-export 'blend_functions.dart';
+part of canvas_query;
 
 class CanvasWrapper implements CanvasElement {
   CanvasElement _canvas;

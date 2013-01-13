@@ -1,4 +1,4 @@
-import "package:canvas_tools/blend_functions.dart";
+import "package:canvas_query/blend_functions.dart";
 import "package:unittest/unittest.dart";
 
 
