@@ -77,4 +77,13 @@ class SpecialBlendFunctions {
   }
 }
 
-int limitValue(int value, int min, int max) => value < min ? min : value > max ? max : value;
+num limitValue(num value, num min, num max) => value < min ? min : value > max ? max : value;
+num mixIt(num a, num b, num ammount) => a + (b - a) * ammount;
+num wrapValue(num value, num min, num max) {
+  if(value < min) {
+    value = max + (value - min);
+  } else if(value > max) {
+    value = min + (value - max);
+  }
+  return value;
+}

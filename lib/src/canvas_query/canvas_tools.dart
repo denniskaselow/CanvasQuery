@@ -64,19 +64,6 @@ class CanvasTools {
     return new CanvasElement().context2d.createImageData(width, height);
   }
 
-  static num wrapValue(num value, num min, num max) {
-    if(value < min) {
-      value = max + (value - min);
-    } else if(value > max) {
-      value = min + (value - max);
-    }
-    return value;
-  }
-
-  static num mix(num a, num b, num ammount) {
-    return a + (b - a) * ammount;
-  }
-
   /* https://gist.github.com/3781251 */
 
   static List<int> mousePosition(MouseEvent event) {
