@@ -34,16 +34,127 @@ class CanvasWrapper implements CanvasElement {
                                                                 .._context.fillStyle = color
                                                                 .._context.fillRect(0, 0, width, height);
 
+  void circle(num x, num y, num radius) => _context.arc(x, y, radius, 0, PI * 2, true);
+
+  void fillCircle(num x, num y, num radius) {
+    _context..beginPath();
+    circle(x, y, radius);
+    _context.fill();
+    _context.closePath();
+  }
+
   void crop(int x, int y, int width, int height) {
-    _context.drawImage(_canvas, x, y, width, height, 0, 0, width, height);
+    var canvas = new CanvasElement(width: width, height: height);
+    var context = canvas.context2d;
+
+    context.drawImage(_canvas, x, y, width, height, 0, 0, width, height);
     _canvas.width = width;
     _canvas.height = height;
+    clear();
+    _context.drawImage(canvas, 0, 0);
   }
 
   void resize(int width, int height) {
-    var resized = new CanvasWrapper.forSize(width, height)..drawImage(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, width, height);
+    int w, h;
+    if (height == null) {
+      if(_canvas.width > width) {
+        h = (_canvas.height * (width / _canvas.width)).toInt();
+        w = width;
+      } else {
+        w = _canvas.width;
+        h = _canvas.height;
+      }
+    } else if (width == null) {
+      if(_canvas.height > height) {
+        w = (_canvas.width * (height / _canvas.height)).toInt();
+        h = height;
+      } else {
+        w = _canvas.width;
+        h = _canvas.height;
+      }
+    }
+
+    var resized = new CanvasWrapper.forSize(w, h)..drawImage(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
     _canvas = resized._canvas;
     _context = resized._context;
+  }
+
+  void trim({String color}) {
+    bool transparent;
+    List<int> targetColor;
+
+    if (color != null) {
+      targetColor = new Color.fromHex(color).toArray();
+      transparent = targetColor[4] == 255 ? true : false;
+    } else transparent = true;
+
+    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourcePixels = sourceData.data;
+
+    var bound = [_canvas.width, _canvas.height, 0, 0];
+
+    for(var i = 0, len = sourcePixels.length; i < len; i += 4) {
+      if(transparent) {
+        if(sourcePixels[i + 3] == 0) continue;
+      } else if(sourcePixels[i + 0] == color[0] && sourcePixels[i + 1] == color[1] && sourcePixels[i + 2] == color[2]) continue;
+      var x = (i ~/ 4) % _canvas.width;
+      var y = (i ~/ 4) ~/ _canvas.width;
+
+      if(x < bound[0]) bound[0] = x;
+      if(x > bound[2]) bound[2] = x;
+
+      if(y < bound[1]) bound[1] = y;
+      if(y > bound[3]) bound[3] = y;
+    }
+
+    crop(bound[0], bound[1], bound[2] - bound[0], bound[3] - bound[1]);
+  }
+
+  int resizePixel(int pixelSize) {
+
+    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourcePixels = sourceData.data;
+    var canvas = new CanvasElement();
+    var context = canvas.context2d;
+
+    canvas.width = _canvas.width * pixelSize;
+    canvas.height = _canvas.height * pixelSize;
+
+    for(var i = 0, len = sourcePixels.length; i < len; i += 4) {
+      if(sourcePixels[i + 3] == 0) continue;
+      context.fillStyle = rgbToHex(sourcePixels[i + 0], sourcePixels[i + 1], sourcePixels[i + 2]);
+
+      var x = (i ~/ 4) % _canvas.width;
+      var y = (i ~/ 4) ~/ _canvas.width;
+
+      context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+    }
+
+    _context = context;
+    _canvas = canvas;
+
+    return 1;
+
+    /* this very clever method is working only under Chrome */
+
+    // TODO check speed and browsersupport
+//    var x = 0,
+//      y = 0;
+//
+//    canvas.width = _canvas.width * pixelSize | 0;
+//    canvas.height = _canvas.height * pixelSize | 0;
+//
+//    while(x < _canvas.width) {
+//      y = 0;
+//      while(y < _canvas.height) {
+//        context.drawImage(_canvas, x, y, 1, 1, x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+//        y++;
+//      }
+//      x++;
+//    }
+//
+//    _canvas = canvas;
+//    _context = context;
   }
 
   void matchPalette(List<String> palette) {
@@ -140,8 +251,21 @@ class CanvasWrapper implements CanvasElement {
     return mask;
   }
 
+  void grayscaleToAlpha() {
+    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourcePixels = sourceData.data;
+
+    for(var i = 0, len = sourcePixels.length; i < len; i += 4) {
+      sourcePixels[i + 3] = (sourcePixels[i + 0] + sourcePixels[i + 1] + sourcePixels[i + 2]) ~/ 3;
+
+      sourcePixels[i + 0] = sourcePixels[i + 1] = sourcePixels[i + 2] = 255;
+    }
+
+    _context.putImageData(sourceData, 0, 0);
+  }
+
   void applyMask(List mask) {
-    var sourceData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
     var mode = mask is List<bool> ? "bool" : "byte";
@@ -275,6 +399,26 @@ class CanvasWrapper implements CanvasElement {
     _context.putImageData(data, 0, 0);
   }
 
+  void replaceHue(double src, double dst) {
+    var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var pixels = data.data;
+    var h, hsl, newPixel;
+
+    for(var i = 0, len = pixels.length; i < len; i += 4) {
+      hsl = rgbToHsl(pixels[i + 0], pixels[i + 1], pixels[i + 2]);
+
+      if ((hsl[0] - src).abs() < 0.05) h = wrapValue(dst, 0, 1); else h = hsl[0];
+
+      newPixel = hslToRgb(h, hsl[1], hsl[2]);
+
+      pixels[i + 0] = newPixel[0];
+      pixels[i + 1] = newPixel[1];
+      pixels[i + 2] = newPixel[2];
+    }
+
+    _context.putImageData(data, 0, 0);
+  }
+
   /* www.html5rocks.com/en/tutorials/canvas/imagefilters/ */
 
   void convolve(List<num> matrix, {num mix: 1, num divide: 1}) {
@@ -368,4 +512,10 @@ class CanvasWrapper implements CanvasElement {
 
     _context.putImageData(data, 0, 0);
   }
+
+
+  TextMetrics measureText(String text) => _context.measureText(text);
+  CanvasGradient createRadialGradient(num x0, num y0, num r0, num x1, num y1, num r1) => _context.createRadialGradient(x0, y0, r0, x1, y1, r1);
+  CanvasGradient createLinearGradient(num x0, num y0, num x1, num y1) => _context.createLinearGradient(x0, y0, x1, y1);
+
 }
