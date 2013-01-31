@@ -327,7 +327,6 @@ class CanvasWrapper implements CanvasElement {
     }
   }
 
-
   CanvasElement copy() {
     var result = new CanvasElement(width: _canvas.width, height: _canvas.height);
     result.context2d.drawImage(_canvas, 0, 0);
@@ -513,9 +512,37 @@ class CanvasWrapper implements CanvasElement {
     _context.putImageData(data, 0, 0);
   }
 
-
   TextMetrics measureText(String text) => _context.measureText(text);
   CanvasGradient createRadialGradient(num x0, num y0, num r0, num x1, num y1, num r1) => _context.createRadialGradient(x0, y0, r0, x1, y1, r1);
   CanvasGradient createLinearGradient(num x0, num y0, num x1, num y1) => _context.createLinearGradient(x0, y0, x1, y1);
 
+
+  void onDropImage(callback(ImageElement image)) {
+    document.onDrop.listen((MouseEvent e) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      var file = e.dataTransfer.files[0];
+
+      if (!file.type.startsWith('image/')) return false;
+      var reader = new FileReader();
+
+      reader.onLoad.listen((ProgressEvent pe) {
+        var image = new ImageElement();
+
+        image.onLoad.listen((e3) {
+          callback(image);
+        });
+
+        image.src = reader.result;
+      });
+
+      reader.readAsDataUrl(file);
+
+    });
+
+    document.onDragOver.listen((e) {
+      e.preventDefault();
+    });
+  }
 }
