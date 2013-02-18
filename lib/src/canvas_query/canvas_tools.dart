@@ -2,21 +2,21 @@ part of canvas_query;
 
 class CanvasTools {
 
-  static void blend(CanvasElement below, CanvasElement above, BlendFunction blendingFunction, [num mix = 1]) {
+  static void blend(CanvasElement below, var above, BlendFunction blendingFunction, [num mix = 1]) {
     _initBlend(below, above, mix, (pixels, belowPixels, abovePixels, mix) {
       _blend(pixels, belowPixels, abovePixels, mix, blendingFunction);
     });
   }
 
-  static void blendSpecial(CanvasElement below, CanvasElement above, SpecialBlendFunction blendingFunction, [num mix = 1]) {
+  static void blendSpecial(CanvasElement below, var above, SpecialBlendFunction blendingFunction, [num mix = 1]) {
     _initBlend(below, above, mix, (pixels, belowPixels, abovePixels, mix) {
       _blendSpecial(pixels, belowPixels, abovePixels, mix, blendingFunction);
     });
   }
 
-  static CanvasElement _initBlend(CanvasElement below, CanvasElement above, num mix, Function blendingFunction(Uint8ClampedArray pixels, Uint8ClampedArray belowPixels, Uint8ClampedArray abovePixels, num mix)) {
+  static CanvasElement _initBlend(CanvasElement below, var above, num mix, Function blendingFunction(Uint8ClampedArray pixels, Uint8ClampedArray belowPixels, Uint8ClampedArray abovePixels, num mix)) {
     var belowCtx = below.context2d;
-    var aboveCtx = above.context2d;
+    var aboveCtx = cq(above).canvas.context2d;
 
     var belowData = belowCtx.getImageData(0, 0, below.width, below.height);
     var aboveData = aboveCtx.getImageData(0, 0, above.width, above.height);
@@ -28,7 +28,7 @@ class CanvasTools {
     below.context2d.putImageData(imageData, 0, 0);
   }
 
-  static _blendSpecial(Uint8ClampedArray pixels, Uint8ClampedArray belowPixels, Uint8ClampedArray abovePixels, num mix, SpecialBlendFunction blendingFunction) {
+  static _blendSpecial(List<int> pixels, List<int> belowPixels, List<int> abovePixels, num mix, SpecialBlendFunction blendingFunction) {
     for(int i = 0; i < belowPixels.length; i += 4) {
       var rgb = blendingFunction([belowPixels[i + 0], belowPixels[i + 1], belowPixels[i + 2]], [abovePixels[i + 0], abovePixels[i + 1], abovePixels[i + 2]]);
 
@@ -40,7 +40,7 @@ class CanvasTools {
     }
   }
 
-  static _blend(Uint8ClampedArray pixels, Uint8ClampedArray belowPixels, Uint8ClampedArray abovePixels, num mix, BlendFunction blendingFunction) {
+  static _blend(List<int> pixels, List<int> belowPixels, List<int> abovePixels, num mix, BlendFunction blendingFunction) {
     for(int i = 0; i < belowPixels.length; i += 4) {
       int r = blendingFunction(belowPixels[i + 0], abovePixels[i + 0]);
       int g = blendingFunction(belowPixels[i + 1], abovePixels[i + 1]);

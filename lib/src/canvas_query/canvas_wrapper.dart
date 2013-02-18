@@ -1,38 +1,69 @@
 part of canvas_query;
 
-class CanvasWrapper implements CanvasElement {
+
+CanvasQuery cq([var selector]) {
+  var canvas;
+  if (null == selector) {
+    canvas = new CanvasElement(width: window.innerWidth, height: window.innerHeight);
+  } else if (selector is String) {
+    canvas = query(selector);
+  } else if (selector is ImageElement) {
+    canvas = CanvasTools.createCanvas(selector);
+  } else if (selector is CanvasQuery) {
+    return selector;
+  } else {
+    canvas = selector;
+  }
+
+  return new CanvasQuery(canvas);
+}
+
+
+class CanvasQuery implements CanvasRenderingContext2D {
   CanvasElement _canvas;
   CanvasRenderingContext2D _context;
   CanvasElement get canvas => _canvas;
   CanvasRenderingContext2D get context2d => _context;
-  CanvasWrapper(this._canvas) {
+  CanvasQuery(this._canvas) {
     _context = _canvas.context2d;
   }
-  CanvasWrapper.forWindow() {
+  CanvasQuery.forWindow() {
     _canvas = new CanvasElement(width: window.innerWidth, height: window.innerHeight);
     _context = _canvas.context2d;
-    window.on.resize.add((e) {
+    window.onResize.listen((e) {
       _canvas.width = window.innerWidth;
       _canvas.height = window.innerHeight;
     });
   }
-  CanvasWrapper.query(String selector) : this(query(selector));
-  CanvasWrapper.forSize(int width, int height) : this(new CanvasElement(width: width, height: height));
-  CanvasWrapper.forImage(ImageElement img) : this(CanvasTools.createCanvas(img));
+  CanvasQuery.query(String selector) : this(query(selector));
+  CanvasQuery.forSize(int width, int height) : this(new CanvasElement(width: width, height: height));
+  CanvasQuery.forImage(ImageElement img) : this(CanvasTools.createCanvas(img));
 
-  dynamic noSuchMethod(InvocationMirror im) => im.invokeOn(_canvas);
+  dynamic noSuchMethod(InvocationMirror im) => im.invokeOn(_context);
 
   void appendTo(Element element) => element.append(_canvas);
 
-  void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) => CanvasTools.blend(what, this, mode, mix);
-  void blend(CanvasElement what, BlendFunction mode, [num mix = 1]) => CanvasTools.blend(this, what, mode, mix);
-  void blendSpecial(CanvasElement what, SpecialBlendFunction mode, [num mix = 1]) => CanvasTools.blendSpecial(this, what, mode, mix);
+  void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) => CanvasTools.blend(what, this.canvas, mode, mix);
+  void blend(var what, BlendFunction mode, [num mix = 1]) {
+    if (what is String) {
+      blendColor(what, mode, mix);
+    } else {
+      CanvasTools.blend(this.canvas, what, mode, mix);
+    }
+  }
   void blendColor(String color, BlendFunction mode, [num mix = 1]) => blend(_createCanvas(color), mode, mix);
+  void blendSpecial(var what, SpecialBlendFunction mode, [num mix = 1]) {
+    if (what is String) {
+      blendSpecialColor(what, mode, mix);
+    } else {
+      CanvasTools.blendSpecial(this.canvas, what, mode, mix);
+    }
+  }
   void blendSpecialColor(String color, SpecialBlendFunction mode, [num mix = 1]) => blendSpecial(_createCanvas(color), mode, mix);
 
-  CanvasElement _createCanvas(String color) => new CanvasWrapper.forSize(_canvas.width, _canvas.height)
-                                                                .._context.fillStyle = color
-                                                                .._context.fillRect(0, 0, width, height);
+  CanvasElement _createCanvas(String color) => new CanvasElement(width: _canvas.width, height: _canvas.height)
+                                                                ..context2d.fillStyle = color
+                                                                ..context2d.fillRect(0, 0, _canvas.width, _canvas.height);
 
   void circle(num x, num y, num radius) => _context.arc(x, y, radius, 0, PI * 2, true);
 
@@ -74,7 +105,7 @@ class CanvasWrapper implements CanvasElement {
       }
     }
 
-    var resized = new CanvasWrapper.forSize(w, h)..drawImage(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
+    var resized = new CanvasQuery.forSize(w, h)..drawImage(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
     _canvas = resized._canvas;
     _context = resized._context;
   }
@@ -208,17 +239,17 @@ class CanvasWrapper implements CanvasElement {
 
   void pixelize([int size = 4]) {
     if (_canvas.width < size) size = _canvas.width;
-    var webkitImageSmoothingEnabled = _context.webkitImageSmoothingEnabled;
-    _context.webkitImageSmoothingEnabled = false;
+    var imageSmoothingEnabled = _context.imageSmoothingEnabled;
+    _context.imageSmoothingEnabled = false;
 
     var scale = (_canvas.width / size) / _canvas.width;
-    var temp = new CanvasWrapper.forSize(_canvas.width, _canvas.height);
+    var temp = new CanvasQuery.forSize(_canvas.width, _canvas.height);
 
     temp._context.drawImage(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt());
     clear();
     _context.drawImage(temp.canvas, 0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt(), 0, 0, _canvas.width, _canvas.height);
 
-    _context.webkitImageSmoothingEnabled = webkitImageSmoothingEnabled;
+    _context.imageSmoothingEnabled = imageSmoothingEnabled;
   }
 
 
@@ -286,11 +317,11 @@ class CanvasWrapper implements CanvasElement {
     var sourcePixels = sourceData.data;
 
     var maskType = mask is List<bool> ? "bool" : "byte";
-    var colorMode = ?hexColorGradient ? "gradient" : "normal";
+    var colorMode = null != hexColorGradient ? "gradient" : "normal";
 
     var color = new Color.fromHex(hexColor);
     var colorB;
-    if (?hexColorGradient) {
+    if (null != hexColorGradient) {
       colorB = new Color.fromHex(hexColorGradient);
     }
 
@@ -385,9 +416,9 @@ class CanvasWrapper implements CanvasElement {
     for(var i = 0, len = pixels.length; i < len; i += 4) {
       hsl = rgbToHsl(pixels[i + 0], pixels[i + 1], pixels[i + 2]);
 
-      h = hIn == null ? hsl[0] : wrapValue(hsl[0] + hIn, 0, 1);
-      s = sIn == null ? hsl[1] : limitValue(hsl[1] + sIn, 0, 1);
-      l = lIn == null ? hsl[2] : limitValue(hsl[2] + lIn, 0, 1);
+      h = hIn == null ? hsl[0] : wrapValue(hsl[0] + hIn, 0.0, 1.0);
+      s = sIn == null ? hsl[1] : limitValue(hsl[1] + sIn, 0.0, 1.0);
+      l = lIn == null ? hsl[2] : limitValue(hsl[2] + lIn, 0.0, 1.0);
 
       newPixel = hslToRgb(h, s, l);
 

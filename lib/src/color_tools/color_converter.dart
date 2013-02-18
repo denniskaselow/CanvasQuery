@@ -49,8 +49,8 @@ List<int> hslToRgb(num hue, num saturation, num lightness) {
   double g;
   double b;
 
-  if(s == 0) {
-    r = g = b = 1.0; // achromatic
+  if(s == 0.0) {
+    r = g = b = l; // achromatic
   } else {
     Function hue2rgb = (num p, num q, num t) {
       if(t < 0) t += 1;
