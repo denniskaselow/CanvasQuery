@@ -67,13 +67,6 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
   void circle(num x, num y, num radius) => _context.arc(x, y, radius, 0, PI * 2, true);
 
-  void fillCircle(num x, num y, num radius) {
-    _context..beginPath();
-    circle(x, y, radius);
-    _context.fill();
-    _context.closePath();
-  }
-
   void crop(int x, int y, int width, int height) {
     var canvas = new CanvasElement(width: width, height: height);
     var context = canvas.context2d;
@@ -138,7 +131,10 @@ class CanvasQuery implements CanvasRenderingContext2D {
       if(y > bound[3]) bound[3] = y;
     }
 
-    crop(bound[0], bound[1], bound[2] - bound[0], bound[3] - bound[1]);
+    if (bound[2] == 0 || bound[3] == 0) {
+    } else {
+      crop(bound[0], bound[1], bound[2] - bound[0] + 1, bound[3] - bound[1] + 1);
+    }
   }
 
   int resizePixel(int pixelSize) {
@@ -163,6 +159,11 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
     _context = context;
     _canvas = canvas;
+
+    _canvas.width = canvas.width;
+    _canvas.height = canvas.height;
+    clear();
+    drawImage(canvas, 0, 0);
 
     return 1;
 
@@ -447,6 +448,152 @@ class CanvasQuery implements CanvasRenderingContext2D {
     }
 
     _context.putImageData(data, 0, 0);
+  }
+
+  void invert(src, dst) {
+
+    var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var pixels = data.data;
+
+    for(var i = 0, len = pixels.length; i < len; i += 4) {
+      pixels[i + 0] = 255 - pixels[i + 0];
+      pixels[i + 1] = 255 - pixels[i + 1];
+      pixels[i + 2] = 255 - pixels[i + 2];
+    }
+
+    _context.putImageData(data, 0, 0);
+  }
+
+  void roundRect(num x, num y, num width, num height, num radius) {
+    _context..beginPath()
+      ..moveTo(x + radius, y)
+      ..lineTo(x + width - radius, y)
+      ..quadraticCurveTo(x + width, y, x + width, y + radius)
+      ..lineTo(x + width, y + height - radius)
+      ..quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+      ..lineTo(x + radius, y + height)
+      ..quadraticCurveTo(x, y + height, x, y + height - radius)
+      ..lineTo(x, y + radius)
+      ..quadraticCurveTo(x, y, x + radius, y)
+      ..closePath();
+  }
+
+  void wrappedText(String text, int x, int y, [int maxWidth]) {
+
+    var words = text.split(" ");
+
+    var regexp = new RegExp(r"(\d+)");
+    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+
+    var ox = 0;
+    var oy = 0;
+
+    var lines = new List<String>.from([""]);
+    if (null != maxWidth) {
+      var line = 0;
+
+      for(var i = 0; i < words.length; i++) {
+        var word = "${words[i]} ";
+        var wordWidth = _context.measureText(word).width;
+
+        if(ox + wordWidth > maxWidth) {
+          lines.add("");
+          line++;
+          ox = 0;
+        }
+
+        lines[line] = "${lines[line]}$word";
+
+        ox += wordWidth;
+      }
+    } else {
+      lines = [text];
+    }
+
+    for(var i = 0; i < lines.length; i++) {
+      var oy = (y + i * h * 0.6).toInt();
+
+      var text = lines[i];
+
+      fillText(text, x, oy);
+    }
+  }
+
+  Map<String, int> textBoundaries(String text, [num maxWidth]) {
+    var words = text.split(" ");
+
+    var regexp = new RegExp(r"(\d+)");
+    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+
+    var ox = 0;
+    var oy = 0;
+
+    var lines = new List<String>.from([""]);
+    if (null != maxWidth) {
+      var line = 0;
+
+      for(var i = 0; i < words.length; i++) {
+        var word = "${words[i]} ";
+        var wordWidth = _context.measureText(word).width;
+
+        if(ox + wordWidth > maxWidth) {
+          lines.add("");
+          line++;
+          ox = 0;
+        }
+
+        lines[line] = "${lines[line]}$word";
+
+        ox += wordWidth;
+      }
+    } else {
+      var lines = [text];
+      maxWidth = _context.measureText(text).width;
+    }
+
+    return {
+      "height": (lines.length * h * 0.6).toInt(),
+      "width": maxWidth
+    };
+  }
+
+  void paperBag(num x, num y, num width, num height, num blowX, num blowY) {
+    _context..beginPath()
+      ..moveTo(x, y)
+      ..quadraticCurveTo(x + width / 2, y + height * blowY, x + width, y)
+      ..quadraticCurveTo(x + width - width * blowX, y + height / 2, x + width, y + height)
+      ..quadraticCurveTo(x + width / 2, y + height - height * blowY, x, y + height)
+      ..quadraticCurveTo(x + width * blowX, y + height / 2, x, y)
+      ..closePath();
+  }
+
+  void borderImage(var image, num x, num y, num w, num h, num t, num r, num b, num l, {bool fill: false, String fillColor}) {
+    _context
+      /* top */
+      ..drawImage(image, l, 0, image.width - l - r, t, x + l, y, w - l - r, t)
+      /* bottom */
+      ..drawImage(image, l, image.height - b, image.width - l - r, b, x + l, y + h - b, w - l - r, b)
+      /* left */
+      ..drawImage(image, 0, t, l, image.height - b - t, x, y + t, l, h - b - t)
+      /* right */
+      ..drawImage(image, image.width - r, t, r, image.height - b - t, x + w - r, y + t, r, h - b - t)
+      /* top-left */
+      ..drawImage(image, 0, 0, l, t, x, y, l, t)
+      /* top-right */
+      ..drawImage(image, image.width - r, 0, r, t, x + w - r, y, r, t)
+      /* bottom-right */
+      ..drawImage(image, image.width - r, image.height - b, r, b, x + w - r, y + h - b, r, b)
+      /* bottom-left */
+      ..drawImage(image, 0, image.height - b, l, b, x, y + h - b, l, b);
+
+    if (fill) {
+      if (null != fillColor) {
+        _context..fillStyle = fillColor
+                ..fillRect(x + l, y + t, w - l - r, h - t - b);
+      } else {
+        _context.drawImage(image, l, t, image.width - r - l, image.height - b - t, x + l, y + t, w - l - r, h - t - b);
+      }
+    }
   }
 
   /* www.html5rocks.com/en/tutorials/canvas/imagefilters/ */
