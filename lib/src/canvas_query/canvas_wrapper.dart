@@ -567,32 +567,30 @@ class CanvasQuery implements CanvasRenderingContext2D {
       ..closePath();
   }
 
-  void borderImage(var image, num x, num y, num w, num h, num t, num r, num b, num l, {bool fill: false, String fillColor}) {
+  void borderImage(var image, num x, num y, num width, num height, num top, num right, num bottome, num left, {bool fill: false, String fillColor}) {
     _context
       /* top */
-      ..drawImage(image, l, 0, image.width - l - r, t, x + l, y, w - l - r, t)
+      ..drawImage(image, left, 0, image.width - left - right, top, x + left, y, width - left - right, top)
       /* bottom */
-      ..drawImage(image, l, image.height - b, image.width - l - r, b, x + l, y + h - b, w - l - r, b)
+      ..drawImage(image, left, image.height - bottome, image.width - left - right, bottome, x + left, y + height - bottome, width - left - right, bottome)
       /* left */
-      ..drawImage(image, 0, t, l, image.height - b - t, x, y + t, l, h - b - t)
+      ..drawImage(image, 0, top, left, image.height - bottome - top, x, y + top, left, height - bottome - top)
       /* right */
-      ..drawImage(image, image.width - r, t, r, image.height - b - t, x + w - r, y + t, r, h - b - t)
+      ..drawImage(image, image.width - right, top, right, image.height - bottome - top, x + width - right, y + top, right, height - bottome - top)
       /* top-left */
-      ..drawImage(image, 0, 0, l, t, x, y, l, t)
+      ..drawImage(image, 0, 0, left, top, x, y, left, top)
       /* top-right */
-      ..drawImage(image, image.width - r, 0, r, t, x + w - r, y, r, t)
+      ..drawImage(image, image.width - right, 0, right, top, x + width - right, y, right, top)
       /* bottom-right */
-      ..drawImage(image, image.width - r, image.height - b, r, b, x + w - r, y + h - b, r, b)
+      ..drawImage(image, image.width - right, image.height - bottome, right, bottome, x + width - right, y + height - bottome, right, bottome)
       /* bottom-left */
-      ..drawImage(image, 0, image.height - b, l, b, x, y + h - b, l, b);
+      ..drawImage(image, 0, image.height - bottome, left, bottome, x, y + height - bottome, left, bottome);
 
-    if (fill) {
-      if (null != fillColor) {
-        _context..fillStyle = fillColor
-                ..fillRect(x + l, y + t, w - l - r, h - t - b);
-      } else {
-        _context.drawImage(image, l, t, image.width - r - l, image.height - b - t, x + l, y + t, w - l - r, h - t - b);
-      }
+    if (null != fillColor) {
+      _context..fillStyle = fillColor
+          ..fillRect(x + left, y + top, width - left - right, height - top - bottome);
+    } else if (fill) {
+      _context.drawImage(image, left, top, image.width - right - left, image.height - bottome - top, x + left, y + top, width - left - right, height - top - bottome);
     }
   }
 
