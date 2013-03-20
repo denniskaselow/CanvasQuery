@@ -41,7 +41,9 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
   dynamic noSuchMethod(InvocationMirror im) => im.invokeOn(_context);
 
-  void appendTo(Element element) => element.append(_canvas);
+  void appendTo(Element element) {
+    element.append(_canvas);
+  }
 
   void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) => CanvasTools.blend(what, this.canvas, mode, mix);
   void blend(var what, BlendFunction mode, [num mix = 1]) {
@@ -71,7 +73,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     var canvas = new CanvasElement(width: width, height: height);
     var context = canvas.context2d;
 
-    context.drawImage(_canvas, x, y, width, height, 0, 0, width, height);
+    context.$dom_drawImage(_canvas, x, y, width, height, 0, 0, width, height);
     _canvas.width = width;
     _canvas.height = height;
     clear();
@@ -98,7 +100,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
       }
     }
 
-    var resized = new CanvasQuery.forSize(w, h)..drawImage(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
+    var resized = new CanvasQuery.forSize(w, h)..$dom_drawImage(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
     _canvas = resized._canvas;
     _context = resized._context;
   }
@@ -245,10 +247,12 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
     var scale = (_canvas.width / size) / _canvas.width;
     var temp = new CanvasQuery.forSize(_canvas.width, _canvas.height);
+    var normal = new Rect(0, 0, _canvas.width, _canvas.height);
+    var shrunk = new Rect(0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt());
 
-    temp._context.drawImage(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt());
+    temp._context.drawImageAtScale(_canvas, shrunk, sourceRect: normal);
     clear();
-    _context.drawImage(temp.canvas, 0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt(), 0, 0, _canvas.width, _canvas.height);
+    _context.drawImageAtScale(temp.canvas, normal, sourceRect: shrunk);
 
     _context.imageSmoothingEnabled = imageSmoothingEnabled;
   }
@@ -350,7 +354,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.putImageData(sourceData, 0, 0);
   }
 
-  void clear([String color]) {
+  void clear({String color}) {
     if(null != color) {
       _context.fillStyle = color;
       _context.fillRect(0, 0, _canvas.width, _canvas.height);
@@ -570,27 +574,27 @@ class CanvasQuery implements CanvasRenderingContext2D {
   void borderImage(var image, num x, num y, num width, num height, num top, num right, num bottome, num left, {bool fill: false, String fillColor}) {
     _context
       /* top */
-      ..drawImage(image, left, 0, image.width - left - right, top, x + left, y, width - left - right, top)
+      ..$dom_drawImage(image, left, 0, image.width - left - right, top, x + left, y, width - left - right, top)
       /* bottom */
-      ..drawImage(image, left, image.height - bottome, image.width - left - right, bottome, x + left, y + height - bottome, width - left - right, bottome)
+      ..$dom_drawImage(image, left, image.height - bottome, image.width - left - right, bottome, x + left, y + height - bottome, width - left - right, bottome)
       /* left */
-      ..drawImage(image, 0, top, left, image.height - bottome - top, x, y + top, left, height - bottome - top)
+      ..$dom_drawImage(image, 0, top, left, image.height - bottome - top, x, y + top, left, height - bottome - top)
       /* right */
-      ..drawImage(image, image.width - right, top, right, image.height - bottome - top, x + width - right, y + top, right, height - bottome - top)
+      ..$dom_drawImage(image, image.width - right, top, right, image.height - bottome - top, x + width - right, y + top, right, height - bottome - top)
       /* top-left */
-      ..drawImage(image, 0, 0, left, top, x, y, left, top)
+      ..$dom_drawImage(image, 0, 0, left, top, x, y, left, top)
       /* top-right */
-      ..drawImage(image, image.width - right, 0, right, top, x + width - right, y, right, top)
+      ..$dom_drawImage(image, image.width - right, 0, right, top, x + width - right, y, right, top)
       /* bottom-right */
-      ..drawImage(image, image.width - right, image.height - bottome, right, bottome, x + width - right, y + height - bottome, right, bottome)
+      ..$dom_drawImage(image, image.width - right, image.height - bottome, right, bottome, x + width - right, y + height - bottome, right, bottome)
       /* bottom-left */
-      ..drawImage(image, 0, image.height - bottome, left, bottome, x, y + height - bottome, left, bottome);
+      ..$dom_drawImage(image, 0, image.height - bottome, left, bottome, x, y + height - bottome, left, bottome);
 
     if (null != fillColor) {
       _context..fillStyle = fillColor
           ..fillRect(x + left, y + top, width - left - right, height - top - bottome);
     } else if (fill) {
-      _context.drawImage(image, left, top, image.width - right - left, image.height - bottome - top, x + left, y + top, width - left - right, height - top - bottome);
+      _context.$dom_drawImage(image, left, top, image.width - right - left, image.height - bottome - top, x + left, y + top, width - left - right, height - top - bottome);
     }
   }
 

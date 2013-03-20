@@ -78,19 +78,19 @@ class CanvasTools {
 
     // Traversing the parents to get the total offset
     do {
-      totalOffsetX += currentElement.offsetLeft;
-      totalOffsetY += currentElement.offsetTop;
+      totalOffsetX += currentElement.offset.left;
+      totalOffsetY += currentElement.offset.top;
     }
     while (null != (currentElement = currentElement.offsetParent));
     // Use pageX to get the mouse coordinates
-    if(null != event.pageX || null != event.pageY) {
-      mouseX = event.pageX;
-      mouseY = event.pageY;
+    if(null != event.page.x || null != event.page.y) {
+      mouseX = event.page.x;
+      mouseY = event.page.x;
     }
     // IE8 and below doesn't support event.pageX
-    else if(null != event.clientX || null != event.clientY) {
-      mouseX = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-      mouseY = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+    else if(null != event.client.x || null != event.client.y) {
+      mouseX = event.client.x + document.body.scrollLeft + document.documentElement.scrollLeft;
+      mouseY = event.client.y + document.body.scrollTop + document.documentElement.scrollTop;
     }
     // Subtract the offset from the mouse coordinates
     coordX = mouseX - totalOffsetX;
