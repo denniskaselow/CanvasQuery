@@ -1,6 +1,16 @@
 part of canvas_query;
 
-
+/**
+ * Create a [CanvasQuery] object using a [selector]. The [selector] can be a
+ * a String that should be used to query the DOM or an existing [CanvasElement]
+ * or [ImageElement] that should be wrapped.
+ *
+ * To create a new [CanvasQuery] object with a specific size the [selector]
+ * argument will take an [int] argoument for the width.
+ *
+ * If no argument is given, the size of the window will be used for the new
+ * [CanvasElement].
+ */
 CanvasQuery cq([var selector, int height]) {
   var canvas;
   if (null == selector || selector is int) {
@@ -16,11 +26,13 @@ CanvasQuery cq([var selector, int height]) {
   } else {
     canvas = selector;
   }
-
   return new CanvasQuery(canvas);
 }
 
-
+/**
+ * The [CanvasQuery] class is a wrapper around [CanvasElement] and
+ * [CanvasRenderingContext2D].
+ */
 class CanvasQuery implements CanvasRenderingContext2D {
   CanvasElement _canvas;
   CanvasRenderingContext2D _context;
@@ -43,17 +55,27 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
   dynamic noSuchMethod(InvocationMirror im) => im.invokeOn(_context);
 
+  /** Appends the canvas to [element]. */
   void appendTo(Element element) {
     element.append(_canvas);
   }
 
+  /**
+   * Replaces the wrapped [CanvasElement] and [CanvasRenderingContext2D] in this
+   * [CanvasQuery] object and in the DOM.
+   */
   void replaceWith(CanvasQuery other) {
     _canvas.replaceWith(other.canvas);
     _canvas = other.canvas;
     _context = other.context2d;
   }
 
+  /** Blends the canvas of this object onto [what] using [mode] and [mix]. */
   void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) => CanvasTools.blend(what, this.canvas, mode, mix);
+  /**
+   * Blends the object [what] ([CanvasQuery], {CanvasElement], [ImageElement] or
+   * color) onto this canvas using [mode] and [mix].
+   */
   void blend(var what, BlendFunction mode, [num mix = 1]) {
     if (what is String) {
       blendColor(what, mode, mix);
@@ -61,7 +83,12 @@ class CanvasQuery implements CanvasRenderingContext2D {
       CanvasTools.blend(this.canvas, what, mode, mix);
     }
   }
+  /** Blends the color [what] onto this canvas using [mode] and [mix]. */
   void blendColor(String color, BlendFunction mode, [num mix = 1]) => blend(_createCanvas(color), mode, mix);
+  /**
+   * Blends the object [what] ([CanvasQuery], {CanvasElement], [ImageElement] or
+   * color) onto this canvas using [mode] and [mix].
+   */
   void blendSpecial(var what, SpecialBlendFunction mode, [num mix = 1]) {
     if (what is String) {
       blendSpecialColor(what, mode, mix);
@@ -69,14 +96,16 @@ class CanvasQuery implements CanvasRenderingContext2D {
       CanvasTools.blendSpecial(this.canvas, what, mode, mix);
     }
   }
+  /** Blends the color [what] onto this canvas using [mode] and [mix]. */
   void blendSpecialColor(String color, SpecialBlendFunction mode, [num mix = 1]) => blendSpecial(_createCanvas(color), mode, mix);
 
   CanvasElement _createCanvas(String color) => new CanvasElement(width: _canvas.width, height: _canvas.height)
                                                                 ..context2d.fillStyle = color
                                                                 ..context2d.fillRect(0, 0, _canvas.width, _canvas.height);
-
+  /** Draws a circls at [x], [y] with [radius]. */
   void circle(num x, num y, num radius) => _context.arc(x, y, radius, 0, PI * 2, true);
 
+  /** Crops the canvas. */
   void crop(int x, int y, int width, int height) {
     var canvas = new CanvasElement(width: width, height: height);
     var context = canvas.context2d;
@@ -88,6 +117,10 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.drawImage(canvas, 0, 0);
   }
 
+  /**
+   * Resizes the canvas. If only [width] or [height] is passed, the image will
+   * be resized proportionally.
+   */
   void resize(int width, int height) {
     int w, h;
     if (height == null) {
@@ -113,6 +146,11 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context = resized._context;
   }
 
+  /**
+   * Trim the canvas using [color] as the transparent color. If no [color] is
+   * provided transparent pixels will be used to determine the size of the
+   * trimmed canvas.
+   */
   void trim({String color}) {
     bool transparent;
     List<int> targetColor;
@@ -147,6 +185,9 @@ class CanvasQuery implements CanvasRenderingContext2D {
     }
   }
 
+  /**
+   * Resizes the canvas by using [pixelSize] to resize each pixel (no bluring).
+   */
   int resizePixel(int pixelSize) {
 
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
@@ -199,6 +240,9 @@ class CanvasQuery implements CanvasRenderingContext2D {
 //    _context = context;
   }
 
+  /**
+   * Reduces the colors of the image to the colors in the [palette].
+   */
   void matchPalette(List<String> palette) {
     var imgData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
 
@@ -233,6 +277,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.putImageData(imgData, 0, 0);
   }
 
+  /** Returns the colors used in the image. */
   List<String> getPalette() {
     var palette = new List<String>();
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
@@ -248,6 +293,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     return palette;
   }
 
+  /** Pixelizes the canvas. */
   void pixelize([int size = 4]) {
     if (_canvas.width < size) size = _canvas.width;
     var imageSmoothingEnabled = _context.imageSmoothingEnabled;
@@ -265,8 +311,11 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.imageSmoothingEnabled = imageSmoothingEnabled;
   }
 
-
-  List<bool> colorToMask(String hexColor) {
+  /**
+   * Returns a mask containing [true] for every pixel that does not have color [hexColor].
+   * The mask will contain [true] for every other pixel if [inverted] is set to [true].
+   */
+  List<bool> colorToMask(String hexColor, {bool inverted: false}) {
     Color color = new Color.fromHex(hexColor);
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
@@ -274,15 +323,18 @@ class CanvasQuery implements CanvasRenderingContext2D {
     var mask = new List<bool>(sourcePixels.length ~/ 4);
 
     for(var i = 0; i < sourcePixels.length; i += 4) {
-      if(sourcePixels[i + 0] == color.r && sourcePixels[i + 1] == color.g && sourcePixels[i + 2] == color.b) mask.add(false);
-      else mask.add(true);
+      if(sourcePixels[i + 0] == color.r && sourcePixels[i + 1] == color.g && sourcePixels[i + 2] == color.b) mask.add(inverted);
+      else mask.add(!inverted);
     }
 
     return mask;
   }
 
-  List<int> grayscaleToMask(String hexColor) {
-    Color color = new Color.fromHex(hexColor);
+  /**
+   * Returns a grayscale maks of the canvas. Each value in the returned list
+   * will be the average of the RGB-values.
+   */
+  List<int> grayscaleToMask() {
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
@@ -295,6 +347,10 @@ class CanvasQuery implements CanvasRenderingContext2D {
     return mask;
   }
 
+  /**
+   * Convert grayscale of an image to its transparency.
+   * Light pixels become opaque. Dark pixels become transparent.
+   */
   void grayscaleToAlpha() {
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
@@ -362,6 +418,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.putImageData(sourceData, 0, 0);
   }
 
+  /** Clears the canvas with [color]. Calls clearRect if no color is passed. */
   void clear({String color}) {
     if(null != color) {
       _context.fillStyle = color;
@@ -371,13 +428,16 @@ class CanvasQuery implements CanvasRenderingContext2D {
     }
   }
 
+  /** Creates a new [CanvasElement] with the same size and content as this canvas. */
   CanvasElement copy() {
     var result = new CanvasElement(width: _canvas.width, height: _canvas.height);
     result.context2d.drawImage(_canvas, 0, 0);
     return result;
   }
 
+  /** Sets the hue, saturation and lightness of the image. */
   void setHslAsList(List<num> hsl) => setHsl(hue: hsl[0], saturation: hsl[1], lightness: hsl[2]);
+  /** Sets the [hue], [saturation] and [lightness] of the image. */
   void setHsl({num hue, num saturation, num lightness}) {
     double hIn = null == hue ? null : hue.toDouble();
     double sIn = null == saturation ? null : saturation.toDouble();
@@ -406,7 +466,9 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.putImageData(data, 0, 0);
   }
 
+  /** Shifts the hue, saturation and lightness of the image by the passes amount. */
   void shiftHslAsList(List<num> hsl) => shiftHsl(hue: hsl[0], saturation: hsl[1], lightness: hsl[2]);
+  /** Shifts the [hue], [saturation] and [lightness] of the image by the passes amount. */
   void shiftHsl({num hue, num saturation, num lightness}) {
     double hIn = null == hue ? null : hue.toDouble();
     double sIn = null == saturation ? null : saturation.toDouble();
@@ -434,6 +496,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.putImageData(data, 0, 0);
   }
 
+  /** Replaces the hue of [src] with [dst]. */
   void replaceHue(double src, double dst) {
     var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var pixels = data.data;
@@ -454,8 +517,8 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.putImageData(data, 0, 0);
   }
 
+  /** Inverts the colors of the image. */
   void invert(src, dst) {
-
     var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var pixels = data.data;
 
@@ -468,6 +531,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.putImageData(data, 0, 0);
   }
 
+  /** Create a rect with rounded corners. */
   void roundRect(num x, num y, num width, num height, num radius) {
     _context..beginPath()
       ..moveTo(x + radius, y)
@@ -482,6 +546,9 @@ class CanvasQuery implements CanvasRenderingContext2D {
       ..closePath();
   }
 
+  /**
+   * Passed [text] will be written at [x], [y] and will be wrapped at [maxWidth].
+   */
   void wrappedText(String text, int x, int y, [int maxWidth]) {
 
     var words = text.split(" ");
@@ -523,6 +590,10 @@ class CanvasQuery implements CanvasRenderingContext2D {
     }
   }
 
+  /**
+   * Returns a map of the 'height' and 'width' of a given [text]. If [maxWidth]
+   * is given, the [text] will be wrapped.
+   */
   Map<String, int> textBoundaries(String text, [num maxWidth]) {
     var words = text.split(" ");
 
@@ -571,6 +642,12 @@ class CanvasQuery implements CanvasRenderingContext2D {
       ..closePath();
   }
 
+  /**
+   * Creates an expandable area with borders from [image].
+   * [x], [y], [width], [height] are the values for the border.
+   * [top], [right], [bottom], [left] are the boundaries of the border in the
+   * [image].
+   */
   void borderImage(var image, num x, num y, num width, num height, num top, num right, num bottome, num left, {bool fill: false, String fillColor}) {
     _context
       /* top */
@@ -598,8 +675,10 @@ class CanvasQuery implements CanvasRenderingContext2D {
     }
   }
 
-  /* www.html5rocks.com/en/tutorials/canvas/imagefilters/ */
-
+  /**
+   * Convolve an image using [matrix].
+   * See [www.html5rocks.com/en/tutorials/canvas/imagefilters/].
+   */
   void convolve(List<num> matrix, {num mix: 1, num divide: 1}) {
 
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
@@ -654,7 +733,9 @@ class CanvasQuery implements CanvasRenderingContext2D {
     return weights;
   }
 
+  /** Blurs an image. */
   void blur({num mix: 1}) => convolve([1, 1, 1, 1, 1, 1, 1, 1, 1], mix: mix, divide: 9);
+  /** Applies a gaussian blur to an image. */
   void gaussianBlur({num mix: 1}) => convolve([0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067,
                                                0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292,
                                                0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117,
@@ -662,7 +743,9 @@ class CanvasQuery implements CanvasRenderingContext2D {
                                                0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117,
                                                0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292,
                                                0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067], mix : mix);
+  /** Sharpens the image. */
   void sharpen({num mix: 1}) => convolve([0, -1, 0, -1, 5, -1, 0, -1, 0], mix : mix);
+  /** Pixels with a grayscale value beyond [threashold] will become transparent. */
   void threshold(num threshold) {
     var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var pixels = data.data;
@@ -679,6 +762,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.putImageData(data, 0, 0);
   }
 
+  /** Sepia filter. */
   void sepia() {
     var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var pixels = data.data;
@@ -691,11 +775,6 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
     _context.putImageData(data, 0, 0);
   }
-
-  TextMetrics measureText(String text) => _context.measureText(text);
-  CanvasGradient createRadialGradient(num x0, num y0, num r0, num x1, num y1, num r1) => _context.createRadialGradient(x0, y0, r0, x1, y1, r1);
-  CanvasGradient createLinearGradient(num x0, num y0, num x1, num y1) => _context.createLinearGradient(x0, y0, x1, y1);
-
 
   void onDropImage(callback(ImageElement image)) {
     document.onDrop.listen((MouseEvent e) {
