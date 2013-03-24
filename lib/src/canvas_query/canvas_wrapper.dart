@@ -1,10 +1,12 @@
 part of canvas_query;
 
 
-CanvasQuery cq([var selector]) {
+CanvasQuery cq([var selector, int height]) {
   var canvas;
-  if (null == selector) {
-    canvas = new CanvasElement(width: window.innerWidth, height: window.innerHeight);
+  if (null == selector || selector is int) {
+    int width = (selector != null ? selector : window.innerWidth);
+    height = (height != null ? height : window.innerHeight);
+    canvas = new CanvasElement(width: width, height: height);
   } else if (selector is String) {
     canvas = query(selector);
   } else if (selector is ImageElement) {
@@ -43,6 +45,12 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
   void appendTo(Element element) {
     element.append(_canvas);
+  }
+
+  void replaceWith(CanvasQuery other) {
+    _canvas.replaceWith(other.canvas);
+    _canvas = other.canvas;
+    _context = other.context2d;
   }
 
   void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) => CanvasTools.blend(what, this.canvas, mode, mix);
@@ -194,13 +202,13 @@ class CanvasQuery implements CanvasRenderingContext2D {
   void matchPalette(List<String> palette) {
     var imgData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
 
-    var rgbPalette = new List<Color>.fixedLength(palette.length);
+    var rgbPalette = new List<Color>(palette.length);
     for(var i = 0; i < palette.length; i++) {
       rgbPalette.add(new Color.fromHex(palette[i]));
     }
 
     for(var i = 0; i < imgData.data.length; i += 4) {
-      var difList = new List<int>.fixedLength(rgbPalette.length);
+      var difList = new List<int>(rgbPalette.length);
       for(var j = 0; j < rgbPalette.length; j++) {
         var rgbVal = rgbPalette[j];
         var rDif = (imgData.data[i] - rgbVal.r).abs(),
@@ -263,7 +271,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
-    var mask = new List<bool>.fixedLength(sourcePixels.length ~/ 4);
+    var mask = new List<bool>(sourcePixels.length ~/ 4);
 
     for(var i = 0; i < sourcePixels.length; i += 4) {
       if(sourcePixels[i + 0] == color.r && sourcePixels[i + 1] == color.g && sourcePixels[i + 2] == color.b) mask.add(false);
@@ -278,7 +286,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
-    var mask = new List<int>.fixedLength(sourcePixels.length ~/ 4);
+    var mask = new List<int>(sourcePixels.length ~/ 4);
 
     for(var i = 0; i < sourcePixels.length; i += 4) {
       mask.add((sourcePixels[i + 0] + sourcePixels[i + 1] + sourcePixels[i + 2]) ~/ 3);
@@ -369,16 +377,8 @@ class CanvasQuery implements CanvasRenderingContext2D {
     return result;
   }
 
-  void set fillStyle(String fillStyle) {
-    _context.fillStyle = fillStyle;
-  }
-
-  void set strokeStyle(String strokeStyle) {
-    _context.strokeStyle = strokeStyle;
-  }
-
-  void setHslAsList(List<num> hsl) => setHsl(hsl[0], hsl[1], hsl[2]);
-  void setHsl(num hue, num saturation, num lightness) {
+  void setHslAsList(List<num> hsl) => setHsl(hue: hsl[0], saturation: hsl[1], lightness: hsl[2]);
+  void setHsl({num hue, num saturation, num lightness}) {
     double hIn = null == hue ? null : hue.toDouble();
     double sIn = null == saturation ? null : saturation.toDouble();
     double lIn = null == lightness ? null : lightness.toDouble();
@@ -406,8 +406,8 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.putImageData(data, 0, 0);
   }
 
-  void shiftHslAsList(List<num> hsl) => shiftHsl(hsl[0], hsl[1], hsl[2]);
-  void shiftHsl(num hue, num saturation, num lightness) {
+  void shiftHslAsList(List<num> hsl) => shiftHsl(hue: hsl[0], saturation: hsl[1], lightness: hsl[2]);
+  void shiftHsl({num hue, num saturation, num lightness}) {
     double hIn = null == hue ? null : hue.toDouble();
     double sIn = null == saturation ? null : saturation.toDouble();
     double lIn = null == lightness ? null : lightness.toDouble();
@@ -644,7 +644,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
   }
 
   List<double> _calculateWeights(List<num> matrix, int matrixSize, num divide) {
-    var weights = new List<double>.fixedLength(matrix.length);
+    var weights = new List<double>(matrix.length);
     for(var cy = 0; cy < matrixSize; cy++) {
       for(var cx = 0; cx < matrixSize; cx++) {
         var index = cy * matrixSize + cx;

@@ -7,7 +7,7 @@ import 'package:canvas_query/color_tools.dart';
 typedef int BlendFunction(int a, int b);
 typedef List<int> SpecialBlendFunction(List<int> a, List<int> b);
 
-class BlendFunctions {
+class Blend {
   static int normal(int a, int b) => b;
 
   static int overlay(num a, num b) {
@@ -21,7 +21,7 @@ class BlendFunctions {
     return min(255, max(0, result * 255)).toInt();
   }
 
-  static int hardLight(int a, int b) => BlendFunctions.overlay(b, a);
+  static int hardLight(int a, int b) => Blend.overlay(b, a);
 
   static int softLight(num a, num b) {
     a /= 255;
@@ -43,9 +43,6 @@ class BlendFunctions {
   static int substract(int a, int b) => max(a - b, 0);
   static int darkenOnly(int a, int b) => min(a, b);
   static int lightenOnly(int a, int b) => max(a, b);
-}
-
-class SpecialBlendFunctions {
 
   static List<int> color(List<int> a, List<int> b) {
     var aHSL = rgbListToHsl(a);

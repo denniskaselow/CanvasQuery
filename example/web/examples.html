@@ -3,13 +3,35 @@
 <html>
   <head>
     <title>canvas_query</title>
+    <link rel="stylesheet" href="example.css">
   </head>
 
-  <body style="background: rgb(80, 60, 80);">
-    <div id="coloring"></div>
-    <div id="blending"></div>
+  <body>
+    <div class="showcasenav">
+      <div class="showcaseintro">Select a showcase from the list below and move over an example to
+      see the function that has been used to create the effect.</div>
+      <ul>
+        <li id="show_coloring">Coloring of units</li>
+        <li id="show_blending">Blending of images</li>
+        <li id="show_border">Drawing borders</li>
+      </ul>
+    </div>
+    <div class="showcases">
+      <div id="coloring" class="example">
+        <fieldset class="hslconfig">
+          <legend>HSL-Config</legend>
+          <div>
+            If your browser does not support sliders, you need to enter a value between 0 and 1.
+          </div>
+          <label>Hue: <input id="hue" type="range" min="0" max="1" step="0.05" value="0" /></label>
+          <label>Saturation: <input id="saturation" type="range" min="0" max="1" step="0.05" value="0" /></label>
+          <label>Lightness: <input id="lightness" type="range" min="0" max="1" step="0.05" value="0" /></label>
+        </fieldset>
+      </div>
+      <div id="blending" class="example"></div>
+      <div id="border" class="example"></div>
+    </div>
     <script type="application/dart" src="examples.dart"></script>
-    <!-- for this next line to work, your pubspec.yaml file must have a dependency on 'browser' -->
     <script src="../packages/browser/dart.js"></script>
   </body>
 </html>
