@@ -14,11 +14,12 @@
         <li id="show_coloring">Coloring of units</li>
         <li id="show_blending">Blending of images</li>
         <li id="show_border">Drawing borders</li>
+        <li id="show_wrappedtext">Wrapping text</li>
       </ul>
     </div>
     <div class="showcases">
       <div id="coloring" class="example">
-        <fieldset class="hslconfig">
+        <fieldset class="config">
           <legend>HSL-Config</legend>
           <div>
             If your browser does not support sliders, you need to enter a value between 0 and 1.
@@ -28,8 +29,18 @@
           <label>Lightness: <input id="lightness" type="range" min="0" max="1" step="0.05" value="0" /></label>
         </fieldset>
       </div>
-      <div id="blending" class="example"></div>
+      <div id="blending" class="example">
+        <fieldset class="config">
+          <legend>Blend-mix-Config</legend>
+          <div>
+            If your browser does not support sliders, you need to enter a value between 0 and 1.
+          </div>
+          <label>mix: <input id="mix" type="range" min="0" max="1" step="0.05" value="0.5" /></label>
+        </fieldset>
+        <br />
+      </div>
       <div id="border" class="example"></div>
+      <div id="wrappedtext" class="example"></div>
     </div>
     <script type="application/dart" src="examples.dart"></script>
     <script src="../packages/browser/dart.js"></script>

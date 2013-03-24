@@ -4,7 +4,7 @@ import 'dart:collection';
 
 import 'package:canvas_query/canvas_query.dart';
 
-var showcases = {'coloring': coloring, 'blending': blending, 'border': border};
+var showcases = {'coloring': coloring, 'blending': blending, 'border': border, 'wrappedtext': wrappedText};
 
 void main() {
 
@@ -46,51 +46,96 @@ void coloring(DivElement parent) {
   });
 }
 
+void blending(DivElement parent) {
+  ImageElement below, above;
+  int count = 0;
+  Future.wait([loadImage('below.png'), loadImage('above.png')]).then((images) {
+    below = images[0];
+    above = images[1];
+    InputElement mixSlider = query("#mix");
+    mixSlider.onChange.listen((_) {
+      mixSlider.disabled = true;
+      double mix = double.parse(mixSlider.value);
+      parent.queryAll("canvas").forEach((canvas) => canvas.remove());
+      for (String functionName in blendFunction.keys) {
+        exampleBlend(below, above, functionName, mix, parent);
+      }
+      for (String functionName in specialBlendFunction.keys) {
+        exampleBlendSpecial(below, above, functionName, mix, parent);
+      }
+      mixSlider.disabled = false;
+    });
+  });
+}
+
+void border(DivElement parent) {
+  parent..appendHtml("using roundRect:<br />");
+  cq(300, 150)..roundRect(10, 10, 280, 130, 50)
+              ..lineWidth = 3
+              ..strokeStyle = 'red'
+              ..stroke()
+              ..fillStyle = 'blue'
+              ..fill()
+              ..appendTo(parent);
+  var image = new ImageElement();
+  image.src = 'border.png';
+  image.onLoad.listen((e) {
+    parent..appendHtml("<br />using borderImage:<br />")
+          ..append(image)
+          ..appendHtml("<br />can be turned into<br />");
+    cq(300, 150)..borderImage(image, 0, 0, 300, 150, 6, 6, 6, 6, fillColor: 'red')
+                ..borderImage(image, 15, 15, 240, 50, 6, 6, 6, 6, fillColor: 'green')
+                ..borderImage(image, 15, 75, 240, 50, 6, 6, 6, 6, fillColor: 'blue')
+                ..borderImage(image, 270, 15, 20, 110, 6, 6, 6, 6, fill: true)
+                ..appendTo(parent)
+                ..canvas.title = '''
+..borderImage(image, 0, 0, 100, 100, 6, 6, 6, 6, fillColor: 'grey')
+..borderImage(image, 15, 15, 240, 50, 6, 6, 6, 6, fillColor: 'green')
+..borderImage(image, 15, 75, 240, 50, 6, 6, 6, 6, fillColor: 'blue')
+..borderImage(image, 270, 15, 20, 110, 6, 6, 6, 6, fill: true);
+''';
+  });
+}
+
+void wrappedText(DivElement parent) {
+  cq(500, 300)..font = '16px Verdana'
+              ..wrappedText('''Lorem ipsum dolor sit amet, consectetur adipiscing 
+elit. In elementum sapien ac turpis tempus pellentesque. Nulla non tellus purus, 
+in iaculis tortor. Integer facilisis varius nibh, sit amet tempus nunc hendrerit 
+non. Maecenas arcu ante, semper eget venenatis eu, commodo sed purus. Vivamus a 
+mi nunc, sed vestibulum lacus.''', 20, 40, 260)
+              ..strokeRect(10, 10, 280, 280)
+              ..canvas.title = '.wrappedText(\'...\', 20, 40, 260);'
+              ..appendTo(parent);
+}
+
+
+
 void updateHsl(ImageElement image, InputElement hueSlider, InputElement saturationSlider, InputElement lightnessSlider, CanvasQuery current) {
   var hue = hueSlider.value;
   var sat = saturationSlider.value;
   var light = lightnessSlider.value;
   var next = cq(image)..shiftHsl(hue: double.parse(hue),
-                    saturation: double.parse(sat),
-                    lightness: double.parse(light))
-                      ..canvas.title = 'cq.shiftHsl(hue: $hue, saturation: $sat, lightness: $light);'
+                                  saturation: double.parse(sat),
+                                  lightness: double.parse(light))
+                      ..canvas.title = '.shiftHsl(hue: $hue, saturation: $sat, lightness: $light);'
                       ..canvas.classes.add('example');
   current.replaceWith(next);
-  current = next;
 }
 
-void blending(DivElement parent) {
-  ImageElement below, above;
-  Future.wait([loadImage('below.png'), loadImage('above.png')]).then((images) {
-    below = images[0];
-    above = images[1];
-    blendAll(below, above, 0.5, parent);
-  });
-}
-
-void blendAll(below, above, mix, DivElement parent) {
-  parent.children.forEach((child) => null == child ? null : child.remove());
-  for (String functionName in blendFunction.keys) {
-    exampleBlend(below, above, functionName, mix, parent);
-  }
-  for (String functionName in specialBlendFunction.keys) {
-    exampleBlendSpecial(below, above, functionName, mix, parent);
-  }
-}
-
-void exampleBlend(below, above, functionName, mix, DivElement parent) {
+void exampleBlend(below, above, String functionName, num mix, DivElement parent) {
   var function = blendFunction[functionName];
   cq(below)..blend(above, function, mix)
            ..appendTo(parent)
-           ..canvas.title = 'cq.blend(above, Blend.$functionName, $mix);'
+           ..canvas.title = '.blend(above, Blend.$functionName, $mix);'
            ..canvas.classes.add('example');
 }
 
-void exampleBlendSpecial(below, above, functionName, mix, parent) {
+void exampleBlendSpecial(below, above, String functionName, num mix, DivElement parent) {
   var function = specialBlendFunction[functionName];
   cq(below)..blendSpecial(above, function, mix)
            ..appendTo(parent)
-           ..canvas.title = 'cq.blendSpecial(above, Blend.$functionName, $mix);'
+           ..canvas.title = '.blendSpecial(above, Blend.$functionName, $mix);'
            ..canvas.classes.add('example');
 }
 
@@ -100,26 +145,6 @@ Future<ImageElement> loadImage(String src) {
   var completer = new Completer<ImageElement>();
   image.onLoad.listen((e) => completer.complete(image));
   return completer.future;
-}
-
-void border(DivElement parent) {
-  var image = new ImageElement();
-  image.src = 'border.png';
-  image.onLoad.listen((e) {
-    parent..append(image)
-          ..appendHtml("<br />can be turned into<br />");
-    cq(300, 150)..borderImage(image, 0, 0, 300, 150, 6, 6, 6, 6, fillColor: 'red')
-                ..borderImage(image, 15, 15, 240, 50, 6, 6, 6, 6, fillColor: 'green')
-                ..borderImage(image, 15, 75, 240, 50, 6, 6, 6, 6, fillColor: 'blue')
-                ..borderImage(image, 270, 15, 20, 110, 6, 6, 6, 6, fill: true)
-                ..appendTo(parent)
-                ..canvas.title = '''
-cq..borderImage(image, 0, 0, 100, 100, 6, 6, 6, 6, fillColor: 'grey')
-  ..borderImage(image, 15, 15, 240, 50, 6, 6, 6, 6, fillColor: 'green')
-  ..borderImage(image, 15, 75, 240, 50, 6, 6, 6, 6, fillColor: 'blue')
-  ..borderImage(image, 270, 15, 20, 110, 6, 6, 6, 6, fill: true);
-''';
-  });
 }
 
 var blendFunction = {

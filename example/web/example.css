@@ -51,11 +51,11 @@ div.example {
   display: none;
 }
 
-.hslconfig {
+.config {
   display: inline-block;
   width: 200px;
 }
-.hslconfig > label {
+.config > label {
   display: inline-block;
   width: 100px;
 }
