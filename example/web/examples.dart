@@ -6,7 +6,7 @@ import 'package:canvas_query/canvas_query.dart';
 
 var showcases = {'coloring': coloring, 'blending': blending,
                  'border': border, 'wrappedtext': wrappedText,
-                 'masking': masking};
+                 'masking': masking, 'convolve': convolve};
 
 void main() {
 
@@ -55,17 +55,10 @@ void blending(DivElement parent) {
     below = images[0];
     above = images[1];
     InputElement mixSlider = query("#mix");
+    blendAll(mixSlider, below, above, parent);
     mixSlider.onChange.listen((_) {
-      mixSlider.disabled = true;
-      double mix = double.parse(mixSlider.value);
       parent.queryAll("canvas").forEach((canvas) => canvas.remove());
-      for (String functionName in blendFunction.keys) {
-        exampleBlend(below, above, functionName, mix, parent);
-      }
-      for (String functionName in specialBlendFunction.keys) {
-        exampleBlendSpecial(below, above, functionName, mix, parent);
-      }
-      mixSlider.disabled = false;
+      blendAll(mixSlider, below, above, parent);
     });
   });
 }
@@ -78,6 +71,7 @@ void border(DivElement parent) {
               ..stroke()
               ..fillStyle = 'blue'
               ..fill()
+              ..canvas.title = '.roundRect(10, 10, 280, 130, 50)'
               ..appendTo(parent);
   var image = new ImageElement();
   image.src = 'border.png';
@@ -125,8 +119,43 @@ cq(image).applyMask(colorMask)'''
   });
 }
 
+void convolve(DivElement parent) {
+  var image = new ImageElement();
+  image.onLoad.listen((e) {
+    cq(image)..canvas.classes.add('example')
+             ..canvas.title = 'This is the source image'
+             ..appendTo(parent);
+    parent.appendHtml('<br />');
+    cq(image)..canvas.classes.add('example')
+             ..blur()
+             ..canvas.title = '.blur()'
+             ..appendTo(parent);
+    cq(image)..canvas.classes.add('example')
+             ..sharpen()
+             ..canvas.title = '.sharpen()'
+             ..appendTo(parent);
+    cq(image)..canvas.classes.add('example')
+             ..convolve([0, 1, 0, 1, -4, 1, 0, 1, 0])
+             ..canvas.title = '.convolve([0, 1, 0, 1, -4, 1, 0, 1, 0])'
+             ..appendTo(parent);
+    cq(image)..canvas.classes.add('example')
+             ..convolve([1/2])
+             ..canvas.title = '.convolve([1/2])'
+             ..appendTo(parent);
+    cq(image)..canvas.classes.add('example')
+             ..convolve([2])
+             ..canvas.title = '.convolve([2])'
+             ..appendTo(parent);
+    cq(image)..canvas.classes.add('example')
+             ..convolve([1/2, 2, 1/9, 2, 1/9, -2, 1/9, -2, -1/2])
+             ..canvas.title = '.convolve([1/2, 2, 1/9, 2, 1/9, -2, 1/9, -2, -1/2])'
+             ..appendTo(parent);
+  });
+  image.src = 'farminglpc.png';
+}
+
 void wrappedText(DivElement parent) {
-  cq(500, 300)..font = '16px Verdana'
+  cq(300, 300)..font = '16px Verdana'
               ..wrappedText('''Lorem ipsum dolor sit amet, consectetur adipiscing 
 elit. In elementum sapien ac turpis tempus pellentesque. Nulla non tellus purus, 
 in iaculis tortor. Integer facilisis varius nibh, sit amet tempus nunc hendrerit 
@@ -149,6 +178,18 @@ void updateHsl(ImageElement image, InputElement hueSlider, InputElement saturati
                       ..canvas.title = '.shiftHsl(hue: $hue, saturation: $sat, lightness: $light);'
                       ..canvas.classes.add('example');
   current.replaceWith(next);
+}
+
+void blendAll(InputElement mixSlider, ImageElement below, ImageElement above, DivElement parent) {
+  mixSlider.disabled = true;
+  double mix = double.parse(mixSlider.value);
+  for (String functionName in blendFunction.keys) {
+    exampleBlend(below, above, functionName, mix, parent);
+  }
+  for (String functionName in specialBlendFunction.keys) {
+    exampleBlendSpecial(below, above, functionName, mix, parent);
+  }
+  mixSlider.disabled = false;
 }
 
 void exampleBlend(below, above, String functionName, num mix, DivElement parent) {
