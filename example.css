@@ -1,0 +1,83 @@
+body {
+  background: hsl(0, 0%, 90%);
+  margin: 0 auto;
+  min-width: 800px;
+}
+
+.showcasenav {
+  background: hsl(240, 10%, 80%);
+  margin: 0px 8px 0px 0px;
+  width: 19%;
+  height: 500px;
+  float: left;
+}
+
+.showcaseintro {
+  background: hsl(240, 10%, 70%);
+  margin: 15px 0px 0px 5px;
+}
+
+.showcasenav > ul {
+  padding: 0px;
+  margin: 15px 0px 0px 5px;
+}
+
+.showcasenav > ul > li {
+  margin: 0px 0px 5px 0px;
+  list-style-type: none;
+  border: 1px solid black;
+  background: hsl(240, 50%, 80%);
+}
+
+.showcasenav > ul > li:hover,
+.showcasenav > ul > li.highlight {
+  background: hsl(240, 80%, 80%);
+  cursor: pointer;
+}
+
+.showcases {
+  width: 80%;
+  float: left;
+}
+
+canvas.example {
+  background: hsl(220, 10%, 25%);
+  border: 1px solid black;
+  margin: 4px;
+  padding: 8px;
+}
+
+div.example {
+  display: none;
+}
+
+.config {
+  display: inline-block;
+  width: 200px;
+}
+.config > label {
+  display: inline-block;
+  width: 100px;
+}
+
+.centered {
+  text-align: center;
+}
+
+.bigtext {
+  font-size: 60px;
+}
+
+.credits:before {
+  content: "Credits: ";
+}
+
+.credits {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 16px;
+  text-align: center;
+  background: hsl(0, 0%, 75%);
+  margin: 5px;
+  padding: 5px;
+  border: 1px solid black;
+}

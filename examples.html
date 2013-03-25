@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>canvas_query examples</title>
+    <link rel="stylesheet" href="example.css">
+  </head>
+
+  <body>
+    <div class="showcasenav">
+      <div class="showcaseintro">Select a showcase from the list below and move over an example to
+      see the function that has been used to create the effect.</div>
+      <ul>
+        <li id="show_coloring">Coloring of units</li>
+        <li id="show_blending">Blending of images</li>
+        <li id="show_border">Drawing borders</li>
+        <li id="show_wrappedtext">Wrapping text</li>
+        <li id="show_masking">Masking</li>
+        <li id="show_convolve">Convolution</li>
+      </ul>
+    </div>
+    <div class="showcases centered">
+      <div id="coloring" class="example">
+        <div class="credits">
+          <a href="http://artperski.com/">Insectoid ships created by Artur Reterski</a>
+        </div>
+        <fieldset class="config">
+          <legend>HSL-Config</legend>
+          <div>
+            If your browser does not support sliders, you need to enter a value between 0 and 1.
+          </div>
+          <label>Hue: <input id="hue" type="range" min="0" max="1" step="0.05" value="0" /></label>
+          <label>Saturation: <input id="saturation" type="range" min="0" max="1" step="0.05" value="0" /></label>
+          <label>Lightness: <input id="lightness" type="range" min="0" max="1" step="0.05" value="0" /></label>
+        </fieldset>
+      </div>
+      <div id="blending" class="example">
+        <fieldset class="config">
+          <legend>Blend-mix-Config</legend>
+          <div>
+            If your browser does not support sliders, you need to enter a value between 0 and 1.
+          </div>
+          <label>mix: <input id="mix" type="range" min="0" max="1" step="0.05" value="0.5" /></label>
+        </fieldset>
+        <br />
+      </div>
+      <div id="border" class="example"></div>
+      <div id="wrappedtext" class="example"></div>
+      <div id="masking" class="example centered bigtext">
+        <div class="credits">
+          <a href="http://opengameart.org/content/farming-tilesets-magic-animations-and-ui-elements">
+            Farming image created by Daniel Eddeland
+          </a>
+        </div>
+      </div>
+      <div id="convolve" class="example">
+        <div class="credits">
+          <a href="http://opengameart.org/content/farming-tilesets-magic-animations-and-ui-elements">
+            Farming image created by Daniel Eddeland
+          </a>
+        </div>
+      </div>
+    </div>
+    <script type="application/dart" src="examples.dart"></script>
+    <script src="dart.js"></script>
+  </body>
+</html>
