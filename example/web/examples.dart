@@ -119,8 +119,8 @@ cq(image).applyMask(grayscaleMask)'''
              ..appendTo(parent);
     cq(image)..applyMask(colorMask)
              ..canvas.title = '''
-List<int> grayscaleMask = cq(maskImg).colorToMask('#000000');\n
-cq(image).applyMask(grayscaleMask)'''
+List<int> colorMask = cq(maskImg).colorToMask('#000000');\n
+cq(image).applyMask(colorMask)'''
              ..appendTo(parent);
   });
 }
