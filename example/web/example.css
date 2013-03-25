@@ -59,3 +59,11 @@ div.example {
   display: inline-block;
   width: 100px;
 }
+
+.centered {
+  text-align: center;
+}
+
+.bigtext {
+  font-size: 60px;
+}

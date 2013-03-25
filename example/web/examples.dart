@@ -4,7 +4,9 @@ import 'dart:collection';
 
 import 'package:canvas_query/canvas_query.dart';
 
-var showcases = {'coloring': coloring, 'blending': blending, 'border': border, 'wrappedtext': wrappedText};
+var showcases = {'coloring': coloring, 'blending': blending,
+                 'border': border, 'wrappedtext': wrappedText,
+                 'masking': masking};
 
 void main() {
 
@@ -32,7 +34,6 @@ void showShowcase(String showcase, Function showcaseFunction) {
 
 void coloring(DivElement parent) {
   var image = new ImageElement();
-  image.src = 'ships.png';
   image.onLoad.listen((e) {
     var current = cq(image)..canvas.classes.add('example');
     current.appendTo(parent);
@@ -44,6 +45,7 @@ void coloring(DivElement parent) {
     saturationSlider.onChange.listen((_) => updateHsl(image, hueSlider, saturationSlider, lightnessSlider, current));
     lightnessSlider.onChange.listen((_) => updateHsl(image, hueSlider, saturationSlider, lightnessSlider, current));
   });
+  image.src = 'ships.png';
 }
 
 void blending(DivElement parent) {
@@ -94,6 +96,32 @@ void border(DivElement parent) {
 ..borderImage(image, 15, 75, 240, 50, 6, 6, 6, 6, fillColor: 'blue')
 ..borderImage(image, 270, 15, 20, 110, 6, 6, 6, 6, fill: true);
 ''';
+  });
+}
+
+void masking(DivElement parent) {
+  ImageElement image, maskImg;
+  int count = 0;
+  Future.wait([loadImage('farminglpc.png'), loadImage('mask.png')]).then((images) {
+    image = images[0];
+    maskImg = images[1];
+    parent..append(image)
+          ..appendText('+')
+          ..append(maskImg)
+          ..appendHtml('<br />=<br />');
+    var cqMaskImg = cq(maskImg);
+    List<int> grayscaleMask = cqMaskImg.grayscaleToMask();
+    List<int> colorMask = cqMaskImg.colorToMask('#000000');
+    cq(image)..applyMask(grayscaleMask)
+             ..canvas.title = '''
+List<int> grayscaleMask = cq(maskImg).grayscaleToMask();\n
+cq(image).applyMask(grayscaleMask)'''
+             ..appendTo(parent);
+    cq(image)..applyMask(colorMask)
+             ..canvas.title = '''
+List<int> grayscaleMask = cq(maskImg).colorToMask('#000000');\n
+cq(image).applyMask(grayscaleMask)'''
+             ..appendTo(parent);
   });
 }
 

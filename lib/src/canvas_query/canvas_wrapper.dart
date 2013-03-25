@@ -323,8 +323,8 @@ class CanvasQuery implements CanvasRenderingContext2D {
     var mask = new List<bool>(sourcePixels.length ~/ 4);
 
     for(var i = 0; i < sourcePixels.length; i += 4) {
-      if(sourcePixels[i + 0] == color.r && sourcePixels[i + 1] == color.g && sourcePixels[i + 2] == color.b) mask.add(inverted);
-      else mask.add(!inverted);
+      if(sourcePixels[i + 0] == color.r && sourcePixels[i + 1] == color.g && sourcePixels[i + 2] == color.b) mask[i ~/ 4] = inverted;
+      else mask[i ~/ 4] = !inverted;
     }
 
     return mask;
@@ -341,7 +341,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     var mask = new List<int>(sourcePixels.length ~/ 4);
 
     for(var i = 0; i < sourcePixels.length; i += 4) {
-      mask.add((sourcePixels[i + 0] + sourcePixels[i + 1] + sourcePixels[i + 2]) ~/ 3);
+      mask[i~/4] = (sourcePixels[i + 0] + sourcePixels[i + 1] + sourcePixels[i + 2]) ~/ 3;
     }
 
     return mask;
