@@ -586,7 +586,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
       var text = lines[i];
 
-      fillText(text, x, oy);
+      _context.fillText(text, x, oy);
     }
   }
 
