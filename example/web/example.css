@@ -81,3 +81,11 @@ div.example {
   padding: 5px;
   border: 1px solid black;
 }
+
+#tooltip {
+  display: none;
+  background: hsl(0, 0%, 95%);
+  margin: 5px;
+  padding: 5px;
+  position: absolute;
+}

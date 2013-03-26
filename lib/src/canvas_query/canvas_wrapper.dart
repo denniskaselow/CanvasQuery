@@ -188,15 +188,12 @@ class CanvasQuery implements CanvasRenderingContext2D {
   /**
    * Resizes the canvas by using [pixelSize] to resize each pixel (no bluring).
    */
-  int resizePixel(int pixelSize) {
+  void resizePixel(int pixelSize) {
 
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
-    var canvas = new CanvasElement();
+    var canvas = new CanvasElement(width: _canvas.width * pixelSize, height: _canvas.height * pixelSize);
     var context = canvas.context2d;
-
-    canvas.width = _canvas.width * pixelSize;
-    canvas.height = _canvas.height * pixelSize;
 
     for(var i = 0, len = sourcePixels.length; i < len; i += 4) {
       if(sourcePixels[i + 3] == 0) continue;
@@ -210,19 +207,8 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
     _context = context;
     _canvas = canvas;
-
-    _canvas.width = canvas.width;
-    _canvas.height = canvas.height;
-    clear();
-    drawImage(canvas, 0, 0);
-
-    return 1;
-
-    /* this very clever method is working only under Chrome */
-
-    // TODO check speed and browsersupport
-//    var x = 0,
-//      y = 0;
+    // creates blurry images in Firefox, works fine in Chrome
+//    var x = 0, y = 0;
 //
 //    canvas.width = _canvas.width * pixelSize | 0;
 //    canvas.height = _canvas.height * pixelSize | 0;
@@ -230,7 +216,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
 //    while(x < _canvas.width) {
 //      y = 0;
 //      while(y < _canvas.height) {
-//        context.drawImage(_canvas, x, y, 1, 1, x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+//        context.drawImageScaledFromSource(_canvas, x, y, 1, 1, x * pixelSize, y * pixelSize, pixelSize, pixelSize);
 //        y++;
 //      }
 //      x++;
@@ -248,7 +234,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
     var rgbPalette = new List<Color>(palette.length);
     for(var i = 0; i < palette.length; i++) {
-      rgbPalette.add(new Color.fromHex(palette[i]));
+      rgbPalette[i] = new Color.fromHex(palette[i]);
     }
 
     for(var i = 0; i < imgData.data.length; i += 4) {
@@ -258,7 +244,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
         var rDif = (imgData.data[i] - rgbVal.r).abs(),
             gDif = (imgData.data[i + 1] - rgbVal.g).abs(),
             bDif = (imgData.data[i + 2] - rgbVal.b).abs();
-        difList.add(rDif + gDif + bDif);
+        difList[j] = rDif + gDif + bDif;
       }
 
       var closestMatch = 0;

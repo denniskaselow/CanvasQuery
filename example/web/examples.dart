@@ -12,10 +12,12 @@ part 'src/border.dart';
 part 'src/wrapped_text.dart';
 part 'src/masking.dart';
 part 'src/convolve.dart';
+part 'src/palette.dart';
 
 var showcases = {'coloring': coloring, 'blending': blending,
                  'border': border, 'wrappedtext': wrappedText,
-                 'masking': masking, 'convolve': convolve};
+                 'masking': masking, 'convolve': convolve,
+                 'palette': palette};
 
 void main() {
 

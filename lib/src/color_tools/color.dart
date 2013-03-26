@@ -6,8 +6,8 @@ class Color {
   Color.fromHex(String hex, [this.a = 255]) {
     var rgb = hexToRgb(hex);
     r = rgb[0];
-    g = rgb[0];
-    b = rgb[0];
+    g = rgb[1];
+    b = rgb[2];
   }
   Color.fromRgb(this.r, this.g, this.b, [this.a = 255]);
 
