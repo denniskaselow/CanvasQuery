@@ -482,8 +482,8 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.putImageData(data, 0, 0);
   }
 
-  /** Replaces the hue of [src] with [dst]. */
-  void replaceHue(double src, double dst) {
+  /** Replaces the hue of 0<=[src]<=1 with 0<=[dst]<=1. */
+  void replaceHue(num src, num dst) {
     var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var pixels = data.data;
     var h, hsl, newPixel;

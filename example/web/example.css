@@ -19,11 +19,14 @@ body {
 
 .showcasenav > ul {
   padding: 0px;
-  margin: 15px 0px 0px 5px;
+  margin: 15px 0px 0px 20px;
 }
 
 .showcasenav > ul > li {
+  border-radius: 10px 0px 0px 10px;
+  text-align: right;
   margin: 0px 0px 5px 0px;
+  padding: 5px;
   list-style-type: none;
   border: 1px solid black;
   background: hsl(240, 50%, 80%);
