@@ -7,9 +7,10 @@ body {
 .showcasenav {
   background: hsl(240, 10%, 80%);
   margin: 0px 8px 0px 0px;
-  width: 19%;
-  height: 500px;
+  padding-bottom: 25px;
+  width: 19%;  
   float: left;
+  border-bottom-right-radius: 20px;
 }
 
 .showcaseintro {
@@ -80,7 +81,7 @@ div.example {
   font-size: 16px;
   text-align: center;
   background: hsl(0, 0%, 75%);
-  margin: 5px;
+  margin: 5px auto;
   padding: 5px;
   border: 1px solid black;
 }
