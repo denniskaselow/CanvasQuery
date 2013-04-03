@@ -5,16 +5,16 @@ var colors = ['red', 'blue', 'yellow', 'green', 'black', 'white'];
 void framework(DivElement parent) {
   var defaultWidth = 500;
   var defaultHeight = 300;
-  var buffer = cq(defaultWidth, defaultHeight);
-  var display = cq(defaultWidth, defaultHeight);
   var draw = false;
   var currentColor = 0;
+  Point pos;
+  var buffer = cq(defaultWidth, defaultHeight);
+  var display = cq(defaultWidth, defaultHeight);
   display..canvas.style.backgroundColor = 'white'
          ..appendTo(parent);
   var framework = display.framework;
-  Point pos;
-  framework.onMouseMove((position) => pos = position);
-  framework.onRender((delta, lastTick) {
+  framework.onMouseMove.listen((position) => pos = position);
+  framework.onRender.listen((_) {
     if (null != pos) {
       if (draw) {
         buffer..circle(pos.x, pos.y, 15)
@@ -30,31 +30,31 @@ void framework(DivElement parent) {
              ..fill();
     }
   });
-  framework.onMouseDown((_, {button}) {
-    if (0 == button) {
+  framework.onMouseDown.listen((e) {
+    if (0 == e.button) {
       draw = true;
     }
   });
-  framework.onMouseUp((_, {button}) {
-    if (0 == button) {
+  framework.onMouseUp.listen((e) {
+    if (0 == e.button) {
       draw = false;
     }
   });
-  framework.onKeyDown((keyCode) {
+  framework.onKeyDown.listen((keyCode) {
     if (keyCode == KeyCode.LEFT) {
       currentColor = (currentColor - 1) % colors.length;
     } else if (keyCode == KeyCode.RIGHT) {
       currentColor = (currentColor + 1) % colors.length;
     }
   });
-  framework.onDropImage((image) {
+  framework.onDropImage.listen((image) {
     buffer.canvas..width = image.width
                  ..height = image.height;
     display.canvas..width = image.width
                   ..height = image.height;
     buffer.drawImage(image, 0, 0);
-  });
-  framework.onSwipe((direction) {
+  }).onError((error) => window.alert(error.error));
+  framework.onSwipe().listen((direction) {
     if (direction == 'down' && colors[currentColor] == 'white') {
       buffer.canvas..width = defaultWidth
                    ..height = defaultHeight;

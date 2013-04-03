@@ -1,13 +1,5 @@
 part of canvas_query;
 
-typedef void StepCallback(num delta, num lastTick);
-typedef void PositionCallback(Point pos);
-typedef void MouseEventCallback(Point pos, {int button});
-typedef void KeyCodeCallback(int keyCode);
-typedef void SwipeEventCallback(String direction);
-typedef void ImageCallback(ImageElement image);
-typedef void ResizeCallback(int width, int height);
-
 class CqFramework {
   CqWrapper cqWrapper;
   CqFramework._(this.cqWrapper);
@@ -15,42 +7,45 @@ class CqFramework {
   Point mousePosition(UIEvent e) => CqTools.mousePosition(e);
   bool get mobile => CqTools.mobile;
 
-  void onStep(StepCallback callback, Duration interval) {
+  Stream<CqStep> onStep(Duration interval) {
+    var controller = new StreamController<CqStep>();
     var lastTick = window.performance.now();
 
     new Timer.periodic(interval, (_) {
       var delta = window.performance.now() - lastTick;
       lastTick = window.performance.now();
-      callback(delta, lastTick);
+      controller.add(new CqStep(delta, lastTick));
     });
+    return controller.stream;
   }
 
-  void onRender(StepCallback callback) {
+  Stream<CqStep> get onRender {
+    var controller = new StreamController<CqStep>();
     var lastTick = window.performance.now();
 
     step(_) {
       var delta = window.performance.now() - lastTick;
       lastTick = window.performance.now();
       window.animationFrame.then(step);
-      callback(delta, lastTick);
+      controller.add(new CqStep(delta, lastTick));
     };
 
     window.animationFrame.then(step);
+    return controller.stream;
   }
 
-  void onMouseMove(PositionCallback callback) {
+  Stream<Point> get onMouseMove {
     Stream<UIEvent> stream;
     if (mobile) {
       stream = canvas.onTouchMove;
     } else {
       stream = canvas.onMouseMove;
     }
-    stream.listen((e) {
-      callback(mousePosition(e));
-    });
+    return stream.map((e) => mousePosition(e));
   }
 
-  void onMouseDown(MouseEventCallback callback) {
+  Stream<CqMouseEvent> get onMouseDown {
+    var controller = new StreamController<CqMouseEvent>();
     Stream<UIEvent> stream;
     if (mobile) {
       stream = canvas.onTouchStart;
@@ -59,24 +54,24 @@ class CqFramework {
     }
     stream.listen((e) {
       e.preventDefault();
-      callback(mousePosition(e), button: e.button);
+      controller.add(new CqMouseEvent(mousePosition(e), e.button));
     });
+    return controller.stream;
   }
 
-  void onMouseUp(MouseEventCallback callback) {
+  Stream<CqMouseEvent> get onMouseUp {
     Stream<UIEvent> stream;
     if (mobile) {
       stream = canvas.onTouchEnd;
     } else {
       stream = canvas.onMouseUp;
     }
-    stream.listen((e) {
-      callback(mousePosition(e), button: e.button);
-    });
+    return stream.map((e) => new CqMouseEvent(mousePosition(e), e.button));
   }
 
-
-  void onSwipe(SwipeEventCallback callback, {num threshold: 35, num timeout: 350}) {
+  /** Returns a [Stream] of swipe direction. */
+  Stream<String> onSwipe({num threshold: 35, num timeout: 350}) {
+    var controller = new StreamController<String>();
     var swipeSP = 0;
     var swipeST = 0;
     var swipeEP = 0;
@@ -119,7 +114,7 @@ class CqFramework {
             swipeDir = "down";
           }
         }
-        callback(swipeDir);
+        controller.add(swipeDir);
       }
     }
     if (mobile) {
@@ -131,43 +126,35 @@ class CqFramework {
       canvas.onMouseMove.listen((e) => swipeUpdate(e));
       canvas.onMouseUp.listen((e) => swipeEnd(e));
     }
+    return controller.stream;
   }
 
-  void onKeyDown(KeyCodeCallback callback) {
-    window.onKeyDown.listen((e) {
-      callback(e.keyCode);
-    });
-  }
-
-  void onKeyUp(KeyCodeCallback callback) {
-    document.onKeyUp.listen((e) {
-      callback(e.keyCode);
-    });
-  }
-
-  void onResize(ResizeCallback callback) {
-    window.onResize.listen((e) {
-      callback(window.innerWidth, window.innerHeight);
-    });
-
-    callback(window.innerWidth, window.innerHeight);
-  }
-
-  void onDropImage(ImageCallback callback) {
+  /** Returns a stream of [KeyCode]. */
+  Stream<int> get onKeyDown => document.onKeyDown.map((e) => e.keyCode);
+  /** Returns a stream of [KeyCode]. */
+  Stream<int> get onKeyUp => document.onKeyUp.map((e) => e.keyCode);
+  /** Returns a Stream of [Rect] for the new size of the window. */
+  Stream<Rect> get onResize => window.onResize.map((_) => new Rect(0, 0, window.innerWidth, window.innerHeight));
+  /** Returns a [Stream} of dropped [ImageElement]. */
+  Stream<ImageElement> get onDropImage {
+    var controller = new StreamController<ImageElement>();
     document.onDrop.listen((MouseEvent e) {
       e.stopPropagation();
       e.preventDefault();
 
       var file = e.dataTransfer.files[0];
 
-      if (!file.type.startsWith('image/')) return false;
+      if (!file.type.startsWith('image/')) {
+        controller.addError('unexpected filetype, "${file.name}" is not an image');
+        return;
+      }
       var reader = new FileReader();
 
       reader.onLoad.listen((ProgressEvent pe) {
         var image = new ImageElement();
 
         image.onLoad.listen((e3) {
-          callback(image);
+          controller.add(image);
         });
 
         image.src = reader.result;
@@ -180,6 +167,17 @@ class CqFramework {
     document.onDragOver.listen((e) {
       e.preventDefault();
     });
+    return controller.stream;
   }
+}
 
+class CqMouseEvent {
+  final Point position;
+  final int button;
+  CqMouseEvent(this.position, this.button);
+}
+
+class CqStep {
+  final double delta, lastTick;
+  CqStep(this.delta, this.lastTick);
 }
