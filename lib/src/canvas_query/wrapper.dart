@@ -1,17 +1,17 @@
 part of canvas_query;
 
 /**
- * Create a [CanvasQuery] object using a [selector]. The [selector] can be a
+ * Create a [CqWrapper] object using a [selector]. The [selector] can be a
  * a String that should be used to query the DOM or an existing [CanvasElement]
  * or [ImageElement] that should be wrapped.
  *
- * To create a new [CanvasQuery] object with a specific size the [selector]
+ * To create a new [CqWrapper] object with a specific size the [selector]
  * argument will take an [int] argoument for the width.
  *
  * If no argument is given, the size of the window will be used for the new
  * [CanvasElement].
  */
-CanvasQuery cq([var selector, int height]) {
+CqWrapper cq([var selector, int height]) {
   var canvas;
   if (null == selector || selector is int) {
     int width = (selector != null ? selector : window.innerWidth);
@@ -21,27 +21,27 @@ CanvasQuery cq([var selector, int height]) {
     canvas = query(selector);
   } else if (selector is ImageElement) {
     canvas = CanvasTools.createCanvas(selector);
-  } else if (selector is CanvasQuery) {
+  } else if (selector is CqWrapper) {
     return selector;
   } else {
     canvas = selector;
   }
-  return new CanvasQuery(canvas);
+  return new CqWrapper(canvas);
 }
 
 /**
- * The [CanvasQuery] class is a wrapper around [CanvasElement] and
+ * The [CqWrapper] class is a wrapper around [CanvasElement] and
  * [CanvasRenderingContext2D].
  */
-class CanvasQuery implements CanvasRenderingContext2D {
+class CqWrapper implements CanvasRenderingContext2D {
   CanvasElement _canvas;
   CanvasRenderingContext2D _context;
   CanvasElement get canvas => _canvas;
   CanvasRenderingContext2D get context2d => _context;
-  CanvasQuery(this._canvas) {
+  CqWrapper(this._canvas) {
     _context = _canvas.context2d;
   }
-  CanvasQuery.forWindow() {
+  CqWrapper.forWindow() {
     _canvas = new CanvasElement(width: window.innerWidth, height: window.innerHeight);
     _context = _canvas.context2d;
     window.onResize.listen((e) {
@@ -49,9 +49,9 @@ class CanvasQuery implements CanvasRenderingContext2D {
       _canvas.height = window.innerHeight;
     });
   }
-  CanvasQuery.query(String selector) : this(query(selector));
-  CanvasQuery.forSize(int width, int height) : this(new CanvasElement(width: width, height: height));
-  CanvasQuery.forImage(ImageElement img) : this(CanvasTools.createCanvas(img));
+  CqWrapper.query(String selector) : this(query(selector));
+  CqWrapper.forSize(int width, int height) : this(new CanvasElement(width: width, height: height));
+  CqWrapper.forImage(ImageElement img) : this(CanvasTools.createCanvas(img));
 
   dynamic noSuchMethod(InvocationMirror im) => im.invokeOn(_context);
 
@@ -62,9 +62,9 @@ class CanvasQuery implements CanvasRenderingContext2D {
 
   /**
    * Replaces the wrapped [CanvasElement] and [CanvasRenderingContext2D] in this
-   * [CanvasQuery] object and in the DOM.
+   * [CqWrapper] object and in the DOM.
    */
-  void replaceWith(CanvasQuery other) {
+  void replaceWith(CqWrapper other) {
     _canvas.replaceWith(other.canvas);
     _canvas = other.canvas;
     _context = other.context2d;
@@ -73,7 +73,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
   /** Blends the canvas of this object onto [what] using [mode] and [mix]. */
   void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) => CanvasTools.blend(what, this.canvas, mode, mix);
   /**
-   * Blends the object [what] ([CanvasQuery], {CanvasElement], [ImageElement] or
+   * Blends the object [what] ([CqWrapper], {CanvasElement], [ImageElement] or
    * color) onto this canvas using [mode] and [mix].
    */
   void blend(var what, BlendFunction mode, [num mix = 1]) {
@@ -86,7 +86,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
   /** Blends the color [what] onto this canvas using [mode] and [mix]. */
   void blendColor(String color, BlendFunction mode, [num mix = 1]) => blend(_createCanvas(color), mode, mix);
   /**
-   * Blends the object [what] ([CanvasQuery], {CanvasElement], [ImageElement] or
+   * Blends the object [what] ([CqWrapper], {CanvasElement], [ImageElement] or
    * color) onto this canvas using [mode] and [mix].
    */
   void blendSpecial(var what, SpecialBlendFunction mode, [num mix = 1]) {
@@ -141,7 +141,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
       }
     }
 
-    var resized = new CanvasQuery.forSize(w, h)..drawImageScaledFromSource(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
+    var resized = new CqWrapper.forSize(w, h)..drawImageScaledFromSource(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
     _canvas = resized._canvas;
     _context = resized._context;
   }
@@ -286,7 +286,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
     _context.imageSmoothingEnabled = false;
 
     var scale = (_canvas.width / size) / _canvas.width;
-    var temp = new CanvasQuery.forSize(_canvas.width, _canvas.height);
+    var temp = new CqWrapper.forSize(_canvas.width, _canvas.height);
     var normal = new Rect(0, 0, _canvas.width, _canvas.height);
     var shrunk = new Rect(0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt());
 
@@ -535,7 +535,7 @@ class CanvasQuery implements CanvasRenderingContext2D {
   /**
    * Passed [text] will be written at [x], [y] and will be wrapped at [maxWidth].
    */
-  void wrappedText(String text, int x, int y, [int maxWidth]) {
+  void wrappedText(String text, int x, int y, {int maxWidth}) {
 
     var words = text.split(" ");
 

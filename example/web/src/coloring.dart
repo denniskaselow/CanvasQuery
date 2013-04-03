@@ -16,7 +16,7 @@ void coloring(DivElement parent) {
   image.src = 'ships.png';
 }
 
-void updateHsl(ImageElement image, InputElement hueSlider, InputElement saturationSlider, InputElement lightnessSlider, CanvasQuery current) {
+void updateHsl(ImageElement image, InputElement hueSlider, InputElement saturationSlider, InputElement lightnessSlider, CqWrapper current) {
   var hue = hueSlider.value;
   var sat = saturationSlider.value;
   var light = lightnessSlider.value;
