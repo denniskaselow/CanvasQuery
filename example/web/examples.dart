@@ -13,11 +13,12 @@ part 'src/wrapped_text.dart';
 part 'src/masking.dart';
 part 'src/convolve.dart';
 part 'src/palette.dart';
+part 'src/framework.dart';
 
 var showcases = {'coloring': coloring, 'blending': blending,
                  'border': border, 'wrappedtext': wrappedText,
                  'masking': masking, 'convolve': convolve,
-                 'palette': palette};
+                 'palette': palette, 'framework': framework};
 
 void main() {
 

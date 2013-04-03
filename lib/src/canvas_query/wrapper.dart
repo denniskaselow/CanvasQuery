@@ -20,7 +20,7 @@ CqWrapper cq([var selector, int height]) {
   } else if (selector is String) {
     canvas = query(selector);
   } else if (selector is ImageElement) {
-    canvas = CanvasTools.createCanvas(selector);
+    canvas = CqTools.createCanvas(selector);
   } else if (selector is CqWrapper) {
     return selector;
   } else {
@@ -36,10 +36,13 @@ CqWrapper cq([var selector, int height]) {
 class CqWrapper implements CanvasRenderingContext2D {
   CanvasElement _canvas;
   CanvasRenderingContext2D _context;
+  CqFramework _framework;
   CanvasElement get canvas => _canvas;
   CanvasRenderingContext2D get context2d => _context;
+  CqFramework get framework => _framework;
   CqWrapper(this._canvas) {
     _context = _canvas.context2d;
+    _framework = new CqFramework._(this);
   }
   CqWrapper.forWindow() {
     _canvas = new CanvasElement(width: window.innerWidth, height: window.innerHeight);
@@ -51,7 +54,7 @@ class CqWrapper implements CanvasRenderingContext2D {
   }
   CqWrapper.query(String selector) : this(query(selector));
   CqWrapper.forSize(int width, int height) : this(new CanvasElement(width: width, height: height));
-  CqWrapper.forImage(ImageElement img) : this(CanvasTools.createCanvas(img));
+  CqWrapper.forImage(ImageElement img) : this(CqTools.createCanvas(img));
 
   dynamic noSuchMethod(InvocationMirror im) => im.invokeOn(_context);
 
@@ -71,7 +74,7 @@ class CqWrapper implements CanvasRenderingContext2D {
   }
 
   /** Blends the canvas of this object onto [what] using [mode] and [mix]. */
-  void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) => CanvasTools.blend(what, this.canvas, mode, mix);
+  void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) => CqTools.blend(what, this.canvas, mode, mix);
   /**
    * Blends the object [what] ([CqWrapper], {CanvasElement], [ImageElement] or
    * color) onto this canvas using [mode] and [mix].
@@ -80,7 +83,7 @@ class CqWrapper implements CanvasRenderingContext2D {
     if (what is String) {
       blendColor(what, mode, mix);
     } else {
-      CanvasTools.blend(this.canvas, what, mode, mix);
+      CqTools.blend(this.canvas, what, mode, mix);
     }
   }
   /** Blends the color [what] onto this canvas using [mode] and [mix]. */
@@ -93,7 +96,7 @@ class CqWrapper implements CanvasRenderingContext2D {
     if (what is String) {
       blendSpecialColor(what, mode, mix);
     } else {
-      CanvasTools.blendSpecial(this.canvas, what, mode, mix);
+      CqTools.blendSpecial(this.canvas, what, mode, mix);
     }
   }
   /** Blends the color [what] onto this canvas using [mode] and [mix]. */
@@ -103,7 +106,11 @@ class CqWrapper implements CanvasRenderingContext2D {
                                                                 ..context2d.fillStyle = color
                                                                 ..context2d.fillRect(0, 0, _canvas.width, _canvas.height);
   /** Draws a circls at [x], [y] with [radius]. */
-  void circle(num x, num y, num radius) => _context.arc(x, y, radius, 0, PI * 2, true);
+  void circle(num x, num y, num radius) {
+    _context.beginPath();
+    _context.arc(x, y, radius, 0, PI * 2, true);
+    _context.closePath();
+  }
 
   /** Crops the canvas. */
   void crop(int x, int y, int width, int height) {
@@ -675,7 +682,7 @@ class CqWrapper implements CanvasRenderingContext2D {
     var sh = sourceData.height;
     var w = sw;
     var h = sh;
-    var output = CanvasTools.createImageData(_canvas.width, _canvas.height);
+    var output = CqTools.createImageData(_canvas.width, _canvas.height);
     var dst = output.data;
     var weights = divide == 1 ? matrix : _calculateWeights(matrix, matrixSize, divide);
 
@@ -760,34 +767,5 @@ class CqWrapper implements CanvasRenderingContext2D {
     }
 
     _context.putImageData(data, 0, 0);
-  }
-
-  void onDropImage(callback(ImageElement image)) {
-    document.onDrop.listen((MouseEvent e) {
-      e.stopPropagation();
-      e.preventDefault();
-
-      var file = e.dataTransfer.files[0];
-
-      if (!file.type.startsWith('image/')) return false;
-      var reader = new FileReader();
-
-      reader.onLoad.listen((ProgressEvent pe) {
-        var image = new ImageElement();
-
-        image.onLoad.listen((e3) {
-          callback(image);
-        });
-
-        image.src = reader.result;
-      });
-
-      reader.readAsDataUrl(file);
-
-    });
-
-    document.onDragOver.listen((e) {
-      e.preventDefault();
-    });
   }
 }

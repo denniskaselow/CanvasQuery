@@ -1,6 +1,8 @@
 part of canvas_query;
 
-class CanvasTools {
+class CqTools {
+
+  static final bool mobile = window.navigator.userAgent.contains(r'Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone');
 
   static void blend(CanvasElement below, var above, BlendFunction blendingFunction, [num mix = 1]) {
     _initBlend(below, above, mix, (pixels, belowPixels, abovePixels, mix) {
@@ -66,7 +68,7 @@ class CanvasTools {
 
   /* https://gist.github.com/3781251 */
 
-  static List<int> mousePosition(MouseEvent event) {
+  static Point mousePosition(UIEvent event) {
     var totalOffsetX = 0,
         totalOffsetY = 0,
         coordX = 0,
@@ -85,17 +87,19 @@ class CanvasTools {
     // Use pageX to get the mouse coordinates
     if(null != event.page.x || null != event.page.y) {
       mouseX = event.page.x;
-      mouseY = event.page.x;
+      mouseY = event.page.y;
     }
     // IE8 and below doesn't support event.pageX
-    else if(null != event.client.x || null != event.client.y) {
-      mouseX = event.client.x + document.body.scrollLeft + document.documentElement.scrollLeft;
-      mouseY = event.client.y + document.body.scrollTop + document.documentElement.scrollTop;
+    else if (event is MouseEvent) {
+      if (null != event.client.x || null != event.client.y) {
+        mouseX = event.client.x + document.body.scrollLeft + document.documentElement.scrollLeft;
+        mouseY = event.client.y + document.body.scrollTop + document.documentElement.scrollTop;
+      }
     }
     // Subtract the offset from the mouse coordinates
     coordX = mouseX - totalOffsetX;
     coordY = mouseY - totalOffsetY;
 
-    return [coordX, coordY];
+    return new Point(coordX, coordY);
   }
 }
