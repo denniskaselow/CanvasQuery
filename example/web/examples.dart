@@ -2,6 +2,7 @@ library examples;
 
 import 'dart:async';
 import 'dart:html';
+import 'dart:math';
 import 'dart:collection';
 
 import 'package:canvas_query/canvas_query.dart';
@@ -14,11 +15,13 @@ part 'src/masking.dart';
 part 'src/convolve.dart';
 part 'src/palette.dart';
 part 'src/framework.dart';
+part 'src/uigeneration.dart';
 
 var showcases = {'coloring': coloring, 'blending': blending,
                  'border': border, 'wrappedtext': wrappedText,
                  'masking': masking, 'convolve': convolve,
-                 'palette': palette, 'framework': framework};
+                 'palette': palette, 'framework': framework,
+                 'uigeneration': uigeneration};
 
 void main() {
 

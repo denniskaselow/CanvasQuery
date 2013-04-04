@@ -539,15 +539,62 @@ class CqWrapper implements CanvasRenderingContext2D {
       ..closePath();
   }
 
+
+
+  void gradientText(String text, int x, int y, List gradient, [num maxWidth]) {
+    var regexp = new RegExp(r"(\d+)");
+    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+    var lines = getLines(text, maxWidth);
+    var oldFillStyle = _context.fillStyle;
+
+    for(var i = 0; i < lines.length; i++) {
+      var oy = (y + i * h * 0.6).toInt();
+      var lingrad = _context.createLinearGradient(0, oy, 0, (oy + h * 0.6).toInt());
+
+      for(var j = 0; j < gradient.length; j += 2) {
+        lingrad.addColorStop(gradient[j], gradient[j + 1]);
+      }
+
+      var text = lines[i];
+
+      _context..fillStyle = lingrad
+              ..fillText(text, x, oy);
+    }
+    _context.fillStyle = oldFillStyle;
+  }
+
   /**
    * Passed [text] will be written at [x], [y] and will be wrapped at [maxWidth].
    */
-  void wrappedText(String text, int x, int y, {int maxWidth}) {
-
-    var words = text.split(" ");
-
+  void wrappedText(String text, int x, int y, [num maxWidth]) {
     var regexp = new RegExp(r"(\d+)");
     var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+    var lines = getLines(text, maxWidth);
+
+    for(var i = 0; i < lines.length; i++) {
+      var oy = (y + i * h * 0.6).toInt();
+      var line = lines[i];
+      _context.fillText(line, x, oy);
+    }
+  }
+
+  /**
+   * Returns a [Rect] with the size of a given [text]. If [maxWidth]
+   * is given, the [text] will be wrapped.
+   */
+  Rect textBoundaries(String text, [num maxWidth]) {
+    var regexp = new RegExp(r"(\d+)");
+    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+    List<String> lines = getLines(text, maxWidth);
+    if (null == maxWidth) {
+      maxWidth = _context.measureText(text).width;
+    }
+
+    return new Rect(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
+  }
+
+  List<String> getLines(String text, [num maxWidth]) {
+    var words = text.split(" ");
 
     var ox = 0;
     var oy = 0;
@@ -555,7 +602,6 @@ class CqWrapper implements CanvasRenderingContext2D {
     var lines = new List<String>.from([""]);
     if (null != maxWidth) {
       var line = 0;
-
       for(var i = 0; i < words.length; i++) {
         var word = "${words[i]} ";
         var wordWidth = _context.measureText(word).width;
@@ -565,7 +611,6 @@ class CqWrapper implements CanvasRenderingContext2D {
           line++;
           ox = 0;
         }
-
         lines[line] = "${lines[line]}$word";
 
         ox += wordWidth;
@@ -573,56 +618,7 @@ class CqWrapper implements CanvasRenderingContext2D {
     } else {
       lines = [text];
     }
-
-    for(var i = 0; i < lines.length; i++) {
-      var oy = (y + i * h * 0.6).toInt();
-
-      var text = lines[i];
-
-      _context.fillText(text, x, oy);
-    }
-  }
-
-  /**
-   * Returns a map of the 'height' and 'width' of a given [text]. If [maxWidth]
-   * is given, the [text] will be wrapped.
-   */
-  Map<String, int> textBoundaries(String text, [num maxWidth]) {
-    var words = text.split(" ");
-
-    var regexp = new RegExp(r"(\d+)");
-    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
-
-    var ox = 0;
-    var oy = 0;
-
-    var lines = new List<String>.from([""]);
-    if (null != maxWidth) {
-      var line = 0;
-
-      for(var i = 0; i < words.length; i++) {
-        var word = "${words[i]} ";
-        var wordWidth = _context.measureText(word).width;
-
-        if(ox + wordWidth > maxWidth) {
-          lines.add("");
-          line++;
-          ox = 0;
-        }
-
-        lines[line] = "${lines[line]}$word";
-
-        ox += wordWidth;
-      }
-    } else {
-      var lines = [text];
-      maxWidth = _context.measureText(text).width;
-    }
-
-    return {
-      "height": (lines.length * h * 0.6).toInt(),
-      "width": maxWidth
-    };
+    return lines;
   }
 
   void paperBag(num x, num y, num width, num height, num blowX, num blowY) {
@@ -661,8 +657,10 @@ class CqWrapper implements CanvasRenderingContext2D {
       ..drawImageScaledFromSource(image, 0, image.height - bottome, left, bottome, x, y + height - bottome, left, bottome);
 
     if (null != fillColor) {
+      var oldFillStyle = _context.fillStyle;
       _context..fillStyle = fillColor
-          ..fillRect(x + left, y + top, width - left - right, height - top - bottome);
+              ..fillRect(x + left, y + top, width - left - right, height - top - bottome)
+              ..fillStyle = oldFillStyle;
     } else if (fill) {
       _context.drawImageScaledFromSource(image, left, top, image.width - right - left, image.height - bottome - top, x + left, y + top, width - left - right, height - top - bottome);
     }
