@@ -9,8 +9,6 @@ import 'package:canvas_query/canvas_query.dart';
 
 part 'src/coloring.dart';
 part 'src/blending.dart';
-part 'src/border.dart';
-part 'src/wrapped_text.dart';
 part 'src/masking.dart';
 part 'src/convolve.dart';
 part 'src/palette.dart';
@@ -18,7 +16,6 @@ part 'src/framework.dart';
 part 'src/uigeneration.dart';
 
 var showcases = {'coloring': coloring, 'blending': blending,
-                 'border': border, 'wrappedtext': wrappedText,
                  'masking': masking, 'convolve': convolve,
                  'palette': palette, 'framework': framework,
                  'uigeneration': uigeneration};
@@ -47,10 +44,16 @@ void showShowcase(String showcase, Function showcaseFunction) {
   });
 }
 
+Future<List<ImageElement>> loadImages(List<String> imageNames) {
+  var futures = new List<Future<ImageElement>>();
+  imageNames.forEach((imageName) => futures.add(loadImage(imageName)));
+  return Future.wait(futures);
+}
+
 Future<ImageElement> loadImage(String src) {
   var image = new ImageElement();
-  image.src = src;
   var completer = new Completer<ImageElement>();
   image.onLoad.listen((e) => completer.complete(image));
+  image.src = src;
   return completer.future;
 }

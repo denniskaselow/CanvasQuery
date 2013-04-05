@@ -1,8 +1,7 @@
 part of examples;
 
 void coloring(DivElement parent) {
-  var image = new ImageElement();
-  image.onLoad.listen((e) {
+  loadImage('ships.png').then((image) {
     var current = cq(image)..canvas.classes.add('example');
     current.appendTo(parent);
 
@@ -13,7 +12,6 @@ void coloring(DivElement parent) {
     saturationSlider.onChange.listen((_) => updateHsl(image, hueSlider, saturationSlider, lightnessSlider, current));
     lightnessSlider.onChange.listen((_) => updateHsl(image, hueSlider, saturationSlider, lightnessSlider, current));
   });
-  image.src = 'ships.png';
 }
 
 void updateHsl(ImageElement image, InputElement hueSlider, InputElement saturationSlider, InputElement lightnessSlider, CqWrapper current) {
@@ -23,7 +21,6 @@ void updateHsl(ImageElement image, InputElement hueSlider, InputElement saturati
   var next = cq(image)..shiftHsl(hue: double.parse(hue),
                                   saturation: double.parse(sat),
                                   lightness: double.parse(light))
-                      ..canvas.title = '.shiftHsl(hue: $hue, saturation: $sat, lightness: $light);'
                       ..canvas.classes.add('example');
   current.replaceWith(next);
 }

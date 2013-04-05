@@ -34,6 +34,7 @@ CqWrapper cq([var selector, int height]) {
  * [CanvasRenderingContext2D].
  */
 class CqWrapper implements CanvasRenderingContext2D {
+  static final Pattern _whitespacePattern = new RegExp((r'\s+'));
   CanvasElement _canvas;
   CanvasRenderingContext2D _context;
   CqFramework _framework;
@@ -105,12 +106,30 @@ class CqWrapper implements CanvasRenderingContext2D {
   CanvasElement _createCanvas(String color) => new CanvasElement(width: _canvas.width, height: _canvas.height)
                                                                 ..context2d.fillStyle = color
                                                                 ..context2d.fillRect(0, 0, _canvas.width, _canvas.height);
+
+  void strokeAndFill({String strokeStyle, String fillStyle}) {
+    if (null != strokeStyle) {
+      var tmp = _context.strokeStyle;
+      _context..strokeStyle = strokeStyle
+              ..stroke()
+              ..strokeStyle = tmp;
+    }
+    if (null != fillStyle) {
+      var tmp = _context.fillStyle;
+      _context..fillStyle = fillStyle
+              ..fill()
+              ..fillStyle = tmp;
+    }
+  }
+
   /** Draws a circls at [x], [y] with [radius]. */
-  void circle(num x, num y, num radius) {
+  void circle(num x, num y, num radius, {String strokeStyle, String fillStyle}) {
     _context.beginPath();
     _context.arc(x, y, radius, 0, PI * 2, true);
     _context.closePath();
+    strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
   }
+
 
   /** Crops the canvas. */
   void crop(int x, int y, int width, int height) {
@@ -525,7 +544,7 @@ class CqWrapper implements CanvasRenderingContext2D {
   }
 
   /** Create a rect with rounded corners. */
-  void roundRect(num x, num y, num width, num height, num radius) {
+  void roundRect(num x, num y, num width, num height, num radius, {String strokeStyle, String fillStyle}) {
     _context..beginPath()
       ..moveTo(x + radius, y)
       ..lineTo(x + width - radius, y)
@@ -537,6 +556,7 @@ class CqWrapper implements CanvasRenderingContext2D {
       ..lineTo(x, y + radius)
       ..quadraticCurveTo(x, y, x + radius, y)
       ..closePath();
+    strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
   }
 
 
@@ -554,11 +574,8 @@ class CqWrapper implements CanvasRenderingContext2D {
       for(var j = 0; j < gradient.length; j += 2) {
         lingrad.addColorStop(gradient[j], gradient[j + 1]);
       }
-
-      var text = lines[i];
-
       _context..fillStyle = lingrad
-              ..fillText(text, x, oy);
+              ..fillText(lines[i], x, oy);
     }
     _context.fillStyle = oldFillStyle;
   }
@@ -589,18 +606,19 @@ class CqWrapper implements CanvasRenderingContext2D {
     if (null == maxWidth) {
       maxWidth = _context.measureText(text).width;
     }
-
     return new Rect(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
   }
 
   List<String> getLines(String text, [num maxWidth]) {
-    var words = text.split(" ");
+    var words = text.split(_whitespacePattern);
 
     var ox = 0;
     var oy = 0;
 
     var lines = new List<String>.from([""]);
+    var spaceWidth = _context.measureText(" ").width;
     if (null != maxWidth) {
+      maxWidth += spaceWidth;
       var line = 0;
       for(var i = 0; i < words.length; i++) {
         var word = "${words[i]} ";
@@ -621,7 +639,7 @@ class CqWrapper implements CanvasRenderingContext2D {
     return lines;
   }
 
-  void paperBag(num x, num y, num width, num height, num blowX, num blowY) {
+  void paperBag(num x, num y, num width, num height, num blowX, num blowY, {String strokeStyle, String fillStyle}) {
     _context..beginPath()
       ..moveTo(x, y)
       ..quadraticCurveTo(x + width / 2, y + height * blowY, x + width, y)
@@ -629,6 +647,7 @@ class CqWrapper implements CanvasRenderingContext2D {
       ..quadraticCurveTo(x + width / 2, y + height - height * blowY, x, y + height)
       ..quadraticCurveTo(x + width * blowX, y + height / 2, x, y)
       ..closePath();
+    strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
   }
 
   /**
@@ -637,7 +656,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    * [top], [right], [bottom], [left] are the boundaries of the border in the
    * [image].
    */
-  void borderImage(var image, num x, num y, num width, num height, num top, num right, num bottome, num left, {bool fill: false, String fillColor}) {
+  void borderImage(var image, num x, num y, num width, num height, num top, num right, num bottome, num left, {bool fill: false, String fillStyle}) {
     _context
       /* top */
       ..drawImageScaledFromSource(image, left, 0, image.width - left - right, top, x + left, y, width - left - right, top)
@@ -656,9 +675,9 @@ class CqWrapper implements CanvasRenderingContext2D {
       /* bottom-left */
       ..drawImageScaledFromSource(image, 0, image.height - bottome, left, bottome, x, y + height - bottome, left, bottome);
 
-    if (null != fillColor) {
+    if (null != fillStyle) {
       var oldFillStyle = _context.fillStyle;
-      _context..fillStyle = fillColor
+      _context..fillStyle = fillStyle
               ..fillRect(x + left, y + top, width - left - right, height - top - bottome)
               ..fillStyle = oldFillStyle;
     } else if (fill) {
@@ -671,7 +690,6 @@ class CqWrapper implements CanvasRenderingContext2D {
    * See [www.html5rocks.com/en/tutorials/canvas/imagefilters/].
    */
   void convolve(List<num> matrix, {num mix: 1, num divide: 1}) {
-
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var matrixSize = (sqrt(matrix.length) + 0.5).toInt();
     var halfMatrixSize = matrixSize ~/ 2;
@@ -686,7 +704,6 @@ class CqWrapper implements CanvasRenderingContext2D {
 
     for(var y = 1; y < h - 1; y++) {
       for(var x = 1; x < w - 1; x++) {
-
         var dstOff = (y * w + x) * 4;
         double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
         for(var cy = 0; cy < matrixSize; cy++) {

@@ -3,7 +3,7 @@ part of examples;
 void blending(DivElement parent) {
   ImageElement below, above;
   int count = 0;
-  Future.wait([loadImage('below.png'), loadImage('above.png')]).then((images) {
+  loadImages(['below.png', 'above.png']).then((images) {
     below = images[0];
     above = images[1];
     InputElement mixSlider = query("#mix");

@@ -2,8 +2,7 @@ part of examples;
 
 void masking(DivElement parent) {
   ImageElement image, maskImg;
-  int count = 0;
-  Future.wait([loadImage('farminglpc.png'), loadImage('mask.png')]).then((images) {
+  loadImages(['farminglpc.png', 'mask.png']).then((images) {
     image = images[0];
     maskImg = images[1];
     parent..append(image)

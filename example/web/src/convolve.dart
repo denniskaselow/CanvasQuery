@@ -1,8 +1,7 @@
 part of examples;
 
 void convolve(DivElement parent) {
-  var image = new ImageElement();
-  image.onLoad.listen((e) {
+  loadImage('farminglpc.png').then((image) {
     cq(image)..canvas.classes.add('example')
              ..canvas.title = 'This is the source image'
              ..appendTo(parent);
@@ -32,5 +31,4 @@ void convolve(DivElement parent) {
              ..canvas.title = '.convolve([1/2, 2, 1/9, 2, 1/9, -2, 1/9, -2, -1/2])'
              ..appendTo(parent);
   });
-  image.src = 'farminglpc.png';
 }

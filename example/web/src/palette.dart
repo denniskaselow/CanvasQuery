@@ -15,25 +15,25 @@ void palette(DivElement parent) {
   SelectElement paletteSelect = query('#paletteselect');
   SelectElement imageSelect = query('#imageselect');
   paletteSelect.append(new OptionElement('None', '', true, true));
-  
+
   var loader = new List<Future<ImageElement>>();
   loader.addAll(initDropdown(paletteSelect, paletteData));
   loader.addAll(initDropdown(imageSelect, imageData));
-  
+
   Future.wait(loader).then((_) {
     var paletteInfo = new DivElement();
     var link = new AnchorElement();
     paletteInfo..classes.add('credits')
                ..appendText('Palette: ')
                ..append(link);
-    
-    var currentCq = cq(imageData['dawnbringer']['img']);
+
+    var currentCq = cq(imageData[imageSelect.value]['img']);
     currentCq..appendTo(parent);
-    
+
     void updateExample(_) {
       var palleteSelection = paletteSelect.value;
-      var selectedImage = imageData[imageSelect.value]['img']; 
-      var nextCq = cq(selectedImage);      
+      var selectedImage = imageData[imageSelect.value]['img'];
+      var nextCq = cq(selectedImage);
       if ("" == palleteSelection) {
         currentCq.replaceWith(nextCq);
         paletteInfo.remove();
@@ -46,7 +46,7 @@ void palette(DivElement parent) {
         parent.append(paletteInfo);
       }
     }
-    
+
     paletteSelect.onChange.listen(updateExample);
     imageSelect.onChange.listen(updateExample);
   });
