@@ -11,32 +11,28 @@ String rgbToHex(int r, int g, int b) {
 /* author: http://mjijackson.com/ */
 List<double> rgbListToHsl(List<int> rgb) => rgbToHsl(rgb[0], rgb[1], rgb[2]);
 List<double> rgbToHsl(int red, int green, int blue) {
-  final double r = red / 255;
-  final double g = green / 255;
-  final double b = blue / 255;
-  double maxv = max(max(r, g), b),
-      minv = min(min(r, g), b);
-  double h, s, l = (maxv + minv) / 2;
+  int maxv = max(max(red, green), blue),
+      minv = min(min(red, green), blue);
+  double h, s, l = (maxv + minv) / (2*255);
 
   if(maxv == minv) {
     h = s = 0.0; // achromatic
   } else {
     num d = maxv - minv;
-    s = l > 0.5 ? d / (2 - maxv - minv) : d / (maxv + minv);
+    s = l > 0.5 ? d / (2*255 - maxv - minv) : d / (maxv + minv);
     switch(maxv) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
+      case red:
+        h = (green - blue) / d + (green < blue ? 6 : 0);
         break;
-      case g:
-        h = (b - r) / d + 2;
+      case green:
+        h = (blue - red) / d + 2;
         break;
-      case b:
-        h = (r - g) / d + 4;
+      case blue:
+        h = (red - green) / d + 4;
         break;
     }
-    h /= 6;
+    h /= 6.0;
   }
-
   return [h, s, l];
 }
 /* author: http://mjijackson.com/ */
@@ -74,12 +70,9 @@ List<int> hslToRgb(num hue, num saturation, num lightness) {
 
 List<double> rgbListToHsv(List<int> rgb) => rgbToHsv(rgb[0], rgb[1], rgb[2]);
 List<double> rgbToHsv(int red, int green, int blue) {
-  final double r = red / 255;
-  final double g = green / 255;
-  final double b = blue / 255;
-  double maxv = max(max(r, g), b),
-      minv = min(min(r, g), b);
-  double h, s, v = maxv.toDouble();
+  int maxv = max(max(red, green), blue),
+      minv = min(min(red, green), blue);
+  double h, s, v = maxv / 255;
 
   var d = maxv - minv;
   s = maxv == 0.0 ? 0.0 : d / maxv;
@@ -88,17 +81,17 @@ List<double> rgbToHsv(int red, int green, int blue) {
     h = 0.0; // achromatic
   } else {
     switch(maxv) {
-      case r:
-        h = (g - b) / d + (g < b ? 6 : 0);
+      case red:
+        h = (green - blue) / d + (green < blue ? 6 : 0);
         break;
-      case g:
-        h = (b - r) / d + 2;
+      case green:
+        h = (blue - red) / d + 2;
         break;
-      case b:
-        h = (r - g) / d + 4;
+      case blue:
+        h = (red - green) / d + 4;
         break;
     }
-    h /= 6;
+    h /= 6.0;
   }
 
   return [h, s, v];
