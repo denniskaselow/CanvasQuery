@@ -1,5 +1,5 @@
 /*     
-  Canvas Query 0.8.0
+  Canvas Query 0.8.3 work in progress
   http://canvasquery.org
   (c) 2012-2013 http://rezoner.net
   Canvas Query may be freely distributed under the MIT license.
@@ -589,7 +589,8 @@
       return this;
     },
 
-    trim: function(color) {
+
+    trim: function(color, changes) {
       var transparent;
 
       if(color) {
@@ -618,7 +619,16 @@
 
       if(bound[2] === 0 || bound[3] === 0) {
 
-      } else this.crop(bound[0], bound[1], bound[2] - bound[0] + 1, bound[3] - bound[1] + 1);
+      } else {
+        if(changes) {
+          changes.left = bound[0];
+          changes.top = bound[1];
+          changes.width = bound[2] - bound[0];
+          changes.height = bound[3] - bound[1];
+        }
+        
+        this.crop(bound[0], bound[1], bound[2] - bound[0] + 1, bound[3] - bound[1] + 1);
+      }
 
       return this;
     },
@@ -751,7 +761,7 @@
       return this;
     },
 
-    colorToMask: function(color) {
+    colorToMask: function(color, inverted) {
       color = $.color(color).toArray();
       var sourceData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
       var sourcePixels = sourceData.data;
@@ -759,8 +769,8 @@
       var mask = [];
 
       for(var i = 0, len = sourcePixels.length; i < len; i += 4) {
-        if(sourcePixels[i + 0] == color[0] && sourcePixels[i + 1] == color[1] && sourcePixels[i + 2] == color[2]) mask.push(false);
-        else mask.push(true);
+        if(sourcePixels[i + 0] == color[0] && sourcePixels[i + 1] == color[1] && sourcePixels[i + 2] == color[2]) mask.push(inverted || false);
+        else mask.push(!inverted);
       }
 
       return mask;
@@ -1048,7 +1058,7 @@
       return this;
     },
 
-    wrappedText: function(text, x, y, maxWidth) {
+    wrappedText: function(text, x, y, maxWidth, newlineCallback) {
 
       var words = text.split(" ");
 
@@ -1065,9 +1075,9 @@
           var word = words[i] + " ";
           var wordWidth = this.context.measureText(word).width;
 
-          if(ox + wordWidth > maxWidth) {
+          if(ox + wordWidth > maxWidth) {            
             lines[++line] = "";
-            ox = 0;
+            ox = 0;            
           }
 
           lines[line] += word;
@@ -1082,6 +1092,8 @@
         var oy = y + i * h * 0.6 | 0;
 
         var text = lines[i];
+
+        if(newlineCallback) newlineCallback.call(this, x, y + oy);
 
         this.fillText(text, x, oy);
       }
@@ -1279,6 +1291,10 @@
     createLinearGradient: function() {
       return this.context.createLinearGradient.apply(this.context, arguments);
     },
+
+    getImageData: function() {
+      return this.context.getImageData.apply(this.context, arguments);
+    },    
 
     /* framework */
 
@@ -1543,16 +1559,42 @@
   $.Color.prototype = {
     parse: function(args) {
       if(typeof args[0] === "string") {
-        var rgb = $.hexToRgb(args[0]);
-        this[0] = rgb[0];
-        this[1] = rgb[1];
-        this[2] = rgb[2];
-        this[3] = 255;
+        var match = null;
+
+        if(args[0][0] === "#") {
+          var rgb = $.hexToRgb(args[0]);
+          this[0] = rgb[0];
+          this[1] = rgb[1];
+          this[2] = rgb[2];
+          this[3] = 1.0;
+        } else if (match = args[0].match(/rgb\((.*),(.*),(.*)\)/)) {
+          this[0] = match[1] | 0;
+          this[1] = match[2] | 0;
+          this[2] = match[3] | 0;
+          this[3] = 1.0;
+        } else if (match = args[0].match(/rgba\((.*),(.*),(.*)\)/)) {
+          this[0] = match[1] | 0;
+          this[1] = match[2] | 0;
+          this[2] = match[3] | 0;
+          this[3] = match[4] | 0;
+        } else if (match = args[0].match(/hsl\((.*),(.*),(.*)\)/)) {
+          var color = $.hslToRgb(match[1], match[2], match[3]);
+          this[0] = color[0];
+          this[1] = color[1];
+          this[2] = color[2];
+          this[3] = 1.0;
+        } else if (match = args[0].match(/hsv\((.*),(.*),(.*)\)/)) {
+          var color = $.hsTvoRgb(match[1], match[2], match[3]);
+          this[0] = color[0];
+          this[1] = color[1];
+          this[2] = color[2];
+          this[3] = 1.0;
+        }
       } else {
         this[0] = args[0];
         this[1] = args[1];
         this[2] = args[2];
-        this[3] = typeof args[3] === "undefined" ? 255 : args[3];
+        this[3] = typeof args[3] === "undefined" ? 1.0 : args[3];
       }
     },
 
@@ -1565,7 +1607,7 @@
     },
 
     toRgba: function() {
-      return "rgb(" + this[0] + ", " + this[1] + ", " + this[2] + ", " + this[3] + ")";
+      return "rgba(" + this[0] + ", " + this[1] + ", " + this[2] + ", " + this[3] + ")";
     },
 
     toHex: function() {
