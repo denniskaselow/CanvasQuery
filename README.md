@@ -17,7 +17,7 @@ cq(640, 480)
 
 # Overview
 
-[Reference Manual](http://denniskaselow.github.io/CanvasQuery/docs/canvas_query.html)
+[Reference Manual](http://denniskaselow.github.io/CanvasQuery/docs/canvas_query.html)  
 [Examples](http://denniskaselow.github.io/CanvasQuery/examples.html)
 
 # Getting started
