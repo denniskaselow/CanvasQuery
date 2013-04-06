@@ -1,0 +1,351 @@
+        <!DOCTYPE html>
+        <html>
+        <head>
+                <meta charset="utf-8">
+        <title>Blend class / blend_functions Library / Dart Documentation</title>
+        <link rel="stylesheet" type="text/css"
+            href="../styles.css">
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:400,600,700,800" rel="stylesheet" type="text/css">
+        <link rel="shortcut icon" href="../favicon.ico">
+        
+        </head>
+        <body data-library="blend_functions" data-type="Blend">
+        <div class="page">
+        <div class="header">
+          <a href="../index.html"><div class="logo"></div></a>
+          <a href="../index.html">Dart Documentation</a>
+         &rsaquo; <a href="../blend_functions.html">blend_functions</a> &rsaquo; <a href="../blend_functions/Blend.html">Blend</a>        <div id="search-box">
+          <input type="search" name="q" id="q" autocomplete="off"
+              class="search-input" placeholder="Search API">
+        </div>
+        
+      </div>
+      <div class="drop-down" id="drop-down"></div>
+      
+        <div class="nav">
+        
+</div>
+<div class="content">
+        <h2><strong>Blend</strong>
+          class
+        </h2>
+        
+<button id="show-inherited" class="show-inherited">Hide inherited</button>
+<div class="doc">
+<pre class="source">
+class Blend {
+ static int normal(int a, int b) =&gt; b;
+
+ static int overlay(num a, num b) {
+   a /= 255;
+   b /= 255;
+   var result = 0;
+
+   if (a &lt; 0.5) result = 2 * a * b;
+   else result = 1 - 2 * (1 - a) * (1 - b);
+
+   return min(255, max(0, result * 255)).toInt();
+ }
+
+ static int hardLight(int a, int b) =&gt; Blend.overlay(b, a);
+
+ static int softLight(num a, num b) {
+   a /= 255;
+   b /= 255;
+
+   var v = ((1 - 2 * b) * a + 2 * b) * a;
+   return limitValue((v * 255).toInt(), 0, 255);
+ }
+
+ static int dodge(int a, int b) =&gt; min(256 * a ~/ (255 - b + 1), 255);
+ static int burn(int a, int b) =&gt; 255 - min(256 * (255 - a) ~/ (b + 1), 255);
+ static int multiply(int a, int b) =&gt; b * a ~/ 255;
+ static int divide(int a, int b) =&gt; min(256 * a ~/ (b + 1), 255);
+ static int screen(int a, int b) =&gt; 255 - (255 - b) * (255 - a) ~/ 255;
+ static int grainExtract(int a, int b) =&gt; limitValue(a - b + 128, 0, 255);
+ static int grainMerge(int a, int b) =&gt; limitValue(a + b - 128, 0, 255);
+ static int difference(int a, int b) =&gt; (a - b).abs();
+ static int addition(int a, int b) =&gt; min(a + b, 255);
+ static int substract(int a, int b) =&gt; max(a - b, 0);
+ static int darkenOnly(int a, int b) =&gt; min(a, b);
+ static int lightenOnly(int a, int b) =&gt; max(a, b);
+
+ static List&lt;int&gt; color(List&lt;int&gt; a, List&lt;int&gt; b) {
+   var aHSL = rgbListToHsl(a);
+   var bHSL = rgbListToHsl(b);
+
+   return hslToRgb(bHSL[0], bHSL[1], aHSL[2]);
+ }
+
+ static List&lt;int&gt; hue(List&lt;int&gt; a, List&lt;int&gt; b) {
+   var aHSV = rgbListToHsv(a);
+   var bHSV = rgbListToHsv(b);
+
+   if(bHSV[1] == 0) return hsvToRgb(aHSV[0], aHSV[1], aHSV[2]);
+   else return hsvToRgb(bHSV[0], aHSV[1], aHSV[2]);
+ }
+
+ static List&lt;int&gt; value(List&lt;int&gt; a, List&lt;int&gt; b) {
+   var aHSV = rgbListToHsv(a);
+   var bHSV = rgbListToHsv(b);
+
+   return hsvToRgb(aHSV[0], aHSV[1], bHSV[2]);
+ }
+
+ static List&lt;int&gt; saturation(List&lt;int&gt; a, List&lt;int&gt; b) {
+   var aHSV = rgbListToHsv(a);
+   var bHSV = rgbListToHsv(b);
+
+   return hsvToRgb(aHSV[0], bHSV[1], aHSV[2]);
+ }
+}
+</pre>
+</div>
+<div>
+<h3>Static Methods</h3>
+<div class="method"><h4 id="normal">
+<button class="show-code">Code</button>
+int <strong>normal</strong>(int a, int b) <a class="anchor-link" href="#normal"
+              title="Permalink to Blend.normal">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int normal(int a, int b) =&gt; b;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="overlay">
+<button class="show-code">Code</button>
+int <strong>overlay</strong>(num a, num b) <a class="anchor-link" href="#overlay"
+              title="Permalink to Blend.overlay">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int overlay(num a, num b) {
+ a /= 255;
+ b /= 255;
+ var result = 0;
+
+ if (a &lt; 0.5) result = 2 * a * b;
+ else result = 1 - 2 * (1 - a) * (1 - b);
+
+ return min(255, max(0, result * 255)).toInt();
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="hardLight">
+<button class="show-code">Code</button>
+int <strong>hardLight</strong>(int a, int b) <a class="anchor-link" href="#hardLight"
+              title="Permalink to Blend.hardLight">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int hardLight(int a, int b) =&gt; Blend.overlay(b, a);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="softLight">
+<button class="show-code">Code</button>
+int <strong>softLight</strong>(num a, num b) <a class="anchor-link" href="#softLight"
+              title="Permalink to Blend.softLight">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int softLight(num a, num b) {
+ a /= 255;
+ b /= 255;
+
+ var v = ((1 - 2 * b) * a + 2 * b) * a;
+ return limitValue((v * 255).toInt(), 0, 255);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="dodge">
+<button class="show-code">Code</button>
+int <strong>dodge</strong>(int a, int b) <a class="anchor-link" href="#dodge"
+              title="Permalink to Blend.dodge">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int dodge(int a, int b) =&gt; min(256 * a ~/ (255 - b + 1), 255);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="burn">
+<button class="show-code">Code</button>
+int <strong>burn</strong>(int a, int b) <a class="anchor-link" href="#burn"
+              title="Permalink to Blend.burn">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int burn(int a, int b) =&gt; 255 - min(256 * (255 - a) ~/ (b + 1), 255);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="multiply">
+<button class="show-code">Code</button>
+int <strong>multiply</strong>(int a, int b) <a class="anchor-link" href="#multiply"
+              title="Permalink to Blend.multiply">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int multiply(int a, int b) =&gt; b * a ~/ 255;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="divide">
+<button class="show-code">Code</button>
+int <strong>divide</strong>(int a, int b) <a class="anchor-link" href="#divide"
+              title="Permalink to Blend.divide">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int divide(int a, int b) =&gt; min(256 * a ~/ (b + 1), 255);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="screen">
+<button class="show-code">Code</button>
+int <strong>screen</strong>(int a, int b) <a class="anchor-link" href="#screen"
+              title="Permalink to Blend.screen">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int screen(int a, int b) =&gt; 255 - (255 - b) * (255 - a) ~/ 255;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="grainExtract">
+<button class="show-code">Code</button>
+int <strong>grainExtract</strong>(int a, int b) <a class="anchor-link" href="#grainExtract"
+              title="Permalink to Blend.grainExtract">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int grainExtract(int a, int b) =&gt; limitValue(a - b + 128, 0, 255);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="grainMerge">
+<button class="show-code">Code</button>
+int <strong>grainMerge</strong>(int a, int b) <a class="anchor-link" href="#grainMerge"
+              title="Permalink to Blend.grainMerge">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int grainMerge(int a, int b) =&gt; limitValue(a + b - 128, 0, 255);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="difference">
+<button class="show-code">Code</button>
+int <strong>difference</strong>(int a, int b) <a class="anchor-link" href="#difference"
+              title="Permalink to Blend.difference">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int difference(int a, int b) =&gt; (a - b).abs();
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="addition">
+<button class="show-code">Code</button>
+int <strong>addition</strong>(int a, int b) <a class="anchor-link" href="#addition"
+              title="Permalink to Blend.addition">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int addition(int a, int b) =&gt; min(a + b, 255);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="substract">
+<button class="show-code">Code</button>
+int <strong>substract</strong>(int a, int b) <a class="anchor-link" href="#substract"
+              title="Permalink to Blend.substract">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int substract(int a, int b) =&gt; max(a - b, 0);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="darkenOnly">
+<button class="show-code">Code</button>
+int <strong>darkenOnly</strong>(int a, int b) <a class="anchor-link" href="#darkenOnly"
+              title="Permalink to Blend.darkenOnly">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int darkenOnly(int a, int b) =&gt; min(a, b);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="lightenOnly">
+<button class="show-code">Code</button>
+int <strong>lightenOnly</strong>(int a, int b) <a class="anchor-link" href="#lightenOnly"
+              title="Permalink to Blend.lightenOnly">#</a></h4>
+<div class="doc">
+<pre class="source">
+static int lightenOnly(int a, int b) =&gt; max(a, b);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="color">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>color</strong>(List&lt;int&gt; a, List&lt;int&gt; b) <a class="anchor-link" href="#color"
+              title="Permalink to Blend.color">#</a></h4>
+<div class="doc">
+<pre class="source">
+static List&lt;int&gt; color(List&lt;int&gt; a, List&lt;int&gt; b) {
+ var aHSL = rgbListToHsl(a);
+ var bHSL = rgbListToHsl(b);
+
+ return hslToRgb(bHSL[0], bHSL[1], aHSL[2]);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="hue">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>hue</strong>(List&lt;int&gt; a, List&lt;int&gt; b) <a class="anchor-link" href="#hue"
+              title="Permalink to Blend.hue">#</a></h4>
+<div class="doc">
+<pre class="source">
+static List&lt;int&gt; hue(List&lt;int&gt; a, List&lt;int&gt; b) {
+ var aHSV = rgbListToHsv(a);
+ var bHSV = rgbListToHsv(b);
+
+ if(bHSV[1] == 0) return hsvToRgb(aHSV[0], aHSV[1], aHSV[2]);
+ else return hsvToRgb(bHSV[0], aHSV[1], aHSV[2]);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="value">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>value</strong>(List&lt;int&gt; a, List&lt;int&gt; b) <a class="anchor-link" href="#value"
+              title="Permalink to Blend.value">#</a></h4>
+<div class="doc">
+<pre class="source">
+static List&lt;int&gt; value(List&lt;int&gt; a, List&lt;int&gt; b) {
+ var aHSV = rgbListToHsv(a);
+ var bHSV = rgbListToHsv(b);
+
+ return hsvToRgb(aHSV[0], aHSV[1], bHSV[2]);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="saturation">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>saturation</strong>(List&lt;int&gt; a, List&lt;int&gt; b) <a class="anchor-link" href="#saturation"
+              title="Permalink to Blend.saturation">#</a></h4>
+<div class="doc">
+<pre class="source">
+static List&lt;int&gt; saturation(List&lt;int&gt; a, List&lt;int&gt; b) {
+ var aHSV = rgbListToHsv(a);
+ var bHSV = rgbListToHsv(b);
+
+ return hsvToRgb(aHSV[0], bHSV[1], aHSV[2]);
+}
+</pre>
+</div>
+</div>
+</div>
+        </div>
+        <div class="clear"></div>
+        </div>
+        <div class="footer">
+          <div>This page was generated at 2013-04-06 18:44:28.545</div>
+        </div>
+        <script async src="../client-live-nav.js"></script>
+        </body></html>
+        

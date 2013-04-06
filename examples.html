@@ -8,19 +8,23 @@
 
   <body>
     <div class="showcasenav">
-      <div class="showcaseintro">Select a showcase from the list below and move over an example to
-      see the function that has been used to create the effect.</div>
+      <div class="showcaseintro">
+        These examples show some of the functionality of CanvasQuery.<br />
+        Select an example from the list below to see what is possible using CanvasQuery.
+      </div>
       <ul>
         <li id="show_coloring">Coloring of units</li>
         <li id="show_blending">Blending of images</li>
-        <li id="show_border">Drawing borders</li>
-        <li id="show_wrappedtext">Wrapping text</li>
         <li id="show_masking">Masking</li>
         <li id="show_convolve">Convolution</li>
+        <li id="show_palette">Palette</li>
+        <li id="show_framework">Framework</li>
+        <li id="show_uigeneration">UI Generation</li>
       </ul>
     </div>
     <div class="showcases centered">
       <div id="coloring" class="example">
+        <a class="source" target="_blank" href="https://github.com/denniskaselow/CanvasQuery/blob/master/example/web/src/coloring.dart"></a>
         <div class="credits">
           <a href="http://artperski.com/">Insectoid ships created by Artur Reterski</a>
         </div>
@@ -29,24 +33,29 @@
           <div>
             If your browser does not support sliders, you need to enter a value between 0 and 1.
           </div>
-          <label>Hue: <input id="hue" type="range" min="0" max="1" step="0.05" value="0" /></label>
-          <label>Saturation: <input id="saturation" type="range" min="0" max="1" step="0.05" value="0" /></label>
-          <label>Lightness: <input id="lightness" type="range" min="0" max="1" step="0.05" value="0" /></label>
+          <label for="hue">Hue: </label><br />
+          <input id="hue" type="range" min="0" max="1" step="0.05" value="0" /><br />
+          <label>Saturation:</label><br />
+          <input id="saturation" type="range" min="0" max="1" step="0.05" value="0" /><br />
+          <label>Lightness:</label><br />
+          <input id="lightness" type="range" min="0" max="1" step="0.05" value="0" />
         </fieldset>
       </div>
       <div id="blending" class="example">
+        <a class="source" target="_blank" href="https://github.com/denniskaselow/CanvasQuery/blob/master/example/web/src/blending.dart"></a>
         <fieldset class="config">
           <legend>Blend-mix-Config</legend>
           <div>
-            If your browser does not support sliders, you need to enter a value between 0 and 1.
+            If your browser does not support sliders, you need to enter a value between 0 and 1.<br />
+            'Mix' defines the strength of the blending process.
           </div>
-          <label>mix: <input id="mix" type="range" min="0" max="1" step="0.05" value="0.5" /></label>
+          <label for="mix">Mix:</label>
+          <input id="mix" type="range" min="0" max="1" step="0.05" value="0.5" />
         </fieldset>
         <br />
       </div>
-      <div id="border" class="example"></div>
-      <div id="wrappedtext" class="example"></div>
-      <div id="masking" class="example centered bigtext">
+      <div id="masking" class="example bigtext">
+        <a class="source" target="_blank" href="https://github.com/denniskaselow/CanvasQuery/blob/master/example/web/src/masking.dart"></a>
         <div class="credits">
           <a href="http://opengameart.org/content/farming-tilesets-magic-animations-and-ui-elements">
             Farming image created by Daniel Eddeland
@@ -54,13 +63,52 @@
         </div>
       </div>
       <div id="convolve" class="example">
+        <a class="source" target="_blank" href="https://github.com/denniskaselow/CanvasQuery/blob/master/example/web/src/convolve.dart"></a>
         <div class="credits">
           <a href="http://opengameart.org/content/farming-tilesets-magic-animations-and-ui-elements">
             Farming image created by Daniel Eddeland
           </a>
         </div>
       </div>
+      <div id="palette" class="example">
+        <a class="source" target="_blank" href="https://github.com/denniskaselow/CanvasQuery/blob/master/example/web/src/palette.dart"></a>
+        <div class="credits">
+          <a href="http://opengameart.org/content/farming-tilesets-magic-animations-and-ui-elements">
+            Farming image created by Daniel Eddeland
+          </a><br />
+          <a href="http://www.pixeljoint.com/forum/forum_posts.asp?TID=12795">
+            Mockup image created by Dawnbringer
+          </a><br />
+          <label>Image:
+            <select id="imageselect">
+            </select>
+          </label>
+          <label>Palette:
+            <select id="paletteselect">
+            </select>
+          </label>
+        </div>
+      </div>
+      <div id="framework" class="example">
+        <a class="source" target="_blank" href="https://github.com/denniskaselow/CanvasQuery/blob/master/example/web/src/framework.dart"></a>
+        Draw with left mouse button, switch colors with left and right arrow keys.<br />
+        Drop an image on the canvas to display it.<br />
+        Swipe downwards with white color to reset the canvas.<br />
+      </div>
+      <div id="uigeneration" class="example">
+        <a class="source" target="_blank" href="https://github.com/denniskaselow/CanvasQuery/blob/master/example/web/src/uigeneration.dart"></a>
+        <label for="uitext">Enter text:</label><br />
+        <textarea id="uitext" cols="50" rows="8">The borders of this image have been created using 'borderImage'.
+This text is displayed using 'wrappedText'. If you move the mouse over the buttons you will see an animated 'paperBag'.
+Changing this text will resize the 'borderImage'.</textarea><br />
+      </div>
+      <div class="footerspace"></div>
     </div>
+    <div class="footer">
+      <a href="http://canvasquery.com/">CanvasQuery by Przemyslaw Sikorski/rezoner</a><br />
+      <a href="https://github.com/denniskaselow/CanvasQuery">ported to Dart by Dennis Kaselow</a>
+    </div>
+    <div id="tooltip"></div>
     <script type="application/dart" src="examples.dart"></script>
     <script src="dart.js"></script>
   </body>

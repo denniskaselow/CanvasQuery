@@ -1,0 +1,3200 @@
+        <!DOCTYPE html>
+        <html>
+        <head>
+                <meta charset="utf-8">
+        <title>CqWrapper class / canvas_query Library / Dart Documentation</title>
+        <link rel="stylesheet" type="text/css"
+            href="../styles.css">
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:400,600,700,800" rel="stylesheet" type="text/css">
+        <link rel="shortcut icon" href="../favicon.ico">
+        
+        </head>
+        <body data-library="canvas_query" data-type="CqWrapper">
+        <div class="page">
+        <div class="header">
+          <a href="../index.html"><div class="logo"></div></a>
+          <a href="../index.html">Dart Documentation</a>
+         &rsaquo; <a href="../canvas_query.html">canvas_query</a> &rsaquo; <a href="../canvas_query/CqWrapper.html">CqWrapper</a>        <div id="search-box">
+          <input type="search" name="q" id="q" autocomplete="off"
+              class="search-input" placeholder="Search API">
+        </div>
+        
+      </div>
+      <div class="drop-down" id="drop-down"></div>
+      
+        <div class="nav">
+        
+</div>
+<div class="content">
+        <h2><strong>CqWrapper</strong>
+          class
+        </h2>
+        
+<button id="show-inherited" class="show-inherited">Hide inherited</button>
+<div class="doc">
+<p>Wrapper around <code>CanvasElement</code> and <code>CanvasRenderingContext2D</code> offering
+additional functionality.</p>
+<pre class="source">
+class CqWrapper implements CanvasRenderingContext2D {
+ static final Pattern _whitespacePattern = new RegExp((r'\s+'));
+ CanvasElement _canvas;
+ CanvasRenderingContext2D _context;
+ CqFramework _framework;
+ /// The wrapped [CanvasElement].
+ CanvasElement get canvas =&gt; _canvas;
+ /// The wrapped [CanvasRenderingContext2D].
+ CanvasRenderingContext2D get context2d =&gt; _context;
+ /// The [CqFramework] to access several Event-[Stream]s.
+ CqFramework get framework =&gt; _framework;
+ /**
+  * Wrap an existing [CanvasElement].
+  */
+ CqWrapper(this._canvas) {
+   _context = _canvas.context2d;
+   _framework = new CqFramework._(this);
+ }
+ /**
+  * Creates and wrap a [CanvasElement] covering the whole window. Resizing included.
+  */
+ CqWrapper.forWindow() {
+   _canvas = new CanvasElement(width: window.innerWidth, height: window.innerHeight);
+   _context = _canvas.context2d;
+   window.onResize.listen((e) {
+     _canvas.width = window.innerWidth;
+     _canvas.height = window.innerHeight;
+   });
+ }
+ /**
+  * Queries a {CanvasElement] from the DOM and wraps it.
+  */
+ CqWrapper.query(String selector) : this(query(selector));
+ /**
+  * Creates and wraps a [CanvasElement] with the given [width] and [height].
+  */
+ CqWrapper.forSize(int width, int height) : this(new CanvasElement(width: width, height: height));
+ /**
+  * Creates and wraps a [CanvasElement] using the given image.
+  */
+ CqWrapper.forImage(ImageElement img) : this(CqTools.createCanvas(img));
+
+ /**
+  * Delegates to the wrapped [CanvasRenderingContext2D].
+  */
+ dynamic noSuchMethod(InvocationMirror im) =&gt; im.invokeOn(_context);
+
+ /**
+  * Appends the canvas to [element].
+  */
+ void appendTo(Element element) {
+   element.append(_canvas);
+ }
+
+ /**
+  * Replaces the wrapped [CanvasElement] and [CanvasRenderingContext2D] in this
+  * [CqWrapper] object and in the DOM.
+  */
+ void replaceWith(CqWrapper other) {
+   _canvas.replaceWith(other.canvas);
+   _canvas = other.canvas;
+   _context = other.context2d;
+ }
+
+ /**
+  * Blends the canvas of this object onto [what] using [mode] and [mix].
+  */
+ void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) =&gt; CqTools.blend(what, this.canvas, mode, mix);
+ /**
+  * Blends the object [what] ([CqWrapper], [CanvasElement], [ImageElement] or
+  * color) onto this canvas using [mode] and [mix].
+  */
+ void blend(var what, BlendFunction mode, [num mix = 1]) {
+   if (what is String) {
+     blendColor(what, mode, mix);
+   } else {
+     CqTools.blend(this.canvas, what, mode, mix);
+   }
+ }
+ /**
+  * Blends the color [what] onto this canvas using [mode] and [mix].
+  */
+ void blendColor(String color, BlendFunction mode, [num mix = 1]) =&gt; blend(_createCanvas(color), mode, mix);
+ /**
+  * Blends the object [what] ([CqWrapper], [CanvasElement], [ImageElement] or
+  * color) onto this canvas using [mode] and [mix].
+  */
+ void blendSpecial(var what, SpecialBlendFunction mode, [num mix = 1]) {
+   if (what is String) {
+     blendSpecialColor(what, mode, mix);
+   } else {
+     CqTools.blendSpecial(this.canvas, what, mode, mix);
+   }
+ }
+ /**
+  * Blends the color [what] onto this canvas using [mode] and [mix].
+  */
+ void blendSpecialColor(String color, SpecialBlendFunction mode, [num mix = 1]) =&gt; blendSpecial(_createCanvas(color), mode, mix);
+
+ CanvasElement _createCanvas(String color) =&gt; new CanvasElement(width: _canvas.width, height: _canvas.height)
+                                                               ..context2d.fillStyle = color
+                                                               ..context2d.fillRect(0, 0, _canvas.width, _canvas.height);
+
+ /**
+  * Calls [stroke()] if [strokeStyle] is set.
+  * Calls [fill()] if [fillStyle] is set.
+  * The values of strokeStyle and fillStyle on the wrapped
+  * [CanvasRenderingContext2D] will only be changed for the call
+  * to this function and will be reset afterwards.
+  */
+ void strokeAndFill({String strokeStyle, String fillStyle}) {
+   if (null != strokeStyle) {
+     var tmp = _context.strokeStyle;
+     _context..strokeStyle = strokeStyle
+             ..stroke()
+             ..strokeStyle = tmp;
+   }
+   if (null != fillStyle) {
+     var tmp = _context.fillStyle;
+     _context..fillStyle = fillStyle
+             ..fill()
+             ..fillStyle = tmp;
+   }
+ }
+
+ /**
+  * Draws a circls at [x], [y] with [radius].
+  */
+ void circle(num x, num y, num radius, {String strokeStyle, String fillStyle}) {
+   _context.beginPath();
+   _context.arc(x, y, radius, 0, PI * 2, true);
+   _context.closePath();
+   strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
+ }
+
+ /**
+  * Crops the canvas.
+  */
+ void crop(int x, int y, int width, int height) {
+   var canvas = new CanvasElement(width: width, height: height);
+   var context = canvas.context2d;
+
+   context.drawImageScaledFromSource(_canvas, x, y, width, height, 0, 0, width, height);
+   _canvas.width = width;
+   _canvas.height = height;
+   clear();
+   _context.drawImage(canvas, 0, 0);
+ }
+
+ /**
+  * Resizes the canvas. If only [width] or [height] is passed, the image will
+  * be resized proportionally.
+  */
+ void resize(int width, int height) {
+   int w, h;
+   if (height == null) {
+     if(_canvas.width &gt; width) {
+       h = (_canvas.height * (width / _canvas.width)).toInt();
+       w = width;
+     } else {
+       w = _canvas.width;
+       h = _canvas.height;
+     }
+   } else if (width == null) {
+     if(_canvas.height &gt; height) {
+       w = (_canvas.width * (height / _canvas.height)).toInt();
+       h = height;
+     } else {
+       w = _canvas.width;
+       h = _canvas.height;
+     }
+   }
+
+   var resized = new CqWrapper.forSize(w, h)..drawImageScaledFromSource(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
+   _canvas = resized._canvas;
+   _context = resized._context;
+ }
+
+ /**
+  * Trims the canvas using [color] as the transparent color. If no [color] is
+  * provided transparent pixels will be used to determine the size of the
+  * trimmed canvas.
+  *
+  * Returns a [Rect] with the trim boundaries or null if nothing was trimmed.
+  */
+ Rect trim({String color}) {
+   bool transparent;
+   List&lt;int&gt; targetColor;
+   var boundary;
+
+   if (color != null) {
+     targetColor = new Color.fromHex(color).toArray();
+     transparent = targetColor[4] == 255 ? true : false;
+   } else transparent = true;
+
+   var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var sourcePixels = sourceData.data;
+
+   var bound = [_canvas.width, _canvas.height, 0, 0];
+
+   for(var i = 0, len = sourcePixels.length; i &lt; len; i += 4) {
+     if(transparent) {
+       if(sourcePixels[i + 3] == 0) continue;
+     } else if(sourcePixels[i + 0] == color[0] &amp;&amp; sourcePixels[i + 1] == color[1] &amp;&amp; sourcePixels[i + 2] == color[2]) continue;
+     var x = (i ~/ 4) % _canvas.width;
+     var y = (i ~/ 4) ~/ _canvas.width;
+
+     if(x &lt; bound[0]) bound[0] = x;
+     if(x &gt; bound[2]) bound[2] = x;
+
+     if(y &lt; bound[1]) bound[1] = y;
+     if(y &gt; bound[3]) bound[3] = y;
+   }
+
+   if (bound[2] == 0 || bound[3] == 0) {
+   } else {
+     boundary = new Rect(bound[0], bound[1], bound[2] - bound[0], bound[3] - bound[1]);
+
+     crop(bound[0], bound[1], bound[2] - bound[0] + 1, bound[3] - bound[1] + 1);
+   }
+   return boundary;
+ }
+
+ /**
+  * Resizes the canvas by using [pixelSize] to resize each pixel (no bluring).
+  */
+ void resizePixel(int pixelSize) {
+
+   var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var sourcePixels = sourceData.data;
+   var canvas = new CanvasElement(width: _canvas.width * pixelSize, height: _canvas.height * pixelSize);
+   var context = canvas.context2d;
+
+   for(var i = 0, len = sourcePixels.length; i &lt; len; i += 4) {
+     if(sourcePixels[i + 3] == 0) continue;
+     context.fillStyle = rgbToHex(sourcePixels[i + 0], sourcePixels[i + 1], sourcePixels[i + 2]);
+
+     var x = (i ~/ 4) % _canvas.width;
+     var y = (i ~/ 4) ~/ _canvas.width;
+
+     context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+   }
+
+   _context = context;
+   _canvas = canvas;
+   // creates blurry images in Firefox, works fine in Chrome
+//    var x = 0, y = 0;
+//
+//    canvas.width = _canvas.width * pixelSize | 0;
+//    canvas.height = _canvas.height * pixelSize | 0;
+//
+//    while(x &lt; _canvas.width) {
+//      y = 0;
+//      while(y &lt; _canvas.height) {
+//        context.drawImageScaledFromSource(_canvas, x, y, 1, 1, x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+//        y++;
+//      }
+//      x++;
+//    }
+//
+//    _canvas = canvas;
+//    _context = context;
+ }
+
+ /**
+  * Reduces the colors of the image to the colors in the [palette].
+  */
+ void matchPalette(List&lt;String&gt; palette) {
+   var imgData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+
+   var rgbPalette = new List&lt;Color&gt;(palette.length);
+   for(var i = 0; i &lt; palette.length; i++) {
+     rgbPalette[i] = new Color.fromHex(palette[i]);
+   }
+
+   for(var i = 0; i &lt; imgData.data.length; i += 4) {
+     var difList = new List&lt;int&gt;(rgbPalette.length);
+     for(var j = 0; j &lt; rgbPalette.length; j++) {
+       var rgbVal = rgbPalette[j];
+       var rDif = (imgData.data[i] - rgbVal.r).abs(),
+           gDif = (imgData.data[i + 1] - rgbVal.g).abs(),
+           bDif = (imgData.data[i + 2] - rgbVal.b).abs();
+       difList[j] = rDif + gDif + bDif;
+     }
+
+     var closestMatch = 0;
+     for(var j = 0; j &lt; palette.length; j++) {
+       if(difList[j] &lt; difList[closestMatch]) {
+         closestMatch = j;
+       }
+     }
+
+     var paletteRgb = hexToRgb(palette[closestMatch]);
+     imgData.data[i] = paletteRgb[0];
+     imgData.data[i + 1] = paletteRgb[1];
+     imgData.data[i + 2] = paletteRgb[2];
+   }
+
+   _context.putImageData(imgData, 0, 0);
+ }
+
+ /**
+  * Returns a [List&lt;String&gt;] of the colors used in the canvas.
+  */
+ List&lt;String&gt; getPalette() {
+   var palette = new List&lt;String&gt;();
+   var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var sourcePixels = sourceData.data;
+
+   for(var i = 0; i &lt; sourcePixels.length; i += 4) {
+     if(0 != sourcePixels[i + 3]) {
+       var hex = rgbToHex(sourcePixels[i + 0], sourcePixels[i + 1], sourcePixels[i + 2]);
+       if(palette.indexOf(hex) == -1) palette.add(hex);
+     }
+   }
+
+   return palette;
+ }
+
+ /**
+  * Pixelizes the canvas.
+  */
+ void pixelize([int size = 4]) {
+   if (_canvas.width &lt; size) size = _canvas.width;
+   var imageSmoothingEnabled = _context.imageSmoothingEnabled;
+   _context.imageSmoothingEnabled = false;
+
+   var scale = (_canvas.width / size) / _canvas.width;
+   var temp = new CqWrapper.forSize(_canvas.width, _canvas.height);
+   var normal = new Rect(0, 0, _canvas.width, _canvas.height);
+   var shrunk = new Rect(0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt());
+
+   temp._context.drawImageToRect(_canvas, shrunk, sourceRect: normal);
+   clear();
+   _context.drawImageToRect(temp.canvas, normal, sourceRect: shrunk);
+
+   _context.imageSmoothingEnabled = imageSmoothingEnabled;
+ }
+
+ /**
+  * Returns a mask containing [true] for every pixel that does not have color [hexColor].
+  * The mask will contain [true] for every other pixel if [inverted] is set to [true].
+  */
+ List&lt;bool&gt; colorToMask(String hexColor, {bool inverted: false}) {
+   Color color = new Color.fromHex(hexColor);
+   var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var sourcePixels = sourceData.data;
+
+   var mask = new List&lt;bool&gt;(sourcePixels.length ~/ 4);
+
+   for(var i = 0; i &lt; sourcePixels.length; i += 4) {
+     if(sourcePixels[i + 0] == color.r &amp;&amp; sourcePixels[i + 1] == color.g &amp;&amp; sourcePixels[i + 2] == color.b) mask[i ~/ 4] = inverted;
+     else mask[i ~/ 4] = !inverted;
+   }
+
+   return mask;
+ }
+
+ /**
+  * Returns a grayscale maks of the canvas. Each value in the returned list
+  * will be the average of the RGB-values.
+  */
+ List&lt;int&gt; grayscaleToMask() {
+   var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var sourcePixels = sourceData.data;
+
+   var mask = new List&lt;int&gt;(sourcePixels.length ~/ 4);
+
+   for(var i = 0; i &lt; sourcePixels.length; i += 4) {
+     mask[i~/4] = (sourcePixels[i + 0] + sourcePixels[i + 1] + sourcePixels[i + 2]) ~/ 3;
+   }
+
+   return mask;
+ }
+
+ /**
+  * Converts grayscale of an image to its transparency.
+  * Light pixels become opaque. Dark pixels become transparent.
+  */
+ void grayscaleToAlpha() {
+   var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var sourcePixels = sourceData.data;
+
+   for(var i = 0, len = sourcePixels.length; i &lt; len; i += 4) {
+     sourcePixels[i + 3] = (sourcePixels[i + 0] + sourcePixels[i + 1] + sourcePixels[i + 2]) ~/ 3;
+
+     sourcePixels[i + 0] = sourcePixels[i + 1] = sourcePixels[i + 2] = 255;
+   }
+
+   _context.putImageData(sourceData, 0, 0);
+ }
+
+ /**
+  * Applies a mask.
+  * For a mask of [bool] every [true] value will turn a pixel transparent.
+  * For a grayscalemask of [int] values, black will turn a pixel transparent.
+  */
+ void applyMask(List mask) {
+   var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var sourcePixels = sourceData.data;
+
+   var mode = mask is List&lt;bool&gt; ? "bool" : "byte";
+
+   for(var i = 0, len = sourcePixels.length; i &lt; len; i += 4) {
+     var value = mask[i ~/ 4];
+
+     if(mode == "bool") sourcePixels[i + 3] = value ? 255 : 0;
+     else sourcePixels[i + 3] = value;
+   }
+
+   _context.putImageData(sourceData, 0, 0);
+ }
+
+ /**
+  * Fills the canvas using [hexColor] for [true] and
+  * [hexColorGradient] for [false] bits in the [mask]. If the mask is a
+  * grayscale, a gradient between both colors will be created.
+  */
+ void fillMask(List mask, String hexColor, [String hexColorGradient]) {
+
+   var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var sourcePixels = sourceData.data;
+
+   var maskType = mask is List&lt;bool&gt; ? "bool" : "byte";
+   var colorMode = null != hexColorGradient ? "gradient" : "normal";
+
+   var color = new Color.fromHex(hexColor);
+   var colorB;
+   if (null != hexColorGradient) {
+     colorB = new Color.fromHex(hexColorGradient);
+   }
+
+   for(var i = 0, len = sourcePixels.length; i &lt; len; i += 4) {
+     var value = mask[i ~/ 4];
+
+     if (maskType == "byte") value /= 255;
+     else value = value ? 1 : 0;
+
+     if(colorMode == "normal") {
+       if(0 != value) {
+         sourcePixels[i + 0] = color.r;
+         sourcePixels[i + 1] = color.g;
+         sourcePixels[i + 2] = color.b;
+         sourcePixels[i + 3] = (value * 255).toInt();
+       }
+     } else {
+       sourcePixels[i + 0] = (color.r + (colorB.r - color.r) * value).toInt();
+       sourcePixels[i + 1] = (color.g + (colorB.g - color.g) * value).toInt();
+       sourcePixels[i + 2] = (color.b + (colorB.b - color.b) * value).toInt();
+       sourcePixels[i + 3] = 255;
+     }
+   }
+
+   _context.putImageData(sourceData, 0, 0);
+ }
+
+ /**
+  * Clears the canvas with [color]. Calls [clearRect()] if no color is passed.
+  */
+ void clear({String color}) {
+   if(null != color) {
+     _context.fillStyle = color;
+     _context.fillRect(0, 0, _canvas.width, _canvas.height);
+   } else {
+     _context.clearRect(0, 0, _canvas.width, _canvas.height);
+   }
+ }
+
+ /**
+  * Creates a new [CanvasElement] with the same size and content as this canvas.
+  */
+ CanvasElement copy() {
+   var result = new CanvasElement(width: _canvas.width, height: _canvas.height);
+   result.context2d.drawImage(_canvas, 0, 0);
+   return result;
+ }
+
+ /**
+  * Sets the hue, saturation and lightness of the image.
+  */
+ void setHslAsList(List&lt;num&gt; hsl) =&gt; setHsl(hue: hsl[0], saturation: hsl[1], lightness: hsl[2]);
+ /**
+  * Sets the [hue], [saturation] and [lightness] of the image.
+  */
+ void setHsl({num hue, num saturation, num lightness}) {
+   double hIn = null == hue ? null : hue.toDouble();
+   double sIn = null == saturation ? null : saturation.toDouble();
+   double lIn = null == lightness ? null : lightness.toDouble();
+
+   var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var pixels = data.data;
+   double h, s, l;
+   List&lt;double&gt; hsl;
+   List&lt;int&gt; newPixel;
+
+   for(var i = 0, len = pixels.length; i &lt; len; i += 4) {
+     hsl = rgbToHsl(pixels[i + 0], pixels[i + 1], pixels[i + 2]);
+
+     h = hIn == null ? hsl[0] : limitValue(hIn, 0, 1);
+     s = sIn == null ? hsl[1] : limitValue(sIn, 0, 1);
+     l = lIn == null ? hsl[2] : limitValue(lIn, 0, 1);
+
+     newPixel = hslToRgb(h, s, l);
+
+     pixels[i + 0] = newPixel[0];
+     pixels[i + 1] = newPixel[1];
+     pixels[i + 2] = newPixel[2];
+   }
+
+   _context.putImageData(data, 0, 0);
+ }
+
+ /**
+  * Shifts the hue, saturation and lightness of the image by the passes amount.
+  * */
+ void shiftHslAsList(List&lt;num&gt; hsl) =&gt; shiftHsl(hue: hsl[0], saturation: hsl[1], lightness: hsl[2]);
+ /**
+  * Shifts the [hue], [saturation] and [lightness] of the image by the passes amount.
+  */
+ void shiftHsl({num hue, num saturation, num lightness}) {
+   double hIn = null == hue ? null : hue.toDouble();
+   double sIn = null == saturation ? null : saturation.toDouble();
+   double lIn = null == lightness ? null : lightness.toDouble();
+
+   var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var pixels = data.data;
+   double h, s, l;
+   List&lt;double&gt; hsl;
+   List&lt;int&gt; newPixel;
+
+   for(var i = 0, len = pixels.length; i &lt; len; i += 4) {
+     hsl = rgbToHsl(pixels[i + 0], pixels[i + 1], pixels[i + 2]);
+
+     h = hIn == null ? hsl[0] : wrapValue(hsl[0] + hIn, 0.0, 1.0);
+     s = sIn == null ? hsl[1] : limitValue(hsl[1] + sIn, 0.0, 1.0);
+     l = lIn == null ? hsl[2] : limitValue(hsl[2] + lIn, 0.0, 1.0);
+
+     newPixel = hslToRgb(h, s, l);
+
+     pixels[i + 0] = newPixel[0];
+     pixels[i + 1] = newPixel[1];
+     pixels[i + 2] = newPixel[2];
+   }
+   _context.putImageData(data, 0, 0);
+ }
+
+ /**
+  * Replaces the hue of 0&lt;=[src]&lt;=1 with 0&lt;=[dst]&lt;=1.
+  */
+ void replaceHue(num src, num dst) {
+   var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var pixels = data.data;
+   var h, hsl, newPixel;
+
+   for(var i = 0, len = pixels.length; i &lt; len; i += 4) {
+     hsl = rgbToHsl(pixels[i + 0], pixels[i + 1], pixels[i + 2]);
+
+     if ((hsl[0] - src).abs() &lt; 0.05) h = wrapValue(dst, 0, 1); else h = hsl[0];
+
+     newPixel = hslToRgb(h, hsl[1], hsl[2]);
+
+     pixels[i + 0] = newPixel[0];
+     pixels[i + 1] = newPixel[1];
+     pixels[i + 2] = newPixel[2];
+   }
+
+   _context.putImageData(data, 0, 0);
+ }
+
+ /**
+  * Inverts the colors of the image.
+  */
+ void invert() {
+   var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var pixels = data.data;
+
+   for(var i = 0, len = pixels.length; i &lt; len; i += 4) {
+     pixels[i + 0] = 255 - pixels[i + 0];
+     pixels[i + 1] = 255 - pixels[i + 1];
+     pixels[i + 2] = 255 - pixels[i + 2];
+   }
+
+   _context.putImageData(data, 0, 0);
+ }
+
+ /**
+  * Creates a rect with rounded corners.
+  */
+ void roundRect(num x, num y, num width, num height, num radius, {String strokeStyle, String fillStyle}) {
+   _context..beginPath()
+     ..moveTo(x + radius, y)
+     ..lineTo(x + width - radius, y)
+     ..quadraticCurveTo(x + width, y, x + width, y + radius)
+     ..lineTo(x + width, y + height - radius)
+     ..quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+     ..lineTo(x + radius, y + height)
+     ..quadraticCurveTo(x, y + height, x, y + height - radius)
+     ..lineTo(x, y + radius)
+     ..quadraticCurveTo(x, y, x + radius, y)
+     ..closePath();
+   strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
+ }
+
+ /**
+  * Creates a [text] with [gradient] colors. If a [maxWidth] is set the [text]
+  * will wrap around at [maxWidth].
+  * The [gradient] is a list of color stops and colors.
+  * E.g.
+  *     [0, '#000000', 0.5, '#FF0000', 1, '#0000FF']
+  */
+ void gradientText(String text, int x, int y, List gradient, [num maxWidth]) {
+   var regexp = new RegExp(r"(\d+)");
+   var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+   var lines = getLines(text, maxWidth);
+   var oldFillStyle = _context.fillStyle;
+
+   for(var i = 0; i &lt; lines.length; i++) {
+     var oy = (y + i * h * 0.6).toInt();
+     var lingrad = _context.createLinearGradient(0, oy, 0, (oy + h * 0.6).toInt());
+
+     for(var j = 0; j &lt; gradient.length; j += 2) {
+       lingrad.addColorStop(gradient[j], gradient[j + 1]);
+     }
+     _context..fillStyle = lingrad
+             ..fillText(lines[i], x, oy);
+   }
+   _context.fillStyle = oldFillStyle;
+ }
+
+ /**
+  * Writes [text] at [x], [y] and wraps at [maxWidth].
+  *
+  * The [nlCallback] will be called before a line is written.
+  */
+ void wrappedText(String text, int x, int y, num maxWidth, {NewlineCallback nlCallback}) {
+   var regexp = new RegExp(r"(\d+)");
+   var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+   var lines = getLines(text, maxWidth);
+
+   for(var i = 0; i &lt; lines.length; i++) {
+     var oy = (y + i * h * 0.6).toInt();
+     if (null != nlCallback) {
+       nlCallback(x, oy);
+     }
+     var line = lines[i];
+     _context.fillText(line, x, oy);
+   }
+ }
+
+ /**
+  * Returns a [Rect] with the size of a given [text]. If [maxWidth]
+  * is given, the [text] will be wrapped.
+  */
+ Rect textBoundaries(String text, [num maxWidth]) {
+   var regexp = new RegExp(r"(\d+)");
+   var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+   List&lt;String&gt; lines = getLines(text, maxWidth);
+   if (null == maxWidth) {
+     maxWidth = _context.measureText(text).width;
+   }
+   return new Rect(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
+ }
+
+ /**
+  * Splits the [text] at [maxWidth] and returns a list of lines.
+  */
+ List&lt;String&gt; getLines(String text, [num maxWidth]) {
+   var words = text.split(_whitespacePattern);
+
+   var ox = 0;
+   var oy = 0;
+
+   var lines = new List&lt;String&gt;.from([""]);
+   var spaceWidth = _context.measureText(" ").width;
+   if (null != maxWidth) {
+     maxWidth += spaceWidth;
+     var line = 0;
+     for(var i = 0; i &lt; words.length; i++) {
+       var word = "${words[i]} ";
+       var wordWidth = _context.measureText(word).width;
+
+       if(ox + wordWidth &gt; maxWidth) {
+         lines.add("");
+         line++;
+         ox = 0;
+       }
+       lines[line] = "${lines[line]}$word";
+
+       ox += wordWidth;
+     }
+   } else {
+     lines = [text];
+   }
+   return lines;
+ }
+
+ /**
+  * Creates a paper bag shaped path.
+  */
+ void paperBag(num x, num y, num width, num height, num blowX, num blowY, {String strokeStyle, String fillStyle}) {
+   _context..beginPath()
+     ..moveTo(x, y)
+     ..quadraticCurveTo(x + width / 2, y + height * blowY, x + width, y)
+     ..quadraticCurveTo(x + width - width * blowX, y + height / 2, x + width, y + height)
+     ..quadraticCurveTo(x + width / 2, y + height - height * blowY, x, y + height)
+     ..quadraticCurveTo(x + width * blowX, y + height / 2, x, y)
+     ..closePath();
+   strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
+ }
+
+ /**
+  * Creates an expandable area with borders from [image].
+  * [x], [y], [width], [height] are the values for the border.
+  * [top], [right], [bottom], [left] are the boundaries of the border in the
+  * [image].
+  */
+ void borderImage(var image, num x, num y, num width, num height, num top, num right, num bottom, num left, {bool fill: false, String fillStyle}) {
+   _context
+     /* top */
+     ..drawImageScaledFromSource(image, left, 0, image.width - left - right, top, x + left, y, width - left - right, top)
+     /* bottom */
+     ..drawImageScaledFromSource(image, left, image.height - bottom, image.width - left - right, bottom, x + left, y + height - bottom, width - left - right, bottom)
+     /* left */
+     ..drawImageScaledFromSource(image, 0, top, left, image.height - bottom - top, x, y + top, left, height - bottom - top)
+     /* right */
+     ..drawImageScaledFromSource(image, image.width - right, top, right, image.height - bottom - top, x + width - right, y + top, right, height - bottom - top)
+     /* top-left */
+     ..drawImageScaledFromSource(image, 0, 0, left, top, x, y, left, top)
+     /* top-right */
+     ..drawImageScaledFromSource(image, image.width - right, 0, right, top, x + width - right, y, right, top)
+     /* bottom-right */
+     ..drawImageScaledFromSource(image, image.width - right, image.height - bottom, right, bottom, x + width - right, y + height - bottom, right, bottom)
+     /* bottom-left */
+     ..drawImageScaledFromSource(image, 0, image.height - bottom, left, bottom, x, y + height - bottom, left, bottom);
+
+   if (null != fillStyle) {
+     var oldFillStyle = _context.fillStyle;
+     _context..fillStyle = fillStyle
+             ..fillRect(x + left, y + top, width - left - right, height - top - bottom)
+             ..fillStyle = oldFillStyle;
+   } else if (fill) {
+     _context.drawImageScaledFromSource(image, left, top, image.width - right - left, image.height - bottom - top, x + left, y + top, width - left - right, height - top - bottom);
+   }
+ }
+
+ /**
+  * Convolve an image using [matrix].
+  * See &lt;www.html5rocks.com/en/tutorials/canvas/imagefilters/&gt;.
+  */
+ void convolve(List&lt;num&gt; matrix, {num mix: 1, num divide: 1}) {
+   var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var matrixSize = (sqrt(matrix.length) + 0.5).toInt();
+   var halfMatrixSize = matrixSize ~/ 2;
+   var src = sourceData.data;
+   var sw = sourceData.width;
+   var sh = sourceData.height;
+   var w = sw;
+   var h = sh;
+   var output = CqTools.createImageData(_canvas.width, _canvas.height);
+   var dst = output.data;
+   var weights = divide == 1 ? matrix : _calculateWeights(matrix, matrixSize, divide);
+
+   for(var y = 1; y &lt; h - 1; y++) {
+     for(var x = 1; x &lt; w - 1; x++) {
+       var dstOff = (y * w + x) * 4;
+       double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
+       for(var cy = 0; cy &lt; matrixSize; cy++) {
+         for(var cx = 0; cx &lt; matrixSize; cx++) {
+           var scy = y + cy - halfMatrixSize;
+           var scx = x + cx - halfMatrixSize;
+           if(scy &gt;= 0 &amp;&amp; scy &lt; sh &amp;&amp; scx &gt;= 0 &amp;&amp; scx &lt; sw) {
+             var srcOff = (scy * sw + scx) * 4;
+             var wt = weights[cy * matrixSize + cx];
+             r += src[srcOff + 0] * wt;
+             g += src[srcOff + 1] * wt;
+             b += src[srcOff + 2] * wt;
+             a += src[srcOff + 3] * wt;
+           }
+         }
+       }
+       dst[dstOff + 0] = mixIt(src[dstOff + 0], r, mix).toInt();
+       dst[dstOff + 1] = mixIt(src[dstOff + 1], g, mix).toInt();
+       dst[dstOff + 2] = mixIt(src[dstOff + 2], b, mix).toInt();
+       dst[dstOff + 3] = src[dstOff + 3];
+     }
+   }
+
+   _context.putImageData(output, 0, 0);
+ }
+
+ List&lt;double&gt; _calculateWeights(List&lt;num&gt; matrix, int matrixSize, num divide) {
+   var weights = new List&lt;double&gt;(matrix.length);
+   for(var cy = 0; cy &lt; matrixSize; cy++) {
+     for(var cx = 0; cx &lt; matrixSize; cx++) {
+       var index = cy * matrixSize + cx;
+       weights[index] = matrix[index] / divide;
+     }
+   }
+   return weights;
+ }
+
+ /**
+  * Blurs an image.
+  */
+ void blur({num mix: 1}) =&gt; convolve([1, 1, 1, 1, 1, 1, 1, 1, 1], mix: mix, divide: 9);
+ /**
+  * Applies a gaussian blur to an image.
+  */
+ void gaussianBlur({num mix: 1}) =&gt; convolve([0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067,
+                                              0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292,
+                                              0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117,
+                                              0.00038771, 0.01330373, 0.11098164, 0.22508352, 0.11098164, 0.01330373, 0.00038771,
+                                              0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117,
+                                              0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292,
+                                              0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067], mix : mix);
+ /**
+  * Sharpens the image.
+  */
+ void sharpen({num mix: 1}) =&gt; convolve([0, -1, 0, -1, 5, -1, 0, -1, 0], mix : mix);
+ /**
+  * Pixels with a grayscale value beyond [threshold] will become transparent.
+  */
+ void threshold(num threshold) {
+   var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var pixels = data.data;
+   int r, g, b;
+
+   for(var i = 0; i &lt; pixels.length; i += 4) {
+     r = pixels[i];
+     g = pixels[i + 1];
+     b = pixels[i + 2];
+     var v = (0.2126 * r + 0.7152 * g + 0.0722 * b &gt;= threshold) ? 255 : 0;
+     pixels[i] = pixels[i + 1] = pixels[i + 2] = v.toInt();
+   }
+
+   _context.putImageData(data, 0, 0);
+ }
+
+ /**
+  * Sepia filter.
+  */
+ void sepia() {
+   var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+   var pixels = data.data;
+
+   for(var i = 0; i &lt; pixels.length; i += 4) {
+     pixels[i + 0] = limitValue((pixels[i + 0] * .393) + (pixels[i + 1] * .769) + (pixels[i + 2] * .189), 0, 255).toInt();
+     pixels[i + 1] = limitValue((pixels[i + 0] * .349) + (pixels[i + 1] * .686) + (pixels[i + 2] * .168), 0, 255).toInt();
+     pixels[i + 2] = limitValue((pixels[i + 0] * .272) + (pixels[i + 1] * .534) + (pixels[i + 2] * .131), 0, 255).toInt();
+   }
+
+   _context.putImageData(data, 0, 0);
+ }
+}
+</pre>
+</div>
+<h3>Implements</h3>
+<p>
+<span class="type-box"><span class="icon-class"></span><a href="../dart_html/CanvasRenderingContext2D.html">CanvasRenderingContext2D</a></span></p>
+<div>
+<h3>Constructors</h3>
+<div class="method"><h4 id="CqWrapper">
+<button class="show-code">Code</button>
+new <strong>CqWrapper</strong>(CanvasElement _canvas) <a class="anchor-link" href="#CqWrapper"
+              title="Permalink to CqWrapper.CqWrapper">#</a></h4>
+<div class="doc">
+<p>Wrap an existing <code>CanvasElement</code>.</p>
+<pre class="source">
+CqWrapper(this._canvas) {
+ _context = _canvas.context2d;
+ _framework = new CqFramework._(this);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="CqWrapper.forImage">
+<button class="show-code">Code</button>
+new <strong>CqWrapper.forImage</strong>(ImageElement img) <a class="anchor-link" href="#CqWrapper.forImage"
+              title="Permalink to CqWrapper.CqWrapper.forImage">#</a></h4>
+<div class="doc">
+<p>Creates and wraps a <code>CanvasElement</code> using the given image.</p>
+<pre class="source">
+CqWrapper.forImage(ImageElement img) : this(CqTools.createCanvas(img));
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="CqWrapper.forSize">
+<button class="show-code">Code</button>
+new <strong>CqWrapper.forSize</strong>(int width, int height) <a class="anchor-link" href="#CqWrapper.forSize"
+              title="Permalink to CqWrapper.CqWrapper.forSize">#</a></h4>
+<div class="doc">
+<p>Creates and wraps a <code>CanvasElement</code> with the given 
+<span class="param">width</span> and 
+<span class="param">height</span>.</p>
+<pre class="source">
+CqWrapper.forSize(int width, int height) : this(new CanvasElement(width: width, height: height));
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="CqWrapper.forWindow">
+<button class="show-code">Code</button>
+new <strong>CqWrapper.forWindow</strong>() <a class="anchor-link" href="#CqWrapper.forWindow"
+              title="Permalink to CqWrapper.CqWrapper.forWindow">#</a></h4>
+<div class="doc">
+<p>Creates and wrap a <code>CanvasElement</code> covering the whole window. Resizing included.</p>
+<pre class="source">
+CqWrapper.forWindow() {
+ _canvas = new CanvasElement(width: window.innerWidth, height: window.innerHeight);
+ _context = _canvas.context2d;
+ window.onResize.listen((e) {
+   _canvas.width = window.innerWidth;
+   _canvas.height = window.innerHeight;
+ });
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="CqWrapper.query">
+<button class="show-code">Code</button>
+new <strong>CqWrapper.query</strong>(String selector) <a class="anchor-link" href="#CqWrapper.query"
+              title="Permalink to CqWrapper.CqWrapper.query">#</a></h4>
+<div class="doc">
+<p>Queries a {CanvasElement] from the DOM and wraps it.</p>
+<pre class="source">
+CqWrapper.query(String selector) : this(query(selector));
+</pre>
+</div>
+</div>
+</div>
+<div>
+<h3>Properties</h3>
+<div class="field inherited"><h4 id="backingStorePixelRatio">
+<button class="show-code">Code</button>
+final num         <strong>backingStorePixelRatio</strong> <a class="anchor-link"
+            href="#backingStorePixelRatio"
+            title="Permalink to CqWrapper.backingStorePixelRatio">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@JSName('webkitBackingStorePixelRatio')
+@DomName('CanvasRenderingContext2D.webkitBackingStorePixelRatio')
+@DocsEditable
+@SupportedBrowser(SupportedBrowser.CHROME)
+@SupportedBrowser(SupportedBrowser.SAFARI)
+@Experimental
+final num backingStorePixelRatio
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="canvas">
+<button class="show-code">Code</button>
+final CanvasElement         <strong>canvas</strong> <a class="anchor-link"
+            href="#canvas"
+            title="Permalink to CqWrapper.canvas">#</a>
+        </h4>
+        <div class="doc">
+<p>The wrapped <code>CanvasElement</code>.</p>
+<pre class="source">
+CanvasElement get canvas =&gt; _canvas;
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="context2d">
+<button class="show-code">Code</button>
+final CanvasRenderingContext2D         <strong>context2d</strong> <a class="anchor-link"
+            href="#context2d"
+            title="Permalink to CqWrapper.context2d">#</a>
+        </h4>
+        <div class="doc">
+<p>The wrapped <code>CanvasRenderingContext2D</code>.</p>
+<pre class="source">
+CanvasRenderingContext2D get context2d =&gt; _context;
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="fillStyle">
+<button class="show-code">Code</button>
+var         <strong>fillStyle</strong> <a class="anchor-link"
+            href="#fillStyle"
+            title="Permalink to CqWrapper.fillStyle">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.fillStyle')
+@DocsEditable
+@Creates('String|CanvasGradient|CanvasPattern')
+@Returns('String|CanvasGradient|CanvasPattern')
+dynamic fillStyle
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="font">
+<button class="show-code">Code</button>
+String         <strong>font</strong> <a class="anchor-link"
+            href="#font"
+            title="Permalink to CqWrapper.font">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.font')
+@DocsEditable
+String font
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="framework">
+<button class="show-code">Code</button>
+final <a href="../canvas_query/CqFramework.html">CqFramework</a>         <strong>framework</strong> <a class="anchor-link"
+            href="#framework"
+            title="Permalink to CqWrapper.framework">#</a>
+        </h4>
+        <div class="doc">
+<p>The <a class="crossref" href="../canvas_query/CqFramework.html">CqFramework</a> to access several Event-<code>Stream</code>s.</p>
+<pre class="source">
+CqFramework get framework =&gt; _framework;
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="globalAlpha">
+<button class="show-code">Code</button>
+num         <strong>globalAlpha</strong> <a class="anchor-link"
+            href="#globalAlpha"
+            title="Permalink to CqWrapper.globalAlpha">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.globalAlpha')
+@DocsEditable
+num globalAlpha
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="globalCompositeOperation">
+<button class="show-code">Code</button>
+String         <strong>globalCompositeOperation</strong> <a class="anchor-link"
+            href="#globalCompositeOperation"
+            title="Permalink to CqWrapper.globalCompositeOperation">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.globalCompositeOperation')
+@DocsEditable
+String globalCompositeOperation
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="imageSmoothingEnabled">
+<button class="show-code">Code</button>
+bool         <strong>imageSmoothingEnabled</strong> <a class="anchor-link"
+            href="#imageSmoothingEnabled"
+            title="Permalink to CqWrapper.imageSmoothingEnabled">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@JSName('webkitImageSmoothingEnabled')
+@DomName('CanvasRenderingContext2D.webkitImageSmoothingEnabled')
+@DocsEditable
+@SupportedBrowser(SupportedBrowser.CHROME)
+@SupportedBrowser(SupportedBrowser.SAFARI)
+@Experimental
+bool imageSmoothingEnabled
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="lineCap">
+<button class="show-code">Code</button>
+String         <strong>lineCap</strong> <a class="anchor-link"
+            href="#lineCap"
+            title="Permalink to CqWrapper.lineCap">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.lineCap')
+@DocsEditable
+String lineCap
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="lineDashOffset">
+<button class="show-code">Code</button>
+num         <strong>lineDashOffset</strong> <a class="anchor-link"
+            href="#lineDashOffset"
+            title="Permalink to CqWrapper.lineDashOffset">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.lineDashOffset')
+num get lineDashOffset =&gt; JS('num',
+   '#.lineDashOffset || #.webkitLineDashOffset', this, this);
+</pre>
+<pre class="source">
+@DomName('CanvasRenderingContext2D.lineDashOffset')
+void set lineDashOffset(num value) =&gt; JS('void', 
+   'typeof #.lineDashOffset != "undefined" ? #.lineDashOffset = # : '
+   '#.webkitLineDashOffset = #', this, this, value, this, value);
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="lineJoin">
+<button class="show-code">Code</button>
+String         <strong>lineJoin</strong> <a class="anchor-link"
+            href="#lineJoin"
+            title="Permalink to CqWrapper.lineJoin">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.lineJoin')
+@DocsEditable
+String lineJoin
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="lineWidth">
+<button class="show-code">Code</button>
+num         <strong>lineWidth</strong> <a class="anchor-link"
+            href="#lineWidth"
+            title="Permalink to CqWrapper.lineWidth">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.lineWidth')
+@DocsEditable
+num lineWidth
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="miterLimit">
+<button class="show-code">Code</button>
+num         <strong>miterLimit</strong> <a class="anchor-link"
+            href="#miterLimit"
+            title="Permalink to CqWrapper.miterLimit">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.miterLimit')
+@DocsEditable
+num miterLimit
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="shadowBlur">
+<button class="show-code">Code</button>
+num         <strong>shadowBlur</strong> <a class="anchor-link"
+            href="#shadowBlur"
+            title="Permalink to CqWrapper.shadowBlur">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.shadowBlur')
+@DocsEditable
+num shadowBlur
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="shadowColor">
+<button class="show-code">Code</button>
+String         <strong>shadowColor</strong> <a class="anchor-link"
+            href="#shadowColor"
+            title="Permalink to CqWrapper.shadowColor">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.shadowColor')
+@DocsEditable
+String shadowColor
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="shadowOffsetX">
+<button class="show-code">Code</button>
+num         <strong>shadowOffsetX</strong> <a class="anchor-link"
+            href="#shadowOffsetX"
+            title="Permalink to CqWrapper.shadowOffsetX">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.shadowOffsetX')
+@DocsEditable
+num shadowOffsetX
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="shadowOffsetY">
+<button class="show-code">Code</button>
+num         <strong>shadowOffsetY</strong> <a class="anchor-link"
+            href="#shadowOffsetY"
+            title="Permalink to CqWrapper.shadowOffsetY">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.shadowOffsetY')
+@DocsEditable
+num shadowOffsetY
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="strokeStyle">
+<button class="show-code">Code</button>
+var         <strong>strokeStyle</strong> <a class="anchor-link"
+            href="#strokeStyle"
+            title="Permalink to CqWrapper.strokeStyle">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.strokeStyle')
+@DocsEditable
+@Creates('String|CanvasGradient|CanvasPattern')
+@Returns('String|CanvasGradient|CanvasPattern')
+dynamic strokeStyle
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="textAlign">
+<button class="show-code">Code</button>
+String         <strong>textAlign</strong> <a class="anchor-link"
+            href="#textAlign"
+            title="Permalink to CqWrapper.textAlign">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.textAlign')
+@DocsEditable
+String textAlign
+</pre>
+</div>
+</div>
+<div class="field inherited"><h4 id="textBaseline">
+<button class="show-code">Code</button>
+String         <strong>textBaseline</strong> <a class="anchor-link"
+            href="#textBaseline"
+            title="Permalink to CqWrapper.textBaseline">#</a>
+        </h4>
+        <div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.textBaseline')
+@DocsEditable
+String textBaseline
+</pre>
+</div>
+</div>
+</div>
+<div>
+<h3>Methods</h3>
+<div class="method"><h4 id="appendTo">
+<button class="show-code">Code</button>
+void <strong>appendTo</strong>(Element element) <a class="anchor-link" href="#appendTo"
+              title="Permalink to CqWrapper.appendTo">#</a></h4>
+<div class="doc">
+<p>Appends the canvas to 
+<span class="param">element</span>.</p>
+<pre class="source">
+void appendTo(Element element) {
+ element.append(_canvas);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="applyMask">
+<button class="show-code">Code</button>
+void <strong>applyMask</strong>(List mask) <a class="anchor-link" href="#applyMask"
+              title="Permalink to CqWrapper.applyMask">#</a></h4>
+<div class="doc">
+<p>Applies a mask.
+For a mask of <code>bool</code> every <code>true</code> value will turn a pixel transparent.
+For a grayscalemask of <code>int</code> values, black will turn a pixel transparent.</p>
+<pre class="source">
+void applyMask(List mask) {
+ var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var sourcePixels = sourceData.data;
+
+ var mode = mask is List&lt;bool&gt; ? "bool" : "byte";
+
+ for(var i = 0, len = sourcePixels.length; i &lt; len; i += 4) {
+   var value = mask[i ~/ 4];
+
+   if(mode == "bool") sourcePixels[i + 3] = value ? 255 : 0;
+   else sourcePixels[i + 3] = value;
+ }
+
+ _context.putImageData(sourceData, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="arc">
+<button class="show-code">Code</button>
+void <strong>arc</strong>(num x, num y, num radius, num startAngle, num endAngle, [bool anticlockwise = false]) <a class="anchor-link" href="#arc"
+              title="Permalink to CqWrapper.arc">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.arc')
+void arc(num x,  num y,  num radius,  num startAngle, num endAngle,
+   [bool anticlockwise = false]) {
+ $dom_arc(x, y, radius, startAngle, endAngle, anticlockwise);
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="arcTo">
+<button class="show-code">Code</button>
+void <strong>arcTo</strong>(num x1, num y1, num x2, num y2, num radius) <a class="anchor-link" href="#arcTo"
+              title="Permalink to CqWrapper.arcTo">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.arcTo')
+@DocsEditable
+void arcTo(num x1, num y1, num x2, num y2, num radius) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="beginPath">
+<button class="show-code">Code</button>
+void <strong>beginPath</strong>() <a class="anchor-link" href="#beginPath"
+              title="Permalink to CqWrapper.beginPath">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.beginPath')
+@DocsEditable
+void beginPath() native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="bezierCurveTo">
+<button class="show-code">Code</button>
+void <strong>bezierCurveTo</strong>(num cp1x, num cp1y, num cp2x, num cp2y, num x, num y) <a class="anchor-link" href="#bezierCurveTo"
+              title="Permalink to CqWrapper.bezierCurveTo">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.bezierCurveTo')
+@DocsEditable
+void bezierCurveTo(num cp1x, num cp1y, num cp2x, num cp2y, num x, num y) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="blend">
+<button class="show-code">Code</button>
+void <strong>blend</strong>(what, <a href="../blend_functions/BlendFunction.html">BlendFunction</a> mode, [num mix = 1]) <a class="anchor-link" href="#blend"
+              title="Permalink to CqWrapper.blend">#</a></h4>
+<div class="doc">
+<p>Blends the object 
+<span class="param">what</span> (<a class="crossref" href="../canvas_query/CqWrapper.html#CqWrapper">CqWrapper</a>, <code>CanvasElement</code>, <code>ImageElement</code> or
+color) onto this canvas using 
+<span class="param">mode</span> and 
+<span class="param">mix</span>.</p>
+<pre class="source">
+void blend(var what, BlendFunction mode, [num mix = 1]) {
+ if (what is String) {
+   blendColor(what, mode, mix);
+ } else {
+   CqTools.blend(this.canvas, what, mode, mix);
+ }
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="blendColor">
+<button class="show-code">Code</button>
+void <strong>blendColor</strong>(String color, <a href="../blend_functions/BlendFunction.html">BlendFunction</a> mode, [num mix = 1]) <a class="anchor-link" href="#blendColor"
+              title="Permalink to CqWrapper.blendColor">#</a></h4>
+<div class="doc">
+<p>Blends the color <code>what</code> onto this canvas using 
+<span class="param">mode</span> and 
+<span class="param">mix</span>.</p>
+<pre class="source">
+void blendColor(String color, BlendFunction mode, [num mix = 1]) =&gt; blend(_createCanvas(color), mode, mix);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="blendOn">
+<button class="show-code">Code</button>
+void <strong>blendOn</strong>(CanvasElement what, <a href="../blend_functions/BlendFunction.html">BlendFunction</a> mode, [num mix = 1]) <a class="anchor-link" href="#blendOn"
+              title="Permalink to CqWrapper.blendOn">#</a></h4>
+<div class="doc">
+<p>Blends the canvas of this object onto 
+<span class="param">what</span> using 
+<span class="param">mode</span> and 
+<span class="param">mix</span>.</p>
+<pre class="source">
+void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) =&gt; CqTools.blend(what, this.canvas, mode, mix);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="blendSpecial">
+<button class="show-code">Code</button>
+void <strong>blendSpecial</strong>(what, <a href="../blend_functions/SpecialBlendFunction.html">SpecialBlendFunction</a> mode, [num mix = 1]) <a class="anchor-link" href="#blendSpecial"
+              title="Permalink to CqWrapper.blendSpecial">#</a></h4>
+<div class="doc">
+<p>Blends the object 
+<span class="param">what</span> (<a class="crossref" href="../canvas_query/CqWrapper.html#CqWrapper">CqWrapper</a>, <code>CanvasElement</code>, <code>ImageElement</code> or
+color) onto this canvas using 
+<span class="param">mode</span> and 
+<span class="param">mix</span>.</p>
+<pre class="source">
+void blendSpecial(var what, SpecialBlendFunction mode, [num mix = 1]) {
+ if (what is String) {
+   blendSpecialColor(what, mode, mix);
+ } else {
+   CqTools.blendSpecial(this.canvas, what, mode, mix);
+ }
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="blendSpecialColor">
+<button class="show-code">Code</button>
+void <strong>blendSpecialColor</strong>(String color, <a href="../blend_functions/SpecialBlendFunction.html">SpecialBlendFunction</a> mode, [num mix = 1]) <a class="anchor-link" href="#blendSpecialColor"
+              title="Permalink to CqWrapper.blendSpecialColor">#</a></h4>
+<div class="doc">
+<p>Blends the color <code>what</code> onto this canvas using 
+<span class="param">mode</span> and 
+<span class="param">mix</span>.</p>
+<pre class="source">
+void blendSpecialColor(String color, SpecialBlendFunction mode, [num mix = 1]) =&gt; blendSpecial(_createCanvas(color), mode, mix);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="blur">
+<button class="show-code">Code</button>
+void <strong>blur</strong>({num mix: 1}) <a class="anchor-link" href="#blur"
+              title="Permalink to CqWrapper.blur">#</a></h4>
+<div class="doc">
+<p>Blurs an image.</p>
+<pre class="source">
+void blur({num mix: 1}) =&gt; convolve([1, 1, 1, 1, 1, 1, 1, 1, 1], mix: mix, divide: 9);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="borderImage">
+<button class="show-code">Code</button>
+void <strong>borderImage</strong>(image, num x, num y, num width, num height, num top, num right, num bottom, num left, {bool fill: false, String fillStyle}) <a class="anchor-link" href="#borderImage"
+              title="Permalink to CqWrapper.borderImage">#</a></h4>
+<div class="doc">
+<p>Creates an expandable area with borders from 
+<span class="param">image</span>.
+
+<span class="param">x</span>, 
+<span class="param">y</span>, 
+<span class="param">width</span>, 
+<span class="param">height</span> are the values for the border.
+
+<span class="param">top</span>, 
+<span class="param">right</span>, 
+<span class="param">bottom</span>, 
+<span class="param">left</span> are the boundaries of the border in the
+
+<span class="param">image</span>.</p>
+<pre class="source">
+void borderImage(var image, num x, num y, num width, num height, num top, num right, num bottom, num left, {bool fill: false, String fillStyle}) {
+ _context
+   /* top */
+   ..drawImageScaledFromSource(image, left, 0, image.width - left - right, top, x + left, y, width - left - right, top)
+   /* bottom */
+   ..drawImageScaledFromSource(image, left, image.height - bottom, image.width - left - right, bottom, x + left, y + height - bottom, width - left - right, bottom)
+   /* left */
+   ..drawImageScaledFromSource(image, 0, top, left, image.height - bottom - top, x, y + top, left, height - bottom - top)
+   /* right */
+   ..drawImageScaledFromSource(image, image.width - right, top, right, image.height - bottom - top, x + width - right, y + top, right, height - bottom - top)
+   /* top-left */
+   ..drawImageScaledFromSource(image, 0, 0, left, top, x, y, left, top)
+   /* top-right */
+   ..drawImageScaledFromSource(image, image.width - right, 0, right, top, x + width - right, y, right, top)
+   /* bottom-right */
+   ..drawImageScaledFromSource(image, image.width - right, image.height - bottom, right, bottom, x + width - right, y + height - bottom, right, bottom)
+   /* bottom-left */
+   ..drawImageScaledFromSource(image, 0, image.height - bottom, left, bottom, x, y + height - bottom, left, bottom);
+
+ if (null != fillStyle) {
+   var oldFillStyle = _context.fillStyle;
+   _context..fillStyle = fillStyle
+           ..fillRect(x + left, y + top, width - left - right, height - top - bottom)
+           ..fillStyle = oldFillStyle;
+ } else if (fill) {
+   _context.drawImageScaledFromSource(image, left, top, image.width - right - left, image.height - bottom - top, x + left, y + top, width - left - right, height - top - bottom);
+ }
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="circle">
+<button class="show-code">Code</button>
+void <strong>circle</strong>(num x, num y, num radius, {String strokeStyle, String fillStyle}) <a class="anchor-link" href="#circle"
+              title="Permalink to CqWrapper.circle">#</a></h4>
+<div class="doc">
+<p>Draws a circls at 
+<span class="param">x</span>, 
+<span class="param">y</span> with 
+<span class="param">radius</span>.</p>
+<pre class="source">
+void circle(num x, num y, num radius, {String strokeStyle, String fillStyle}) {
+ _context.beginPath();
+ _context.arc(x, y, radius, 0, PI * 2, true);
+ _context.closePath();
+ strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="clear">
+<button class="show-code">Code</button>
+void <strong>clear</strong>({String color}) <a class="anchor-link" href="#clear"
+              title="Permalink to CqWrapper.clear">#</a></h4>
+<div class="doc">
+<p>Clears the canvas with 
+<span class="param">color</span>. Calls <code>clearRect()</code> if no color is passed.</p>
+<pre class="source">
+void clear({String color}) {
+ if(null != color) {
+   _context.fillStyle = color;
+   _context.fillRect(0, 0, _canvas.width, _canvas.height);
+ } else {
+   _context.clearRect(0, 0, _canvas.width, _canvas.height);
+ }
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="clearRect">
+<button class="show-code">Code</button>
+void <strong>clearRect</strong>(num x, num y, num width, num height) <a class="anchor-link" href="#clearRect"
+              title="Permalink to CqWrapper.clearRect">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.clearRect')
+@DocsEditable
+void clearRect(num x, num y, num width, num height) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="clip">
+<button class="show-code">Code</button>
+void <strong>clip</strong>([String winding]) <a class="anchor-link" href="#clip"
+              title="Permalink to CqWrapper.clip">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.clip')
+@DocsEditable
+void clip([String winding]) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="closePath">
+<button class="show-code">Code</button>
+void <strong>closePath</strong>() <a class="anchor-link" href="#closePath"
+              title="Permalink to CqWrapper.closePath">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.closePath')
+@DocsEditable
+void closePath() native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="colorToMask">
+<button class="show-code">Code</button>
+List&lt;bool&gt; <strong>colorToMask</strong>(String hexColor, {bool inverted: false}) <a class="anchor-link" href="#colorToMask"
+              title="Permalink to CqWrapper.colorToMask">#</a></h4>
+<div class="doc">
+<p>Returns a mask containing <code>true</code> for every pixel that does not have color 
+<span class="param">hexColor</span>.
+The mask will contain <code>true</code> for every other pixel if 
+<span class="param">inverted</span> is set to <code>true</code>.</p>
+<pre class="source">
+List&lt;bool&gt; colorToMask(String hexColor, {bool inverted: false}) {
+ Color color = new Color.fromHex(hexColor);
+ var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var sourcePixels = sourceData.data;
+
+ var mask = new List&lt;bool&gt;(sourcePixels.length ~/ 4);
+
+ for(var i = 0; i &lt; sourcePixels.length; i += 4) {
+   if(sourcePixels[i + 0] == color.r &amp;&amp; sourcePixels[i + 1] == color.g &amp;&amp; sourcePixels[i + 2] == color.b) mask[i ~/ 4] = inverted;
+   else mask[i ~/ 4] = !inverted;
+ }
+
+ return mask;
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="convolve">
+<button class="show-code">Code</button>
+void <strong>convolve</strong>(List&lt;num&gt; matrix, {num mix: 1, num divide: 1}) <a class="anchor-link" href="#convolve"
+              title="Permalink to CqWrapper.convolve">#</a></h4>
+<div class="doc">
+<p>Convolve an image using 
+<span class="param">matrix</span>.
+See &lt;www.html5rocks.com/en/tutorials/canvas/imagefilters/>.</p>
+<pre class="source">
+void convolve(List&lt;num&gt; matrix, {num mix: 1, num divide: 1}) {
+ var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var matrixSize = (sqrt(matrix.length) + 0.5).toInt();
+ var halfMatrixSize = matrixSize ~/ 2;
+ var src = sourceData.data;
+ var sw = sourceData.width;
+ var sh = sourceData.height;
+ var w = sw;
+ var h = sh;
+ var output = CqTools.createImageData(_canvas.width, _canvas.height);
+ var dst = output.data;
+ var weights = divide == 1 ? matrix : _calculateWeights(matrix, matrixSize, divide);
+
+ for(var y = 1; y &lt; h - 1; y++) {
+   for(var x = 1; x &lt; w - 1; x++) {
+     var dstOff = (y * w + x) * 4;
+     double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
+     for(var cy = 0; cy &lt; matrixSize; cy++) {
+       for(var cx = 0; cx &lt; matrixSize; cx++) {
+         var scy = y + cy - halfMatrixSize;
+         var scx = x + cx - halfMatrixSize;
+         if(scy &gt;= 0 &amp;&amp; scy &lt; sh &amp;&amp; scx &gt;= 0 &amp;&amp; scx &lt; sw) {
+           var srcOff = (scy * sw + scx) * 4;
+           var wt = weights[cy * matrixSize + cx];
+           r += src[srcOff + 0] * wt;
+           g += src[srcOff + 1] * wt;
+           b += src[srcOff + 2] * wt;
+           a += src[srcOff + 3] * wt;
+         }
+       }
+     }
+     dst[dstOff + 0] = mixIt(src[dstOff + 0], r, mix).toInt();
+     dst[dstOff + 1] = mixIt(src[dstOff + 1], g, mix).toInt();
+     dst[dstOff + 2] = mixIt(src[dstOff + 2], b, mix).toInt();
+     dst[dstOff + 3] = src[dstOff + 3];
+   }
+ }
+
+ _context.putImageData(output, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="copy">
+<button class="show-code">Code</button>
+CanvasElement <strong>copy</strong>() <a class="anchor-link" href="#copy"
+              title="Permalink to CqWrapper.copy">#</a></h4>
+<div class="doc">
+<p>Creates a new <code>CanvasElement</code> with the same size and content as this canvas.</p>
+<pre class="source">
+CanvasElement copy() {
+ var result = new CanvasElement(width: _canvas.width, height: _canvas.height);
+ result.context2d.drawImage(_canvas, 0, 0);
+ return result;
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="createImageData">
+<button class="show-code">Code</button>
+ImageData <strong>createImageData</strong>(num sw, num sh) <a class="anchor-link" href="#createImageData"
+              title="Permalink to CqWrapper.createImageData">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.createImageData')
+@DocsEditable
+@Creates('ImageData|=Object')
+ImageData createImageData(num sw, num sh) {
+ return _convertNativeToDart_ImageData(_createImageData_1(sw, sh));
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="createImageDataFromImageData">
+<button class="show-code">Code</button>
+ImageData <strong>createImageDataFromImageData</strong>(ImageData imagedata) <a class="anchor-link" href="#createImageDataFromImageData"
+              title="Permalink to CqWrapper.createImageDataFromImageData">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.createImageData')
+@DocsEditable
+@Creates('ImageData|=Object')
+ImageData createImageDataFromImageData(ImageData imagedata) {
+ var imagedata_1 = _convertDartToNative_ImageData(imagedata);
+ return _convertNativeToDart_ImageData(_createImageDataFromImageData_1(imagedata_1));
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="createLinearGradient">
+<button class="show-code">Code</button>
+CanvasGradient <strong>createLinearGradient</strong>(num x0, num y0, num x1, num y1) <a class="anchor-link" href="#createLinearGradient"
+              title="Permalink to CqWrapper.createLinearGradient">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.createLinearGradient')
+@DocsEditable
+CanvasGradient createLinearGradient(num x0, num y0, num x1, num y1) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="createPattern">
+<button class="show-code">Code</button>
+CanvasPattern <strong>createPattern</strong>(canvas_OR_image, String repetitionType) <a class="anchor-link" href="#createPattern"
+              title="Permalink to CqWrapper.createPattern">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.createPattern')
+@DocsEditable
+CanvasPattern createPattern(canvas_OR_image, String repetitionType) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="createRadialGradient">
+<button class="show-code">Code</button>
+CanvasGradient <strong>createRadialGradient</strong>(num x0, num y0, num r0, num x1, num y1, num r1) <a class="anchor-link" href="#createRadialGradient"
+              title="Permalink to CqWrapper.createRadialGradient">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.createRadialGradient')
+@DocsEditable
+CanvasGradient createRadialGradient(num x0, num y0, num r0, num x1, num y1, num r1) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="crop">
+<button class="show-code">Code</button>
+void <strong>crop</strong>(int x, int y, int width, int height) <a class="anchor-link" href="#crop"
+              title="Permalink to CqWrapper.crop">#</a></h4>
+<div class="doc">
+<p>Crops the canvas.</p>
+<pre class="source">
+void crop(int x, int y, int width, int height) {
+ var canvas = new CanvasElement(width: width, height: height);
+ var context = canvas.context2d;
+
+ context.drawImageScaledFromSource(_canvas, x, y, width, height, 0, 0, width, height);
+ _canvas.width = width;
+ _canvas.height = height;
+ clear();
+ _context.drawImage(canvas, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="drawImage">
+<button class="show-code">Code</button>
+void <strong>drawImage</strong>(CanvasImageSource source, num destX, num destY) <a class="anchor-link" href="#drawImage"
+              title="Permalink to CqWrapper.drawImage">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<p>Draws an image from a CanvasImageSource to this canvas.</p>
+<p>The entire image from 
+<span class="param">source</span> will be drawn to this context with its top
+left corner at the point (
+<span class="param">destX</span>, 
+<span class="param">destY</span>). If the image is
+larger than canvas will allow, the image will be clipped to fit the
+available space.</p>
+<pre><code>CanvasElement canvas = new CanvasElement(width: 600, height: 600);
+CanvasRenderingContext2D ctx = canvas.context2d;
+ImageElement img = document.query('img');
+
+ctx.drawImage(img, 100, 100);
+
+VideoElement video = document.query('video');
+ctx.drawImage(video, 0, 0);
+
+CanvasElement otherCanvas = document.query('canvas');
+otherCanvas.width = 100;
+otherCanvas.height = 100;
+ctx.drawImage(otherCanvas, 590, 590); // will get clipped
+</code></pre>
+<p>See also:</p><ul><li>
+<p><code>CanvasImageSource</code> for more information on what data is retrieved
+from 
+<span class="param">source</span>.</p></li><li>
+<p><a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-drawimage">drawImage</a>
+from the WHATWG.</p></li></ul>
+<pre class="source">
+@DomName('CanvasRenderingContext2D.drawImage')
+@JSName('drawImage')
+void drawImage(CanvasImageSource source, num destX, num destY) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="drawImageScaled">
+<button class="show-code">Code</button>
+void <strong>drawImageScaled</strong>(CanvasImageSource source, num destX, num destY, num destWidth, num destHeight) <a class="anchor-link" href="#drawImageScaled"
+              title="Permalink to CqWrapper.drawImageScaled">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<p>Draws an image from a CanvasImageSource to an area of this canvas.</p>
+<p>The image will be drawn to this context with its top left corner at the
+point (
+<span class="param">destX</span>, 
+<span class="param">destY</span>) and will be scaled to be 
+<span class="param">destWidth</span> wide and
+
+<span class="param">destHeight</span> tall.</p>
+<p>If the image is larger than canvas
+will allow, the image will be clipped to fit the available space.</p>
+<pre><code>CanvasElement canvas = new CanvasElement(width: 600, height: 600);
+CanvasRenderingContext2D ctx = canvas.context2d;
+ImageElement img = document.query('img');
+img.width = 100;
+img.height = 100;
+
+// Scale the image to 300x50 at the point (20, 20)
+ctx.drawImageScaled(img, 20, 20, 300, 50);
+</code></pre>
+<p>See also:</p><ul><li>
+<p><code>CanvasImageSource</code> for more information on what data is retrieved
+from 
+<span class="param">source</span>.</p></li><li>
+<p><a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-drawimage">drawImage</a>
+from the WHATWG.</p></li></ul>
+<pre class="source">
+@DomName('CanvasRenderingContext2D.drawImage')
+@JSName('drawImage')
+void drawImageScaled(CanvasImageSource source,
+   num destX, num destY, num destWidth, num destHeight) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="drawImageScaledFromSource">
+<button class="show-code">Code</button>
+void <strong>drawImageScaledFromSource</strong>(CanvasImageSource source, num sourceX, num sourceY, num sourceWidth, num sourceHeight, num destX, num destY, num destWidth, num destHeight) <a class="anchor-link" href="#drawImageScaledFromSource"
+              title="Permalink to CqWrapper.drawImageScaledFromSource">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<p>Draws an image from a CanvasImageSource to an area of this canvas.</p>
+<p>The image is a region of 
+<span class="param">source</span> that is 
+<span class="param">sourceWidth</span> wide and
+
+<span class="param">destHeight</span> tall with top left corner at (
+<span class="param">sourceX</span>, 
+<span class="param">sourceY</span>).
+The image will be drawn to this context with its top left corner at the
+point (
+<span class="param">destX</span>, 
+<span class="param">destY</span>) and will be scaled to be 
+<span class="param">destWidth</span> wide and
+
+<span class="param">destHeight</span> tall.</p>
+<p>If the image is larger than canvas
+will allow, the image will be clipped to fit the available space.</p>
+<pre><code>VideoElement video = document.query('video');
+video.width = 100;
+video.height = 100;
+// Take the middle 20x20 pixels from the video and stretch them.
+ctx.drawImageScaledFromSource(video, 40, 40, 20, 20, 50, 50, 100, 100);
+
+// Draw the top 100x20 pixels from the otherCanvas to this one.
+CanvasElement otherCanvas = document.query('canvas');
+ctx.drawImageScaledFromSource(otherCanvas, 0, 0, 100, 20, 0, 0, 100, 20);
+</code></pre>
+<p>See also:</p><ul><li>
+<p><code>CanvasImageSource</code> for more information on what data is retrieved
+from 
+<span class="param">source</span>.</p></li><li>
+<p><a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-drawimage">drawImage</a>
+from the WHATWG.</p></li></ul>
+<pre class="source">
+@DomName('CanvasRenderingContext2D.drawImage')
+@JSName('drawImage')
+void drawImageScaledFromSource(CanvasImageSource source,
+   num sourceX, num sourceY, num sourceWidth, num sourceHeight,
+   num destX, num destY, num destWidth, num destHeight) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="drawImageToRect">
+<button class="show-code">Code</button>
+void <strong>drawImageToRect</strong>(CanvasImageSource source, Rect destRect, {Rect sourceRect}) <a class="anchor-link" href="#drawImageToRect"
+              title="Permalink to CqWrapper.drawImageToRect">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<p>Draws an image from a CanvasImageSource to an area of this canvas.</p>
+<p>The image will be drawn to an area of this canvas defined by
+
+<span class="param">destRect</span>. 
+<span class="param">sourceRect</span> defines the region of the source image that is
+drawn.
+If 
+<span class="param">sourceRect</span> is not provided, then
+the entire rectangular image from 
+<span class="param">source</span> will be drawn to this context.</p>
+<p>If the image is larger than canvas
+will allow, the image will be clipped to fit the available space.</p>
+<pre><code>CanvasElement canvas = new CanvasElement(width: 600, height: 600);
+CanvasRenderingContext2D ctx = canvas.context2d;
+ImageElement img = document.query('img');
+img.width = 100;
+img.height = 100;
+
+// Scale the image to 20x20.
+ctx.drawImageToRect(img, new Rect(50, 50, 20, 20));
+
+VideoElement video = document.query('video');
+video.width = 100;
+video.height = 100;
+// Take the middle 20x20 pixels from the video and stretch them.
+ctx.drawImageToRect(video, new Rect(50, 50, 100, 100),
+    sourceRect: new Rect(40, 40, 20, 20));
+
+// Draw the top 100x20 pixels from the otherCanvas.
+CanvasElement otherCanvas = document.query('canvas');
+ctx.drawImageToRect(otherCanvas, new Rect(0, 0, 100, 20),
+    sourceRect: new Rect(0, 0, 100, 20));
+</code></pre>
+<p>See also:</p><ul><li>
+<p><code>CanvasImageSource</code> for more information on what data is retrieved
+from 
+<span class="param">source</span>.</p></li><li>
+<p><a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-drawimage">drawImage</a>
+from the WHATWG.</p></li></ul>
+<pre class="source">
+@DomName('CanvasRenderingContext2D.drawImage')
+void drawImageToRect(CanvasImageSource source, Rect destRect,
+   {Rect sourceRect}) {
+ if (sourceRect == null) {
+   drawImageScaled(source,
+       destRect.left,
+       destRect.top,
+       destRect.width,
+       destRect.height);
+ } else {
+   drawImageScaledFromSource(source,
+       sourceRect.left,
+       sourceRect.top,
+       sourceRect.width,
+       sourceRect.height,
+       destRect.left,
+       destRect.top,
+       destRect.width,
+       destRect.height);
+ }
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="fill">
+<button class="show-code">Code</button>
+void <strong>fill</strong>([String winding]) <a class="anchor-link" href="#fill"
+              title="Permalink to CqWrapper.fill">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.fill')
+@DocsEditable
+void fill([String winding]) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="fillMask">
+<button class="show-code">Code</button>
+void <strong>fillMask</strong>(List mask, String hexColor, [String hexColorGradient]) <a class="anchor-link" href="#fillMask"
+              title="Permalink to CqWrapper.fillMask">#</a></h4>
+<div class="doc">
+<p>Fills the canvas using 
+<span class="param">hexColor</span> for <code>true</code> and
+
+<span class="param">hexColorGradient</span> for <code>false</code> bits in the 
+<span class="param">mask</span>. If the mask is a
+grayscale, a gradient between both colors will be created.</p>
+<pre class="source">
+void fillMask(List mask, String hexColor, [String hexColorGradient]) {
+
+ var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var sourcePixels = sourceData.data;
+
+ var maskType = mask is List&lt;bool&gt; ? "bool" : "byte";
+ var colorMode = null != hexColorGradient ? "gradient" : "normal";
+
+ var color = new Color.fromHex(hexColor);
+ var colorB;
+ if (null != hexColorGradient) {
+   colorB = new Color.fromHex(hexColorGradient);
+ }
+
+ for(var i = 0, len = sourcePixels.length; i &lt; len; i += 4) {
+   var value = mask[i ~/ 4];
+
+   if (maskType == "byte") value /= 255;
+   else value = value ? 1 : 0;
+
+   if(colorMode == "normal") {
+     if(0 != value) {
+       sourcePixels[i + 0] = color.r;
+       sourcePixels[i + 1] = color.g;
+       sourcePixels[i + 2] = color.b;
+       sourcePixels[i + 3] = (value * 255).toInt();
+     }
+   } else {
+     sourcePixels[i + 0] = (color.r + (colorB.r - color.r) * value).toInt();
+     sourcePixels[i + 1] = (color.g + (colorB.g - color.g) * value).toInt();
+     sourcePixels[i + 2] = (color.b + (colorB.b - color.b) * value).toInt();
+     sourcePixels[i + 3] = 255;
+   }
+ }
+
+ _context.putImageData(sourceData, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="fillRect">
+<button class="show-code">Code</button>
+void <strong>fillRect</strong>(num x, num y, num width, num height) <a class="anchor-link" href="#fillRect"
+              title="Permalink to CqWrapper.fillRect">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.fillRect')
+@DocsEditable
+void fillRect(num x, num y, num width, num height) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="fillText">
+<button class="show-code">Code</button>
+void <strong>fillText</strong>(String text, num x, num y, [num maxWidth]) <a class="anchor-link" href="#fillText"
+              title="Permalink to CqWrapper.fillText">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.fillText')
+@DocsEditable
+void fillText(String text, num x, num y, [num maxWidth]) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="gaussianBlur">
+<button class="show-code">Code</button>
+void <strong>gaussianBlur</strong>({num mix: 1}) <a class="anchor-link" href="#gaussianBlur"
+              title="Permalink to CqWrapper.gaussianBlur">#</a></h4>
+<div class="doc">
+<p>Applies a gaussian blur to an image.</p>
+<pre class="source">
+void gaussianBlur({num mix: 1}) =&gt; convolve([0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067,
+                                            0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292,
+                                            0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117,
+                                            0.00038771, 0.01330373, 0.11098164, 0.22508352, 0.11098164, 0.01330373, 0.00038771,
+                                            0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117,
+                                            0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292,
+                                            0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067], mix : mix);
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="getImageData">
+<button class="show-code">Code</button>
+ImageData <strong>getImageData</strong>(num sx, num sy, num sw, num sh) <a class="anchor-link" href="#getImageData"
+              title="Permalink to CqWrapper.getImageData">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.getImageData')
+@DocsEditable
+@Creates('ImageData|=Object')
+ImageData getImageData(num sx, num sy, num sw, num sh) {
+ return _convertNativeToDart_ImageData(_getImageData_1(sx, sy, sw, sh));
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="getImageDataHD">
+<button class="show-code">Code</button>
+ImageData <strong>getImageDataHD</strong>(num sx, num sy, num sw, num sh) <a class="anchor-link" href="#getImageDataHD"
+              title="Permalink to CqWrapper.getImageDataHD">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.webkitGetImageDataHD')
+@DocsEditable
+@SupportedBrowser(SupportedBrowser.CHROME)
+@SupportedBrowser(SupportedBrowser.SAFARI)
+@Experimental
+@Creates('ImageData|=Object')
+ImageData getImageDataHD(num sx, num sy, num sw, num sh) {
+ return _convertNativeToDart_ImageData(_getImageDataHD_1(sx, sy, sw, sh));
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="getLineDash">
+<button class="show-code">Code</button>
+List&lt;num&gt; <strong>getLineDash</strong>() <a class="anchor-link" href="#getLineDash"
+              title="Permalink to CqWrapper.getLineDash">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.getLineDash')
+@DocsEditable
+List&lt;num&gt; getLineDash() native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="getLines">
+<button class="show-code">Code</button>
+List&lt;String&gt; <strong>getLines</strong>(String text, [num maxWidth]) <a class="anchor-link" href="#getLines"
+              title="Permalink to CqWrapper.getLines">#</a></h4>
+<div class="doc">
+<p>Splits the 
+<span class="param">text</span> at 
+<span class="param">maxWidth</span> and returns a list of lines.</p>
+<pre class="source">
+List&lt;String&gt; getLines(String text, [num maxWidth]) {
+ var words = text.split(_whitespacePattern);
+
+ var ox = 0;
+ var oy = 0;
+
+ var lines = new List&lt;String&gt;.from([""]);
+ var spaceWidth = _context.measureText(" ").width;
+ if (null != maxWidth) {
+   maxWidth += spaceWidth;
+   var line = 0;
+   for(var i = 0; i &lt; words.length; i++) {
+     var word = "${words[i]} ";
+     var wordWidth = _context.measureText(word).width;
+
+     if(ox + wordWidth &gt; maxWidth) {
+       lines.add("");
+       line++;
+       ox = 0;
+     }
+     lines[line] = "${lines[line]}$word";
+
+     ox += wordWidth;
+   }
+ } else {
+   lines = [text];
+ }
+ return lines;
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="getPalette">
+<button class="show-code">Code</button>
+List&lt;String&gt; <strong>getPalette</strong>() <a class="anchor-link" href="#getPalette"
+              title="Permalink to CqWrapper.getPalette">#</a></h4>
+<div class="doc">
+<p>Returns a [List<String>] of the colors used in the canvas.</p>
+<pre class="source">
+List&lt;String&gt; getPalette() {
+ var palette = new List&lt;String&gt;();
+ var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var sourcePixels = sourceData.data;
+
+ for(var i = 0; i &lt; sourcePixels.length; i += 4) {
+   if(0 != sourcePixels[i + 3]) {
+     var hex = rgbToHex(sourcePixels[i + 0], sourcePixels[i + 1], sourcePixels[i + 2]);
+     if(palette.indexOf(hex) == -1) palette.add(hex);
+   }
+ }
+
+ return palette;
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="gradientText">
+<button class="show-code">Code</button>
+void <strong>gradientText</strong>(String text, int x, int y, List gradient, [num maxWidth]) <a class="anchor-link" href="#gradientText"
+              title="Permalink to CqWrapper.gradientText">#</a></h4>
+<div class="doc">
+<p>Creates a 
+<span class="param">text</span> with 
+<span class="param">gradient</span> colors. If a 
+<span class="param">maxWidth</span> is set the 
+<span class="param">text</span>
+will wrap around at 
+<span class="param">maxWidth</span>.
+The 
+<span class="param">gradient</span> is a list of color stops and colors.
+E.g.</p>
+<pre><code>[0, '#000000', 0.5, '#FF0000', 1, '#0000FF']
+</code></pre>
+<pre class="source">
+void gradientText(String text, int x, int y, List gradient, [num maxWidth]) {
+ var regexp = new RegExp(r"(\d+)");
+ var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+ var lines = getLines(text, maxWidth);
+ var oldFillStyle = _context.fillStyle;
+
+ for(var i = 0; i &lt; lines.length; i++) {
+   var oy = (y + i * h * 0.6).toInt();
+   var lingrad = _context.createLinearGradient(0, oy, 0, (oy + h * 0.6).toInt());
+
+   for(var j = 0; j &lt; gradient.length; j += 2) {
+     lingrad.addColorStop(gradient[j], gradient[j + 1]);
+   }
+   _context..fillStyle = lingrad
+           ..fillText(lines[i], x, oy);
+ }
+ _context.fillStyle = oldFillStyle;
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="grayscaleToAlpha">
+<button class="show-code">Code</button>
+void <strong>grayscaleToAlpha</strong>() <a class="anchor-link" href="#grayscaleToAlpha"
+              title="Permalink to CqWrapper.grayscaleToAlpha">#</a></h4>
+<div class="doc">
+<p>Converts grayscale of an image to its transparency.
+Light pixels become opaque. Dark pixels become transparent.</p>
+<pre class="source">
+void grayscaleToAlpha() {
+ var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var sourcePixels = sourceData.data;
+
+ for(var i = 0, len = sourcePixels.length; i &lt; len; i += 4) {
+   sourcePixels[i + 3] = (sourcePixels[i + 0] + sourcePixels[i + 1] + sourcePixels[i + 2]) ~/ 3;
+
+   sourcePixels[i + 0] = sourcePixels[i + 1] = sourcePixels[i + 2] = 255;
+ }
+
+ _context.putImageData(sourceData, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="grayscaleToMask">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>grayscaleToMask</strong>() <a class="anchor-link" href="#grayscaleToMask"
+              title="Permalink to CqWrapper.grayscaleToMask">#</a></h4>
+<div class="doc">
+<p>Returns a grayscale maks of the canvas. Each value in the returned list
+will be the average of the RGB-values.</p>
+<pre class="source">
+List&lt;int&gt; grayscaleToMask() {
+ var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var sourcePixels = sourceData.data;
+
+ var mask = new List&lt;int&gt;(sourcePixels.length ~/ 4);
+
+ for(var i = 0; i &lt; sourcePixels.length; i += 4) {
+   mask[i~/4] = (sourcePixels[i + 0] + sourcePixels[i + 1] + sourcePixels[i + 2]) ~/ 3;
+ }
+
+ return mask;
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="invert">
+<button class="show-code">Code</button>
+void <strong>invert</strong>() <a class="anchor-link" href="#invert"
+              title="Permalink to CqWrapper.invert">#</a></h4>
+<div class="doc">
+<p>Inverts the colors of the image.</p>
+<pre class="source">
+void invert() {
+ var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var pixels = data.data;
+
+ for(var i = 0, len = pixels.length; i &lt; len; i += 4) {
+   pixels[i + 0] = 255 - pixels[i + 0];
+   pixels[i + 1] = 255 - pixels[i + 1];
+   pixels[i + 2] = 255 - pixels[i + 2];
+ }
+
+ _context.putImageData(data, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="isPointInPath">
+<button class="show-code">Code</button>
+bool <strong>isPointInPath</strong>(num x, num y, [String winding]) <a class="anchor-link" href="#isPointInPath"
+              title="Permalink to CqWrapper.isPointInPath">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.isPointInPath')
+@DocsEditable
+bool isPointInPath(num x, num y, [String winding]) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="isPointInStroke">
+<button class="show-code">Code</button>
+bool <strong>isPointInStroke</strong>(num x, num y) <a class="anchor-link" href="#isPointInStroke"
+              title="Permalink to CqWrapper.isPointInStroke">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.isPointInStroke')
+@DocsEditable
+bool isPointInStroke(num x, num y) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="lineTo">
+<button class="show-code">Code</button>
+void <strong>lineTo</strong>(num x, num y) <a class="anchor-link" href="#lineTo"
+              title="Permalink to CqWrapper.lineTo">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.lineTo')
+@DocsEditable
+void lineTo(num x, num y) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="matchPalette">
+<button class="show-code">Code</button>
+void <strong>matchPalette</strong>(List&lt;String&gt; palette) <a class="anchor-link" href="#matchPalette"
+              title="Permalink to CqWrapper.matchPalette">#</a></h4>
+<div class="doc">
+<p>Reduces the colors of the image to the colors in the 
+<span class="param">palette</span>.</p>
+<pre class="source">
+void matchPalette(List&lt;String&gt; palette) {
+ var imgData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+
+ var rgbPalette = new List&lt;Color&gt;(palette.length);
+ for(var i = 0; i &lt; palette.length; i++) {
+   rgbPalette[i] = new Color.fromHex(palette[i]);
+ }
+
+ for(var i = 0; i &lt; imgData.data.length; i += 4) {
+   var difList = new List&lt;int&gt;(rgbPalette.length);
+   for(var j = 0; j &lt; rgbPalette.length; j++) {
+     var rgbVal = rgbPalette[j];
+     var rDif = (imgData.data[i] - rgbVal.r).abs(),
+         gDif = (imgData.data[i + 1] - rgbVal.g).abs(),
+         bDif = (imgData.data[i + 2] - rgbVal.b).abs();
+     difList[j] = rDif + gDif + bDif;
+   }
+
+   var closestMatch = 0;
+   for(var j = 0; j &lt; palette.length; j++) {
+     if(difList[j] &lt; difList[closestMatch]) {
+       closestMatch = j;
+     }
+   }
+
+   var paletteRgb = hexToRgb(palette[closestMatch]);
+   imgData.data[i] = paletteRgb[0];
+   imgData.data[i + 1] = paletteRgb[1];
+   imgData.data[i + 2] = paletteRgb[2];
+ }
+
+ _context.putImageData(imgData, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="measureText">
+<button class="show-code">Code</button>
+TextMetrics <strong>measureText</strong>(String text) <a class="anchor-link" href="#measureText"
+              title="Permalink to CqWrapper.measureText">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.measureText')
+@DocsEditable
+TextMetrics measureText(String text) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="moveTo">
+<button class="show-code">Code</button>
+void <strong>moveTo</strong>(num x, num y) <a class="anchor-link" href="#moveTo"
+              title="Permalink to CqWrapper.moveTo">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.moveTo')
+@DocsEditable
+void moveTo(num x, num y) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="noSuchMethod">
+<button class="show-code">Code</button>
+<strong>noSuchMethod</strong>(InvocationMirror im) <a class="anchor-link" href="#noSuchMethod"
+              title="Permalink to CqWrapper.noSuchMethod">#</a></h4>
+<div class="doc">
+<p>Delegates to the wrapped <code>CanvasRenderingContext2D</code>.</p>
+<pre class="source">
+dynamic noSuchMethod(InvocationMirror im) =&gt; im.invokeOn(_context);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="paperBag">
+<button class="show-code">Code</button>
+void <strong>paperBag</strong>(num x, num y, num width, num height, num blowX, num blowY, {String strokeStyle, String fillStyle}) <a class="anchor-link" href="#paperBag"
+              title="Permalink to CqWrapper.paperBag">#</a></h4>
+<div class="doc">
+<p>Creates a paper bag shaped path.</p>
+<pre class="source">
+void paperBag(num x, num y, num width, num height, num blowX, num blowY, {String strokeStyle, String fillStyle}) {
+ _context..beginPath()
+   ..moveTo(x, y)
+   ..quadraticCurveTo(x + width / 2, y + height * blowY, x + width, y)
+   ..quadraticCurveTo(x + width - width * blowX, y + height / 2, x + width, y + height)
+   ..quadraticCurveTo(x + width / 2, y + height - height * blowY, x, y + height)
+   ..quadraticCurveTo(x + width * blowX, y + height / 2, x, y)
+   ..closePath();
+ strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="pixelize">
+<button class="show-code">Code</button>
+void <strong>pixelize</strong>([int size = 4]) <a class="anchor-link" href="#pixelize"
+              title="Permalink to CqWrapper.pixelize">#</a></h4>
+<div class="doc">
+<p>Pixelizes the canvas.</p>
+<pre class="source">
+void pixelize([int size = 4]) {
+ if (_canvas.width &lt; size) size = _canvas.width;
+ var imageSmoothingEnabled = _context.imageSmoothingEnabled;
+ _context.imageSmoothingEnabled = false;
+
+ var scale = (_canvas.width / size) / _canvas.width;
+ var temp = new CqWrapper.forSize(_canvas.width, _canvas.height);
+ var normal = new Rect(0, 0, _canvas.width, _canvas.height);
+ var shrunk = new Rect(0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt());
+
+ temp._context.drawImageToRect(_canvas, shrunk, sourceRect: normal);
+ clear();
+ _context.drawImageToRect(temp.canvas, normal, sourceRect: shrunk);
+
+ _context.imageSmoothingEnabled = imageSmoothingEnabled;
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="putImageData">
+<button class="show-code">Code</button>
+void <strong>putImageData</strong>(ImageData imagedata, num dx, num dy, [num dirtyX, num dirtyY, num dirtyWidth, num dirtyHeight]) <a class="anchor-link" href="#putImageData"
+              title="Permalink to CqWrapper.putImageData">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.putImageData')
+@DocsEditable
+void putImageData(ImageData imagedata, num dx, num dy, [num dirtyX, num dirtyY, num dirtyWidth, num dirtyHeight]) {
+ if (!?dirtyX &amp;&amp; !?dirtyY &amp;&amp; !?dirtyWidth &amp;&amp; !?dirtyHeight) {
+   var imagedata_1 = _convertDartToNative_ImageData(imagedata);
+   _putImageData_1(imagedata_1, dx, dy);
+   return;
+ }
+ var imagedata_2 = _convertDartToNative_ImageData(imagedata);
+ _putImageData_2(imagedata_2, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+ return;
+ throw new ArgumentError("Incorrect number or type of arguments");
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="putImageDataHD">
+<button class="show-code">Code</button>
+void <strong>putImageDataHD</strong>(ImageData imagedata, num dx, num dy, [num dirtyX, num dirtyY, num dirtyWidth, num dirtyHeight]) <a class="anchor-link" href="#putImageDataHD"
+              title="Permalink to CqWrapper.putImageDataHD">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.webkitPutImageDataHD')
+@DocsEditable
+@SupportedBrowser(SupportedBrowser.CHROME)
+@SupportedBrowser(SupportedBrowser.SAFARI)
+@Experimental
+void putImageDataHD(ImageData imagedata, num dx, num dy, [num dirtyX, num dirtyY, num dirtyWidth, num dirtyHeight]) {
+ if (!?dirtyX &amp;&amp; !?dirtyY &amp;&amp; !?dirtyWidth &amp;&amp; !?dirtyHeight) {
+   var imagedata_1 = _convertDartToNative_ImageData(imagedata);
+   _putImageDataHD_1(imagedata_1, dx, dy);
+   return;
+ }
+ var imagedata_2 = _convertDartToNative_ImageData(imagedata);
+ _putImageDataHD_2(imagedata_2, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+ return;
+ throw new ArgumentError("Incorrect number or type of arguments");
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="quadraticCurveTo">
+<button class="show-code">Code</button>
+void <strong>quadraticCurveTo</strong>(num cpx, num cpy, num x, num y) <a class="anchor-link" href="#quadraticCurveTo"
+              title="Permalink to CqWrapper.quadraticCurveTo">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.quadraticCurveTo')
+@DocsEditable
+void quadraticCurveTo(num cpx, num cpy, num x, num y) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="rect">
+<button class="show-code">Code</button>
+void <strong>rect</strong>(num x, num y, num width, num height) <a class="anchor-link" href="#rect"
+              title="Permalink to CqWrapper.rect">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.rect')
+@DocsEditable
+void rect(num x, num y, num width, num height) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="replaceHue">
+<button class="show-code">Code</button>
+void <strong>replaceHue</strong>(num src, num dst) <a class="anchor-link" href="#replaceHue"
+              title="Permalink to CqWrapper.replaceHue">#</a></h4>
+<div class="doc">
+<p>Replaces the hue of 0&lt;=
+<span class="param">src</span>&lt;=1 with 0&lt;=
+<span class="param">dst</span>&lt;=1.</p>
+<pre class="source">
+void replaceHue(num src, num dst) {
+ var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var pixels = data.data;
+ var h, hsl, newPixel;
+
+ for(var i = 0, len = pixels.length; i &lt; len; i += 4) {
+   hsl = rgbToHsl(pixels[i + 0], pixels[i + 1], pixels[i + 2]);
+
+   if ((hsl[0] - src).abs() &lt; 0.05) h = wrapValue(dst, 0, 1); else h = hsl[0];
+
+   newPixel = hslToRgb(h, hsl[1], hsl[2]);
+
+   pixels[i + 0] = newPixel[0];
+   pixels[i + 1] = newPixel[1];
+   pixels[i + 2] = newPixel[2];
+ }
+
+ _context.putImageData(data, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="replaceWith">
+<button class="show-code">Code</button>
+void <strong>replaceWith</strong>(<a href="../canvas_query/CqWrapper.html">CqWrapper</a> other) <a class="anchor-link" href="#replaceWith"
+              title="Permalink to CqWrapper.replaceWith">#</a></h4>
+<div class="doc">
+<p>Replaces the wrapped <code>CanvasElement</code> and <code>CanvasRenderingContext2D</code> in this
+<a class="crossref" href="../canvas_query/CqWrapper.html#CqWrapper">CqWrapper</a> object and in the DOM.</p>
+<pre class="source">
+void replaceWith(CqWrapper other) {
+ _canvas.replaceWith(other.canvas);
+ _canvas = other.canvas;
+ _context = other.context2d;
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="resize">
+<button class="show-code">Code</button>
+void <strong>resize</strong>(int width, int height) <a class="anchor-link" href="#resize"
+              title="Permalink to CqWrapper.resize">#</a></h4>
+<div class="doc">
+<p>Resizes the canvas. If only 
+<span class="param">width</span> or 
+<span class="param">height</span> is passed, the image will
+be resized proportionally.</p>
+<pre class="source">
+void resize(int width, int height) {
+ int w, h;
+ if (height == null) {
+   if(_canvas.width &gt; width) {
+     h = (_canvas.height * (width / _canvas.width)).toInt();
+     w = width;
+   } else {
+     w = _canvas.width;
+     h = _canvas.height;
+   }
+ } else if (width == null) {
+   if(_canvas.height &gt; height) {
+     w = (_canvas.width * (height / _canvas.height)).toInt();
+     h = height;
+   } else {
+     w = _canvas.width;
+     h = _canvas.height;
+   }
+ }
+
+ var resized = new CqWrapper.forSize(w, h)..drawImageScaledFromSource(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
+ _canvas = resized._canvas;
+ _context = resized._context;
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="resizePixel">
+<button class="show-code">Code</button>
+void <strong>resizePixel</strong>(int pixelSize) <a class="anchor-link" href="#resizePixel"
+              title="Permalink to CqWrapper.resizePixel">#</a></h4>
+<div class="doc">
+<p>Resizes the canvas by using 
+<span class="param">pixelSize</span> to resize each pixel (no bluring).</p>
+<pre class="source">
+void resizePixel(int pixelSize) {
+
+ var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var sourcePixels = sourceData.data;
+ var canvas = new CanvasElement(width: _canvas.width * pixelSize, height: _canvas.height * pixelSize);
+ var context = canvas.context2d;
+
+ for(var i = 0, len = sourcePixels.length; i &lt; len; i += 4) {
+   if(sourcePixels[i + 3] == 0) continue;
+   context.fillStyle = rgbToHex(sourcePixels[i + 0], sourcePixels[i + 1], sourcePixels[i + 2]);
+
+   var x = (i ~/ 4) % _canvas.width;
+   var y = (i ~/ 4) ~/ _canvas.width;
+
+   context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+ }
+
+ _context = context;
+ _canvas = canvas;
+ // creates blurry images in Firefox, works fine in Chrome
+//    var x = 0, y = 0;
+//
+//    canvas.width = _canvas.width * pixelSize | 0;
+//    canvas.height = _canvas.height * pixelSize | 0;
+//
+//    while(x &lt; _canvas.width) {
+//      y = 0;
+//      while(y &lt; _canvas.height) {
+//        context.drawImageScaledFromSource(_canvas, x, y, 1, 1, x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+//        y++;
+//      }
+//      x++;
+//    }
+//
+//    _canvas = canvas;
+//    _context = context;
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="restore">
+<button class="show-code">Code</button>
+void <strong>restore</strong>() <a class="anchor-link" href="#restore"
+              title="Permalink to CqWrapper.restore">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.restore')
+@DocsEditable
+void restore() native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="rotate">
+<button class="show-code">Code</button>
+void <strong>rotate</strong>(num angle) <a class="anchor-link" href="#rotate"
+              title="Permalink to CqWrapper.rotate">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.rotate')
+@DocsEditable
+void rotate(num angle) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="roundRect">
+<button class="show-code">Code</button>
+void <strong>roundRect</strong>(num x, num y, num width, num height, num radius, {String strokeStyle, String fillStyle}) <a class="anchor-link" href="#roundRect"
+              title="Permalink to CqWrapper.roundRect">#</a></h4>
+<div class="doc">
+<p>Creates a rect with rounded corners.</p>
+<pre class="source">
+void roundRect(num x, num y, num width, num height, num radius, {String strokeStyle, String fillStyle}) {
+ _context..beginPath()
+   ..moveTo(x + radius, y)
+   ..lineTo(x + width - radius, y)
+   ..quadraticCurveTo(x + width, y, x + width, y + radius)
+   ..lineTo(x + width, y + height - radius)
+   ..quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+   ..lineTo(x + radius, y + height)
+   ..quadraticCurveTo(x, y + height, x, y + height - radius)
+   ..lineTo(x, y + radius)
+   ..quadraticCurveTo(x, y, x + radius, y)
+   ..closePath();
+ strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="save">
+<button class="show-code">Code</button>
+void <strong>save</strong>() <a class="anchor-link" href="#save"
+              title="Permalink to CqWrapper.save">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.save')
+@DocsEditable
+void save() native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="scale">
+<button class="show-code">Code</button>
+void <strong>scale</strong>(num sx, num sy) <a class="anchor-link" href="#scale"
+              title="Permalink to CqWrapper.scale">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.scale')
+@DocsEditable
+void scale(num sx, num sy) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="sepia">
+<button class="show-code">Code</button>
+void <strong>sepia</strong>() <a class="anchor-link" href="#sepia"
+              title="Permalink to CqWrapper.sepia">#</a></h4>
+<div class="doc">
+<p>Sepia filter.</p>
+<pre class="source">
+void sepia() {
+ var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var pixels = data.data;
+
+ for(var i = 0; i &lt; pixels.length; i += 4) {
+   pixels[i + 0] = limitValue((pixels[i + 0] * .393) + (pixels[i + 1] * .769) + (pixels[i + 2] * .189), 0, 255).toInt();
+   pixels[i + 1] = limitValue((pixels[i + 0] * .349) + (pixels[i + 1] * .686) + (pixels[i + 2] * .168), 0, 255).toInt();
+   pixels[i + 2] = limitValue((pixels[i + 0] * .272) + (pixels[i + 1] * .534) + (pixels[i + 2] * .131), 0, 255).toInt();
+ }
+
+ _context.putImageData(data, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="setFillColorHsl">
+<button class="show-code">Code</button>
+void <strong>setFillColorHsl</strong>(int h, num s, num l, [num a = 1]) <a class="anchor-link" href="#setFillColorHsl"
+              title="Permalink to CqWrapper.setFillColorHsl">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<p>Sets the color used inside shapes.
+
+<span class="param">h</span> is in degrees, 0-360.
+
+<span class="param">s</span>, 
+<span class="param">l</span> are in percent, 0-100.
+
+<span class="param">a</span> is 0-1.</p>
+<pre class="source">
+void setFillColorHsl(int h, num s, num l, [num a = 1]) {
+ this.fillStyle = 'hsla($h, $s%, $l%, $a)';
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="setFillColorRgb">
+<button class="show-code">Code</button>
+void <strong>setFillColorRgb</strong>(int r, int g, int b, [num a = 1]) <a class="anchor-link" href="#setFillColorRgb"
+              title="Permalink to CqWrapper.setFillColorRgb">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<p>Sets the color used inside shapes.
+
+<span class="param">r</span>, 
+<span class="param">g</span>, 
+<span class="param">b</span> are 0-255, 
+<span class="param">a</span> is 0-1.</p>
+<pre class="source">
+void setFillColorRgb(int r, int g, int b, [num a = 1]) {
+ this.fillStyle = 'rgba($r, $g, $b, $a)';
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="setHsl">
+<button class="show-code">Code</button>
+void <strong>setHsl</strong>({num hue, num saturation, num lightness}) <a class="anchor-link" href="#setHsl"
+              title="Permalink to CqWrapper.setHsl">#</a></h4>
+<div class="doc">
+<p>Sets the 
+<span class="param">hue</span>, 
+<span class="param">saturation</span> and 
+<span class="param">lightness</span> of the image.</p>
+<pre class="source">
+void setHsl({num hue, num saturation, num lightness}) {
+ double hIn = null == hue ? null : hue.toDouble();
+ double sIn = null == saturation ? null : saturation.toDouble();
+ double lIn = null == lightness ? null : lightness.toDouble();
+
+ var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var pixels = data.data;
+ double h, s, l;
+ List&lt;double&gt; hsl;
+ List&lt;int&gt; newPixel;
+
+ for(var i = 0, len = pixels.length; i &lt; len; i += 4) {
+   hsl = rgbToHsl(pixels[i + 0], pixels[i + 1], pixels[i + 2]);
+
+   h = hIn == null ? hsl[0] : limitValue(hIn, 0, 1);
+   s = sIn == null ? hsl[1] : limitValue(sIn, 0, 1);
+   l = lIn == null ? hsl[2] : limitValue(lIn, 0, 1);
+
+   newPixel = hslToRgb(h, s, l);
+
+   pixels[i + 0] = newPixel[0];
+   pixels[i + 1] = newPixel[1];
+   pixels[i + 2] = newPixel[2];
+ }
+
+ _context.putImageData(data, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="setHslAsList">
+<button class="show-code">Code</button>
+void <strong>setHslAsList</strong>(List&lt;num&gt; hsl) <a class="anchor-link" href="#setHslAsList"
+              title="Permalink to CqWrapper.setHslAsList">#</a></h4>
+<div class="doc">
+<p>Sets the hue, saturation and lightness of the image.</p>
+<pre class="source">
+void setHslAsList(List&lt;num&gt; hsl) =&gt; setHsl(hue: hsl[0], saturation: hsl[1], lightness: hsl[2]);
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="setLineDash">
+<button class="show-code">Code</button>
+void <strong>setLineDash</strong>(List&lt;num&gt; dash) <a class="anchor-link" href="#setLineDash"
+              title="Permalink to CqWrapper.setLineDash">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.setLineDash')
+@DocsEditable
+void setLineDash(List&lt;num&gt; dash) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="setStrokeColorHsl">
+<button class="show-code">Code</button>
+void <strong>setStrokeColorHsl</strong>(int h, num s, num l, [num a = 1]) <a class="anchor-link" href="#setStrokeColorHsl"
+              title="Permalink to CqWrapper.setStrokeColorHsl">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<p>Sets the color used for stroking shapes.
+
+<span class="param">h</span> is in degrees, 0-360.
+
+<span class="param">s</span>, 
+<span class="param">l</span> are in percent, 0-100.
+
+<span class="param">a</span> is 0-1.</p>
+<pre class="source">
+void setStrokeColorHsl(int h, num s, num l, [num a = 1]) {
+ this.strokeStyle = 'hsla($h, $s%, $l%, $a)';
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="setStrokeColorRgb">
+<button class="show-code">Code</button>
+void <strong>setStrokeColorRgb</strong>(int r, int g, int b, [num a = 1]) <a class="anchor-link" href="#setStrokeColorRgb"
+              title="Permalink to CqWrapper.setStrokeColorRgb">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<p>Sets the color used for stroking shapes.
+
+<span class="param">r</span>, 
+<span class="param">g</span>, 
+<span class="param">b</span> are 0-255, 
+<span class="param">a</span> is 0-1.</p>
+<pre class="source">
+void setStrokeColorRgb(int r, int g, int b, [num a = 1]) {
+ this.strokeStyle = 'rgba($r, $g, $b, $a)';
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="setTransform">
+<button class="show-code">Code</button>
+void <strong>setTransform</strong>(num m11, num m12, num m21, num m22, num dx, num dy) <a class="anchor-link" href="#setTransform"
+              title="Permalink to CqWrapper.setTransform">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.setTransform')
+@DocsEditable
+void setTransform(num m11, num m12, num m21, num m22, num dx, num dy) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="sharpen">
+<button class="show-code">Code</button>
+void <strong>sharpen</strong>({num mix: 1}) <a class="anchor-link" href="#sharpen"
+              title="Permalink to CqWrapper.sharpen">#</a></h4>
+<div class="doc">
+<p>Sharpens the image.</p>
+<pre class="source">
+void sharpen({num mix: 1}) =&gt; convolve([0, -1, 0, -1, 5, -1, 0, -1, 0], mix : mix);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="shiftHsl">
+<button class="show-code">Code</button>
+void <strong>shiftHsl</strong>({num hue, num saturation, num lightness}) <a class="anchor-link" href="#shiftHsl"
+              title="Permalink to CqWrapper.shiftHsl">#</a></h4>
+<div class="doc">
+<p>Shifts the 
+<span class="param">hue</span>, 
+<span class="param">saturation</span> and 
+<span class="param">lightness</span> of the image by the passes amount.</p>
+<pre class="source">
+void shiftHsl({num hue, num saturation, num lightness}) {
+ double hIn = null == hue ? null : hue.toDouble();
+ double sIn = null == saturation ? null : saturation.toDouble();
+ double lIn = null == lightness ? null : lightness.toDouble();
+
+ var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var pixels = data.data;
+ double h, s, l;
+ List&lt;double&gt; hsl;
+ List&lt;int&gt; newPixel;
+
+ for(var i = 0, len = pixels.length; i &lt; len; i += 4) {
+   hsl = rgbToHsl(pixels[i + 0], pixels[i + 1], pixels[i + 2]);
+
+   h = hIn == null ? hsl[0] : wrapValue(hsl[0] + hIn, 0.0, 1.0);
+   s = sIn == null ? hsl[1] : limitValue(hsl[1] + sIn, 0.0, 1.0);
+   l = lIn == null ? hsl[2] : limitValue(hsl[2] + lIn, 0.0, 1.0);
+
+   newPixel = hslToRgb(h, s, l);
+
+   pixels[i + 0] = newPixel[0];
+   pixels[i + 1] = newPixel[1];
+   pixels[i + 2] = newPixel[2];
+ }
+ _context.putImageData(data, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="shiftHslAsList">
+<button class="show-code">Code</button>
+void <strong>shiftHslAsList</strong>(List&lt;num&gt; hsl) <a class="anchor-link" href="#shiftHslAsList"
+              title="Permalink to CqWrapper.shiftHslAsList">#</a></h4>
+<div class="doc">
+<p>Shifts the hue, saturation and lightness of the image by the passes amount.</p>
+<pre class="source">
+void shiftHslAsList(List&lt;num&gt; hsl) =&gt; shiftHsl(hue: hsl[0], saturation: hsl[1], lightness: hsl[2]);
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="stroke">
+<button class="show-code">Code</button>
+void <strong>stroke</strong>() <a class="anchor-link" href="#stroke"
+              title="Permalink to CqWrapper.stroke">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.stroke')
+@DocsEditable
+void stroke() native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="strokeAndFill">
+<button class="show-code">Code</button>
+void <strong>strokeAndFill</strong>({String strokeStyle, String fillStyle}) <a class="anchor-link" href="#strokeAndFill"
+              title="Permalink to CqWrapper.strokeAndFill">#</a></h4>
+<div class="doc">
+<p>Calls <code>stroke()</code> if 
+<span class="param">strokeStyle</span> is set.
+Calls <code>fill()</code> if 
+<span class="param">fillStyle</span> is set.
+The values of strokeStyle and fillStyle on the wrapped
+<code>CanvasRenderingContext2D</code> will only be changed for the call
+to this function and will be reset afterwards.</p>
+<pre class="source">
+void strokeAndFill({String strokeStyle, String fillStyle}) {
+ if (null != strokeStyle) {
+   var tmp = _context.strokeStyle;
+   _context..strokeStyle = strokeStyle
+           ..stroke()
+           ..strokeStyle = tmp;
+ }
+ if (null != fillStyle) {
+   var tmp = _context.fillStyle;
+   _context..fillStyle = fillStyle
+           ..fill()
+           ..fillStyle = tmp;
+ }
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="strokeRect">
+<button class="show-code">Code</button>
+void <strong>strokeRect</strong>(num x, num y, num width, num height, [num lineWidth]) <a class="anchor-link" href="#strokeRect"
+              title="Permalink to CqWrapper.strokeRect">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.strokeRect')
+@DocsEditable
+void strokeRect(num x, num y, num width, num height, [num lineWidth]) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="strokeText">
+<button class="show-code">Code</button>
+void <strong>strokeText</strong>(String text, num x, num y, [num maxWidth]) <a class="anchor-link" href="#strokeText"
+              title="Permalink to CqWrapper.strokeText">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.strokeText')
+@DocsEditable
+void strokeText(String text, num x, num y, [num maxWidth]) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="textBoundaries">
+<button class="show-code">Code</button>
+Rect <strong>textBoundaries</strong>(String text, [num maxWidth]) <a class="anchor-link" href="#textBoundaries"
+              title="Permalink to CqWrapper.textBoundaries">#</a></h4>
+<div class="doc">
+<p>Returns a <code>Rect</code> with the size of a given 
+<span class="param">text</span>. If 
+<span class="param">maxWidth</span>
+is given, the 
+<span class="param">text</span> will be wrapped.</p>
+<pre class="source">
+Rect textBoundaries(String text, [num maxWidth]) {
+ var regexp = new RegExp(r"(\d+)");
+ var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+ List&lt;String&gt; lines = getLines(text, maxWidth);
+ if (null == maxWidth) {
+   maxWidth = _context.measureText(text).width;
+ }
+ return new Rect(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="threshold">
+<button class="show-code">Code</button>
+void <strong>threshold</strong>(num threshold) <a class="anchor-link" href="#threshold"
+              title="Permalink to CqWrapper.threshold">#</a></h4>
+<div class="doc">
+<p>Pixels with a grayscale value beyond 
+<span class="param">threshold</span> will become transparent.</p>
+<pre class="source">
+void threshold(num threshold) {
+ var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var pixels = data.data;
+ int r, g, b;
+
+ for(var i = 0; i &lt; pixels.length; i += 4) {
+   r = pixels[i];
+   g = pixels[i + 1];
+   b = pixels[i + 2];
+   var v = (0.2126 * r + 0.7152 * g + 0.0722 * b &gt;= threshold) ? 255 : 0;
+   pixels[i] = pixels[i + 1] = pixels[i + 2] = v.toInt();
+ }
+
+ _context.putImageData(data, 0, 0);
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="transform">
+<button class="show-code">Code</button>
+void <strong>transform</strong>(num m11, num m12, num m21, num m22, num dx, num dy) <a class="anchor-link" href="#transform"
+              title="Permalink to CqWrapper.transform">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.transform')
+@DocsEditable
+void transform(num m11, num m12, num m21, num m22, num dx, num dy) native;
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="translate">
+<button class="show-code">Code</button>
+void <strong>translate</strong>(num tx, num ty) <a class="anchor-link" href="#translate"
+              title="Permalink to CqWrapper.translate">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@DomName('CanvasRenderingContext2D.translate')
+@DocsEditable
+void translate(num tx, num ty) native;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="trim">
+<button class="show-code">Code</button>
+Rect <strong>trim</strong>({String color}) <a class="anchor-link" href="#trim"
+              title="Permalink to CqWrapper.trim">#</a></h4>
+<div class="doc">
+<p>Trims the canvas using 
+<span class="param">color</span> as the transparent color. If no 
+<span class="param">color</span> is
+provided transparent pixels will be used to determine the size of the
+trimmed canvas.</p>
+<p>Returns a <code>Rect</code> with the trim boundaries or null if nothing was trimmed.</p>
+<pre class="source">
+Rect trim({String color}) {
+ bool transparent;
+ List&lt;int&gt; targetColor;
+ var boundary;
+
+ if (color != null) {
+   targetColor = new Color.fromHex(color).toArray();
+   transparent = targetColor[4] == 255 ? true : false;
+ } else transparent = true;
+
+ var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+ var sourcePixels = sourceData.data;
+
+ var bound = [_canvas.width, _canvas.height, 0, 0];
+
+ for(var i = 0, len = sourcePixels.length; i &lt; len; i += 4) {
+   if(transparent) {
+     if(sourcePixels[i + 3] == 0) continue;
+   } else if(sourcePixels[i + 0] == color[0] &amp;&amp; sourcePixels[i + 1] == color[1] &amp;&amp; sourcePixels[i + 2] == color[2]) continue;
+   var x = (i ~/ 4) % _canvas.width;
+   var y = (i ~/ 4) ~/ _canvas.width;
+
+   if(x &lt; bound[0]) bound[0] = x;
+   if(x &gt; bound[2]) bound[2] = x;
+
+   if(y &lt; bound[1]) bound[1] = y;
+   if(y &gt; bound[3]) bound[3] = y;
+ }
+
+ if (bound[2] == 0 || bound[3] == 0) {
+ } else {
+   boundary = new Rect(bound[0], bound[1], bound[2] - bound[0], bound[3] - bound[1]);
+
+   crop(bound[0], bound[1], bound[2] - bound[0] + 1, bound[3] - bound[1] + 1);
+ }
+ return boundary;
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="wrappedText">
+<button class="show-code">Code</button>
+void <strong>wrappedText</strong>(String text, int x, int y, num maxWidth, {<a href="../canvas_query/NewlineCallback.html">NewlineCallback</a> nlCallback}) <a class="anchor-link" href="#wrappedText"
+              title="Permalink to CqWrapper.wrappedText">#</a></h4>
+<div class="doc">
+<p>Writes 
+<span class="param">text</span> at 
+<span class="param">x</span>, 
+<span class="param">y</span> and wraps at 
+<span class="param">maxWidth</span>.</p>
+<p>The 
+<span class="param">nlCallback</span> will be called before a line is written.</p>
+<pre class="source">
+void wrappedText(String text, int x, int y, num maxWidth, {NewlineCallback nlCallback}) {
+ var regexp = new RegExp(r"(\d+)");
+ var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+ var lines = getLines(text, maxWidth);
+
+ for(var i = 0; i &lt; lines.length; i++) {
+   var oy = (y + i * h * 0.6).toInt();
+   if (null != nlCallback) {
+     nlCallback(x, oy);
+   }
+   var line = lines[i];
+   _context.fillText(line, x, oy);
+ }
+}
+</pre>
+</div>
+</div>
+<div class="method inherited"><h4 id="$dom_arc">
+<button class="show-code">Code</button>
+void <strong>$dom_arc</strong>(num x, num y, num radius, num startAngle, num endAngle, bool anticlockwise) <a class="anchor-link" href="#$dom_arc"
+              title="Permalink to CqWrapper.$dom_arc">#</a></h4>
+<div class="inherited-from">inherited from CanvasRenderingContext2D </div><div class="doc">
+<pre class="source">
+@JSName('arc')
+@DomName('CanvasRenderingContext2D.arc')
+@DocsEditable
+void $dom_arc(num x, num y, num radius, num startAngle, num endAngle, bool anticlockwise) native;
+</pre>
+</div>
+</div>
+</div>
+        </div>
+        <div class="clear"></div>
+        </div>
+        <div class="footer">
+          <div>This page was generated at 2013-04-06 18:44:28.808</div>
+        </div>
+        <script async src="../client-live-nav.js"></script>
+        </body></html>
+        

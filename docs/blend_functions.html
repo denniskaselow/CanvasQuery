@@ -1,0 +1,102 @@
+        <!DOCTYPE html>
+        <html>
+        <head>
+                <meta charset="utf-8">
+        <title>blend_functions Library / Dart Documentation</title>
+        <link rel="stylesheet" type="text/css"
+            href="styles.css">
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:400,600,700,800" rel="stylesheet" type="text/css">
+        <link rel="shortcut icon" href="favicon.ico">
+        
+        </head>
+        <body data-library="blend_functions">
+        <div class="page">
+        <div class="header">
+          <a href="index.html"><div class="logo"></div></a>
+          <a href="index.html">Dart Documentation</a>
+         &rsaquo; <a href="blend_functions.html">blend_functions</a>        <div id="search-box">
+          <input type="search" name="q" id="q" autocomplete="off"
+              class="search-input" placeholder="Search API">
+        </div>
+        
+      </div>
+      <div class="drop-down" id="drop-down"></div>
+      
+        <div class="nav">
+        
+</div>
+<div class="content">
+<h2><strong>blend_functions</strong> library</h2>
+<div>
+<h3>Functions</h3>
+<div class="method"><h4 id="wrapValue">
+<button class="show-code">Code</button>
+num <strong>wrapValue</strong>(num value, num min, num max) <a class="anchor-link" href="#wrapValue"
+              title="Permalink to wrapValue">#</a></h4>
+<div class="doc">
+<pre class="source">
+num wrapValue(num value, num min, num max) {
+ if(value &lt; min) {
+   value = max + (value - min);
+ } else if(value &gt; max) {
+   value = min + (value - max);
+ }
+ return value;
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="mixIt">
+<button class="show-code">Code</button>
+num <strong>mixIt</strong>(num a, num b, num ammount) <a class="anchor-link" href="#mixIt"
+              title="Permalink to mixIt">#</a></h4>
+<div class="doc">
+<pre class="source">
+num mixIt(num a, num b, num ammount) =&gt; a + (b - a) * ammount;
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="limitValue">
+<button class="show-code">Code</button>
+num <strong>limitValue</strong>(num value, num min, num max) <a class="anchor-link" href="#limitValue"
+              title="Permalink to limitValue">#</a></h4>
+<div class="doc">
+<pre class="source">
+num limitValue(num value, num min, num max) =&gt; value &lt; min ? min : value &gt; max ? max : value;
+</pre>
+</div>
+</div>
+</div>
+<div>
+<h3>Classes</h3>
+          <div class="type">
+          <h4>
+            <a href="blend_functions/Blend.html"><strong>Blend</strong></a>
+          </h4>
+          </div>
+          
+</div>
+<div>
+<h3>Typedefs</h3>
+          <div class="type">
+          <h4>
+            <a href="blend_functions/BlendFunction.html"><strong>BlendFunction</strong></a>
+          </h4>
+          </div>
+          
+          <div class="type">
+          <h4>
+            <a href="blend_functions/SpecialBlendFunction.html"><strong>SpecialBlendFunction</strong></a>
+          </h4>
+          </div>
+          
+</div>
+        </div>
+        <div class="clear"></div>
+        </div>
+        <div class="footer">
+          <div>This page was generated at 2013-04-06 18:44:28.524</div>
+        </div>
+        <script async src="client-live-nav.js"></script>
+        </body></html>
+        

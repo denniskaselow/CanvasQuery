@@ -1,0 +1,119 @@
+        <!DOCTYPE html>
+        <html>
+        <head>
+                <meta charset="utf-8">
+        <title>canvas_query Library / Dart Documentation</title>
+        <link rel="stylesheet" type="text/css"
+            href="styles.css">
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:400,600,700,800" rel="stylesheet" type="text/css">
+        <link rel="shortcut icon" href="favicon.ico">
+        
+        </head>
+        <body data-library="canvas_query">
+        <div class="page">
+        <div class="header">
+          <a href="index.html"><div class="logo"></div></a>
+          <a href="index.html">Dart Documentation</a>
+         &rsaquo; <a href="canvas_query.html">canvas_query</a>        <div id="search-box">
+          <input type="search" name="q" id="q" autocomplete="off"
+              class="search-input" placeholder="Search API">
+        </div>
+        
+      </div>
+      <div class="drop-down" id="drop-down"></div>
+      
+        <div class="nav">
+        
+</div>
+<div class="content">
+<h2><strong>canvas_query</strong> library</h2>
+<div>
+<h3>Functions</h3>
+<div class="method"><h4 id="cq">
+<button class="show-code">Code</button>
+<a href="canvas_query/CqWrapper.html">CqWrapper</a> <strong>cq</strong>([selector, int height]) <a class="anchor-link" href="#cq"
+              title="Permalink to cq">#</a></h4>
+<div class="doc">
+<p>Create a <a class="crossref" href="canvas_query/CqWrapper.html">CqWrapper</a> object using a 
+<span class="param">selector</span>. The 
+<span class="param">selector</span> can be a
+a String that should be used to query the DOM or an existing <code>CanvasElement</code>
+or <code>ImageElement</code> that should be wrapped.</p>
+<p>To create a new <a class="crossref" href="canvas_query/CqWrapper.html">CqWrapper</a> object with a specific size the 
+<span class="param">selector</span>
+argument will take an <code>int</code> argoument for the width.</p>
+<p>If no argument is given, the size of the window will be used for the new
+<code>CanvasElement</code>.</p>
+<pre class="source">
+CqWrapper cq([var selector, int height]) {
+ var canvas;
+ if (null == selector || selector is int) {
+   int width = (selector != null ? selector : window.innerWidth);
+   height = (height != null ? height : window.innerHeight);
+   canvas = new CanvasElement(width: width, height: height);
+ } else if (selector is String) {
+   canvas = query(selector);
+ } else if (selector is ImageElement) {
+   canvas = CqTools.createCanvas(selector);
+ } else if (selector is CqWrapper) {
+   return selector;
+ } else {
+   canvas = selector;
+ }
+ return new CqWrapper(canvas);
+}
+</pre>
+</div>
+</div>
+</div>
+<div>
+<h3>Classes</h3>
+          <div class="type">
+          <h4>
+            <a href="canvas_query/CqFramework.html"><strong>CqFramework</strong></a>
+          </h4>
+          </div>
+          
+          <div class="type">
+          <h4>
+            <a href="canvas_query/CqMouseEvent.html"><strong>CqMouseEvent</strong></a>
+          </h4>
+          </div>
+          
+          <div class="type">
+          <h4>
+            <a href="canvas_query/CqStepEvent.html"><strong>CqStepEvent</strong></a>
+          </h4>
+          </div>
+          
+          <div class="type">
+          <h4>
+            <a href="canvas_query/CqTools.html"><strong>CqTools</strong></a>
+          </h4>
+          </div>
+          
+          <div class="type">
+          <h4>
+            <a href="canvas_query/CqWrapper.html"><strong>CqWrapper</strong></a>
+          </h4>
+          </div>
+          
+</div>
+<div>
+<h3>Typedefs</h3>
+          <div class="type">
+          <h4>
+            <a href="canvas_query/NewlineCallback.html"><strong>NewlineCallback</strong></a>
+          </h4>
+          </div>
+          
+</div>
+        </div>
+        <div class="clear"></div>
+        </div>
+        <div class="footer">
+          <div>This page was generated at 2013-04-06 18:44:28.576</div>
+        </div>
+        <script async src="client-live-nav.js"></script>
+        </body></html>
+        

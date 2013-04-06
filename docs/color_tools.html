@@ -1,0 +1,276 @@
+        <!DOCTYPE html>
+        <html>
+        <head>
+                <meta charset="utf-8">
+        <title>color_tools Library / Dart Documentation</title>
+        <link rel="stylesheet" type="text/css"
+            href="styles.css">
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:400,600,700,800" rel="stylesheet" type="text/css">
+        <link rel="shortcut icon" href="favicon.ico">
+        
+        </head>
+        <body data-library="color_tools">
+        <div class="page">
+        <div class="header">
+          <a href="index.html"><div class="logo"></div></a>
+          <a href="index.html">Dart Documentation</a>
+         &rsaquo; <a href="color_tools.html">color_tools</a>        <div id="search-box">
+          <input type="search" name="q" id="q" autocomplete="off"
+              class="search-input" placeholder="Search API">
+        </div>
+        
+      </div>
+      <div class="drop-down" id="drop-down"></div>
+      
+        <div class="nav">
+        
+</div>
+<div class="content">
+<h2><strong>color_tools</strong> library</h2>
+<div>
+<h3>Functions</h3>
+<div class="method"><h4 id="hsvToRgb">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>hsvToRgb</strong>(num hue, num saturation, num value) <a class="anchor-link" href="#hsvToRgb"
+              title="Permalink to hsvToRgb">#</a></h4>
+<div class="doc">
+<p>Converts HSV values to RGB values.</p>
+<pre class="source">
+List&lt;int&gt; hsvToRgb(num hue, num saturation, num value) {
+ double h = hue.toDouble();
+ double s = saturation.toDouble();
+ double v = value.toDouble();
+ double r, g, b;
+
+ int i = (h * 6).toInt();
+ double f = h * 6 - i;
+ double p = v * (1 - s);
+ double q = v * (1 - f * s);
+ double t = v * (1 - (1 - f) * s);
+
+ switch(i % 6) {
+   case 0:
+     r = v; g = t; b = p;
+     break;
+   case 1:
+     r = q; g = v; b = p;
+     break;
+   case 2:
+     r = p; g = v; b = t;
+     break;
+   case 3:
+     r = p; g = q; b = v;
+     break;
+   case 4:
+     r = t; g = p; b = v;
+     break;
+   case 5:
+     r = v; g = p; b = q;
+     break;
+ }
+
+ return [(r * 255 + 0.5).toInt(), (g * 255 + 0.5).toInt(), (b * 255 + 0.5).toInt()];
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="hsvListToRgb">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>hsvListToRgb</strong>(List&lt;num&gt; hsv) <a class="anchor-link" href="#hsvListToRgb"
+              title="Permalink to hsvListToRgb">#</a></h4>
+<div class="doc">
+<p>Converts HSV values to RGB values.</p>
+<pre class="source">
+List&lt;int&gt; hsvListToRgb(List&lt;num&gt; hsv) =&gt; hsvToRgb(hsv[0], hsv[1], hsv[2]);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="rgbToHsv">
+<button class="show-code">Code</button>
+List&lt;double&gt; <strong>rgbToHsv</strong>(int red, int green, int blue) <a class="anchor-link" href="#rgbToHsv"
+              title="Permalink to rgbToHsv">#</a></h4>
+<div class="doc">
+<p>Converts RGB values to HSV values.</p>
+<pre class="source">
+List&lt;double&gt; rgbToHsv(int red, int green, int blue) {
+ int maxv = max(max(red, green), blue),
+     minv = min(min(red, green), blue);
+ double h, s, v = maxv / 255;
+
+ var d = maxv - minv;
+ s = maxv == 0.0 ? 0.0 : d / maxv;
+
+ if(maxv == minv) {
+   h = 0.0; // achromatic
+ } else {
+   switch(maxv) {
+     case red:
+       h = (green - blue) / d + (green &lt; blue ? 6 : 0);
+       break;
+     case green:
+       h = (blue - red) / d + 2;
+       break;
+     case blue:
+       h = (red - green) / d + 4;
+       break;
+   }
+   h /= 6.0;
+ }
+
+ return [h, s, v];
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="rgbListToHsv">
+<button class="show-code">Code</button>
+List&lt;double&gt; <strong>rgbListToHsv</strong>(List&lt;int&gt; rgb) <a class="anchor-link" href="#rgbListToHsv"
+              title="Permalink to rgbListToHsv">#</a></h4>
+<div class="doc">
+<p>Converts RGB values to HSV values.</p>
+<pre class="source">
+List&lt;double&gt; rgbListToHsv(List&lt;int&gt; rgb) =&gt; rgbToHsv(rgb[0], rgb[1], rgb[2]);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="hslToRgb">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>hslToRgb</strong>(num hue, num saturation, num lightness) <a class="anchor-link" href="#hslToRgb"
+              title="Permalink to hslToRgb">#</a></h4>
+<div class="doc">
+<p>Converts HSL values to RGB values.</p>
+<pre class="source">
+List&lt;int&gt; hslToRgb(num hue, num saturation, num lightness) {
+ double h = hue.toDouble();
+ double s = saturation.toDouble();
+ double l = lightness.toDouble();
+ double r;
+ double g;
+ double b;
+
+ if(s == 0.0) {
+   r = g = b = l; // achromatic
+ } else {
+   Function hue2rgb = (num p, num q, num t) {
+     if(t &lt; 0) t += 1;
+     if(t &gt; 1) t -= 1;
+     if(t &lt; 1 / 6) return p + (q - p) * 6 * t;
+     if(t &lt; 1 / 2) return q;
+     if(t &lt; 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+     return p;
+   };
+
+   num q = l &lt; 0.5 ? l * (1 + s) : l + s - l * s;
+   num p = 2 * l - q;
+   r = hue2rgb(p, q, h + 1 / 3);
+   g = hue2rgb(p, q, h);
+   b = hue2rgb(p, q, h - 1 / 3);
+ }
+
+ return [(r * 255 + 0.5).toInt(), (g * 255 + 0.5).toInt(), (b * 255 + 0.5).toInt()];
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="hslListToRgb">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>hslListToRgb</strong>(List&lt;num&gt; hsl) <a class="anchor-link" href="#hslListToRgb"
+              title="Permalink to hslListToRgb">#</a></h4>
+<div class="doc">
+<p>Converts HSL values to RGB values.</p>
+<pre class="source">
+List&lt;int&gt; hslListToRgb(List&lt;num&gt; hsl) =&gt; hslToRgb(hsl[0], hsl[1], hsl[2]);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="rgbToHsl">
+<button class="show-code">Code</button>
+List&lt;double&gt; <strong>rgbToHsl</strong>(int red, int green, int blue) <a class="anchor-link" href="#rgbToHsl"
+              title="Permalink to rgbToHsl">#</a></h4>
+<div class="doc">
+<p>Converts RGB values to HSL values.</p>
+<pre class="source">
+List&lt;double&gt; rgbToHsl(int red, int green, int blue) {
+ int maxv = max(max(red, green), blue),
+     minv = min(min(red, green), blue);
+ double h, s, l = (maxv + minv) / (2*255);
+
+ if(maxv == minv) {
+   h = s = 0.0; // achromatic
+ } else {
+   num d = maxv - minv;
+   s = l &gt; 0.5 ? d / (2*255 - maxv - minv) : d / (maxv + minv);
+   switch(maxv) {
+     case red:
+       h = (green - blue) / d + (green &lt; blue ? 6 : 0);
+       break;
+     case green:
+       h = (blue - red) / d + 2;
+       break;
+     case blue:
+       h = (red - green) / d + 4;
+       break;
+   }
+   h /= 6.0;
+ }
+ return [h, s, l];
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="rgbListToHsl">
+<button class="show-code">Code</button>
+List&lt;double&gt; <strong>rgbListToHsl</strong>(List&lt;int&gt; rgb) <a class="anchor-link" href="#rgbListToHsl"
+              title="Permalink to rgbListToHsl">#</a></h4>
+<div class="doc">
+<p>Converts RGB values to HSL values.</p>
+<pre class="source">
+List&lt;double&gt; rgbListToHsl(List&lt;int&gt; rgb) =&gt; rgbToHsl(rgb[0], rgb[1], rgb[2]);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="rgbToHex">
+<button class="show-code">Code</button>
+String <strong>rgbToHex</strong>(int r, int g, int b) <a class="anchor-link" href="#rgbToHex"
+              title="Permalink to rgbToHex">#</a></h4>
+<div class="doc">
+<p>Converts RGB values to a hexadecimal string.</p>
+<pre class="source">
+String rgbToHex(int r, int g, int b) {
+ return '#${((1 &lt;&lt; 24) + (r &lt;&lt; 16) + (g &lt;&lt; 8) + b).toRadixString(16).substring(1, 7)}';
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="hexToRgb">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>hexToRgb</strong>(String hex) <a class="anchor-link" href="#hexToRgb"
+              title="Permalink to hexToRgb">#</a></h4>
+<div class="doc">
+<p>Converts a hexadecimal presentation of a color (#123456) into a list of RGB-values.</p>
+<pre class="source">
+List&lt;int&gt; hexToRgb(String hex) {
+ return [int.parse('0x${hex[1]}${hex[2]}'), int.parse('0x${hex[3]}${hex[4]}'), int.parse('0x${hex[5]}${hex[6]}')];
+}
+</pre>
+</div>
+</div>
+</div>
+<div>
+<h3>Classes</h3>
+          <div class="type">
+          <h4>
+            <a href="color_tools/Color.html"><strong>Color</strong></a>
+          </h4>
+          </div>
+          
+</div>
+        </div>
+        <div class="clear"></div>
+        </div>
+        <div class="footer">
+          <div>This page was generated at 2013-04-06 18:44:28.853</div>
+        </div>
+        <script async src="client-live-nav.js"></script>
+        </body></html>
+        

@@ -1,0 +1,239 @@
+        <!DOCTYPE html>
+        <html>
+        <head>
+                <meta charset="utf-8">
+        <title>Color class / color_tools Library / Dart Documentation</title>
+        <link rel="stylesheet" type="text/css"
+            href="../styles.css">
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:400,600,700,800" rel="stylesheet" type="text/css">
+        <link rel="shortcut icon" href="../favicon.ico">
+        
+        </head>
+        <body data-library="color_tools" data-type="Color">
+        <div class="page">
+        <div class="header">
+          <a href="../index.html"><div class="logo"></div></a>
+          <a href="../index.html">Dart Documentation</a>
+         &rsaquo; <a href="../color_tools.html">color_tools</a> &rsaquo; <a href="../color_tools/Color.html">Color</a>        <div id="search-box">
+          <input type="search" name="q" id="q" autocomplete="off"
+              class="search-input" placeholder="Search API">
+        </div>
+        
+      </div>
+      <div class="drop-down" id="drop-down"></div>
+      
+        <div class="nav">
+        
+</div>
+<div class="content">
+        <h2><strong>Color</strong>
+          class
+        </h2>
+        
+<button id="show-inherited" class="show-inherited">Hide inherited</button>
+<div class="doc">
+<p>Simple class to represent a color in RGBA.</p>
+<pre class="source">
+class Color {
+ int r, g, b, a;
+
+ /**
+  * Creates a [Color] from a hex string.
+  */
+ Color.fromHex(String hex, [this.a = 255]) {
+   var rgb = hexToRgb(hex);
+   r = rgb[0];
+   g = rgb[1];
+   b = rgb[2];
+ }
+ /**
+  * Creates a [Color] from RGB values.
+  */
+ Color.fromRgb(this.r, this.g, this.b, [this.a = 255]);
+
+ /**
+  * Creates a list of the RGBA values.
+  */
+ List&lt;int&gt; toArray() =&gt; [r, g, b, a];
+ /**
+  * Creates a RGB string.
+  */
+ String toRgb() =&gt; "rgb($r,$g,$b)";
+ /**
+  * Creates a RGBA string.
+  */
+ String toRgba() =&gt; "rgba($r,$g,$b,$a)";
+ /**
+  * Creates a hex string.
+  */
+ String toHex() =&gt; rgbToHex(r, g, b);
+ /**
+  * Creates a list of HSL values.
+  */
+ List&lt;double&gt; toHsl() =&gt; rgbToHsl(r, g, b);
+ /**
+  * Creates a list of HSV values.
+  */
+ List&lt;double&gt; toHsv() =&gt; rgbToHsv(r, g, b);
+}
+</pre>
+</div>
+<div>
+<h3>Constructors</h3>
+<div class="method"><h4 id="Color.fromHex">
+<button class="show-code">Code</button>
+new <strong>Color.fromHex</strong>(String hex, [int a = 255]) <a class="anchor-link" href="#Color.fromHex"
+              title="Permalink to Color.Color.fromHex">#</a></h4>
+<div class="doc">
+<p>Creates a <a class="crossref" href="../color_tools/Color.html">Color</a> from a hex string.</p>
+<pre class="source">
+Color.fromHex(String hex, [this.a = 255]) {
+ var rgb = hexToRgb(hex);
+ r = rgb[0];
+ g = rgb[1];
+ b = rgb[2];
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="Color.fromRgb">
+<button class="show-code">Code</button>
+new <strong>Color.fromRgb</strong>(int r, int g, int b, [int a = 255]) <a class="anchor-link" href="#Color.fromRgb"
+              title="Permalink to Color.Color.fromRgb">#</a></h4>
+<div class="doc">
+<p>Creates a <a class="crossref" href="../color_tools/Color.html">Color</a> from RGB values.</p>
+<pre class="source">
+Color.fromRgb(this.r, this.g, this.b, [this.a = 255]);
+</pre>
+</div>
+</div>
+</div>
+<div>
+<h3>Properties</h3>
+<div class="field"><h4 id="a">
+<button class="show-code">Code</button>
+int         <strong>a</strong> <a class="anchor-link"
+            href="#a"
+            title="Permalink to Color.a">#</a>
+        </h4>
+        <div class="doc">
+<pre class="source">
+a
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="b">
+<button class="show-code">Code</button>
+int         <strong>b</strong> <a class="anchor-link"
+            href="#b"
+            title="Permalink to Color.b">#</a>
+        </h4>
+        <div class="doc">
+<pre class="source">
+b
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="g">
+<button class="show-code">Code</button>
+int         <strong>g</strong> <a class="anchor-link"
+            href="#g"
+            title="Permalink to Color.g">#</a>
+        </h4>
+        <div class="doc">
+<pre class="source">
+g
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="r">
+<button class="show-code">Code</button>
+int         <strong>r</strong> <a class="anchor-link"
+            href="#r"
+            title="Permalink to Color.r">#</a>
+        </h4>
+        <div class="doc">
+<pre class="source">
+r
+</pre>
+</div>
+</div>
+</div>
+<div>
+<h3>Methods</h3>
+<div class="method"><h4 id="toArray">
+<button class="show-code">Code</button>
+List&lt;int&gt; <strong>toArray</strong>() <a class="anchor-link" href="#toArray"
+              title="Permalink to Color.toArray">#</a></h4>
+<div class="doc">
+<p>Creates a list of the RGBA values.</p>
+<pre class="source">
+List&lt;int&gt; toArray() =&gt; [r, g, b, a];
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="toHex">
+<button class="show-code">Code</button>
+String <strong>toHex</strong>() <a class="anchor-link" href="#toHex"
+              title="Permalink to Color.toHex">#</a></h4>
+<div class="doc">
+<p>Creates a hex string.</p>
+<pre class="source">
+String toHex() =&gt; rgbToHex(r, g, b);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="toHsl">
+<button class="show-code">Code</button>
+List&lt;double&gt; <strong>toHsl</strong>() <a class="anchor-link" href="#toHsl"
+              title="Permalink to Color.toHsl">#</a></h4>
+<div class="doc">
+<p>Creates a list of HSL values.</p>
+<pre class="source">
+List&lt;double&gt; toHsl() =&gt; rgbToHsl(r, g, b);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="toHsv">
+<button class="show-code">Code</button>
+List&lt;double&gt; <strong>toHsv</strong>() <a class="anchor-link" href="#toHsv"
+              title="Permalink to Color.toHsv">#</a></h4>
+<div class="doc">
+<p>Creates a list of HSV values.</p>
+<pre class="source">
+List&lt;double&gt; toHsv() =&gt; rgbToHsv(r, g, b);
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="toRgb">
+<button class="show-code">Code</button>
+String <strong>toRgb</strong>() <a class="anchor-link" href="#toRgb"
+              title="Permalink to Color.toRgb">#</a></h4>
+<div class="doc">
+<p>Creates a RGB string.</p>
+<pre class="source">
+String toRgb() =&gt; "rgb($r,$g,$b)";
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="toRgba">
+<button class="show-code">Code</button>
+String <strong>toRgba</strong>() <a class="anchor-link" href="#toRgba"
+              title="Permalink to Color.toRgba">#</a></h4>
+<div class="doc">
+<p>Creates a RGBA string.</p>
+<pre class="source">
+String toRgba() =&gt; "rgba($r,$g,$b,$a)";
+</pre>
+</div>
+</div>
+</div>
+        </div>
+        <div class="clear"></div>
+        </div>
+        <div class="footer">
+          <div>This page was generated at 2013-04-06 18:44:28.862</div>
+        </div>
+        <script async src="../client-live-nav.js"></script>
+        </body></html>
+        

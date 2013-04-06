@@ -2,28 +2,34 @@ body {
   background: hsl(0, 0%, 90%);
   margin: 0 auto;
   min-width: 800px;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 14px;
 }
 
 .showcasenav {
   background: hsl(240, 10%, 80%);
   margin: 0px 8px 0px 0px;
+  padding-bottom: 25px;
   width: 19%;
-  height: 500px;
   float: left;
+  border-bottom-right-radius: 20px;
 }
 
 .showcaseintro {
   background: hsl(240, 10%, 70%);
-  margin: 15px 0px 0px 5px;
+  padding: 15px 0px 5px 5px;
 }
 
 .showcasenav > ul {
   padding: 0px;
-  margin: 15px 0px 0px 5px;
+  margin: 15px 0px 0px 20px;
 }
 
 .showcasenav > ul > li {
+  border-radius: 10px 0px 0px 10px;
+  text-align: right;
   margin: 0px 0px 5px 0px;
+  padding: 5px;
   list-style-type: none;
   border: 1px solid black;
   background: hsl(240, 50%, 80%);
@@ -53,11 +59,10 @@ div.example {
 
 .config {
   display: inline-block;
-  width: 200px;
+  width: 320px;
 }
 .config > label {
-  display: inline-block;
-  width: 100px;
+  font-weight: bold;
 }
 
 .centered {
@@ -72,12 +77,45 @@ div.example {
   content: "Credits: ";
 }
 
-.credits {
-  font-family: Verdana, Geneva, sans-serif;
-  font-size: 16px;
-  text-align: center;
-  background: hsl(0, 0%, 75%);
-  margin: 5px;
+.credits, a.source {
+  font-size: 14px;
+  background: hsl(0, 0%, 85%);
+  margin: 5px auto;
   padding: 5px;
   border: 1px solid black;
+}
+
+#tooltip {
+  display: none;
+  background: hsl(0, 0%, 95%);
+  margin: 5px;
+  padding: 5px;
+  position: absolute;
+}
+
+a.source {
+  display: block;
+}
+
+a.source:before {
+  content: "Source Code";
+}
+
+.footer, .footerspace {
+  height: 40px;
+}
+
+.footer {
+  clear: both;
+  background: hsl(0, 0%, 95%);
+  border-top: 1px darkblue dotted;
+  width: 100%;
+  position: fixed;
+  bottom: 0px;
+  text-align: right;
+}
+
+.footer a {
+  margin-right: 15px;
+  padding-top: 5px;
 }

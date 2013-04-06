@@ -1,0 +1,545 @@
+        <!DOCTYPE html>
+        <html>
+        <head>
+                <meta charset="utf-8">
+        <title>CqFramework class / canvas_query Library / Dart Documentation</title>
+        <link rel="stylesheet" type="text/css"
+            href="../styles.css">
+        <link href="//fonts.googleapis.com/css?family=Open+Sans:400,600,700,800" rel="stylesheet" type="text/css">
+        <link rel="shortcut icon" href="../favicon.ico">
+        
+        </head>
+        <body data-library="canvas_query" data-type="CqFramework">
+        <div class="page">
+        <div class="header">
+          <a href="../index.html"><div class="logo"></div></a>
+          <a href="../index.html">Dart Documentation</a>
+         &rsaquo; <a href="../canvas_query.html">canvas_query</a> &rsaquo; <a href="../canvas_query/CqFramework.html">CqFramework</a>        <div id="search-box">
+          <input type="search" name="q" id="q" autocomplete="off"
+              class="search-input" placeholder="Search API">
+        </div>
+        
+      </div>
+      <div class="drop-down" id="drop-down"></div>
+      
+        <div class="nav">
+        
+</div>
+<div class="content">
+        <h2><strong>CqFramework</strong>
+          class
+        </h2>
+        
+<button id="show-inherited" class="show-inherited">Hide inherited</button>
+<div class="doc">
+<p>A simple framework for easy access to events created by the canvas.</p>
+<pre class="source">
+class CqFramework {
+ /// The [CqWrapper] of this object.
+ final CqWrapper cqWrapper;
+ CqFramework._(this.cqWrapper);
+ CanvasElement get _canvas =&gt; cqWrapper.canvas;
+ Point _mousePosition(UIEvent e) =&gt; CqTools.mousePosition(e);
+ bool get _mobile =&gt; CqTools.mobile;
+
+ /**
+  * Fires a [CqStepEvent] every time [interval] has passed.
+  *
+  * Can be used for game logic. Will fire new events even if the browser
+  * tab is inactive.
+  */
+ Stream&lt;CqStepEvent&gt; onStep(Duration interval) {
+   var controller = new StreamController&lt;CqStepEvent&gt;();
+   var lastTick = window.performance.now();
+
+   new Timer.periodic(interval, (_) {
+     var delta = window.performance.now() - lastTick;
+     lastTick = window.performance.now();
+     controller.add(new CqStepEvent(delta, lastTick));
+   });
+   return controller.stream;
+ }
+
+ /**
+  * Fires a [CqStepEvent] when `window.animationFrame`'s future executes.
+  *
+  * Can be used for rendering. Will not fire events while the browser tab is
+  * inactive.
+  */
+ Stream&lt;CqStepEvent&gt; get onRender {
+   var controller = new StreamController&lt;CqStepEvent&gt;();
+   var lastTick = window.performance.now();
+
+   step(_) {
+     var delta = window.performance.now() - lastTick;
+     lastTick = window.performance.now();
+     window.animationFrame.then(step);
+     controller.add(new CqStepEvent(delta, lastTick));
+   };
+
+   window.animationFrame.then(step);
+   return controller.stream;
+ }
+
+ /**
+  * Fires a [CqMouseEvent] when an `onMouseMove` or an `onTouchMove` event
+  * is fired.
+  */
+ Stream&lt;Point&gt; get onMouseMove {
+   Stream&lt;UIEvent&gt; stream;
+   if (_mobile) {
+     stream = _canvas.onTouchMove;
+   } else {
+     stream = _canvas.onMouseMove;
+   }
+   return stream.map((e) =&gt; _mousePosition(e));
+ }
+
+ /**
+  * Fires a [CqMouseEvent] when an `onMouseDown` or an `onTouchSouch` event
+  * is fired.
+  */
+ Stream&lt;CqMouseEvent&gt; get onMouseDown {
+   var controller = new StreamController&lt;CqMouseEvent&gt;();
+   Stream&lt;UIEvent&gt; stream;
+   if (_mobile) {
+     stream = _canvas.onTouchStart;
+   } else {
+     stream = _canvas.onMouseDown;
+   }
+   stream.listen((e) {
+     e.preventDefault();
+     controller.add(new CqMouseEvent(_mousePosition(e), e.button));
+   });
+   return controller.stream;
+ }
+
+ /**
+  * Fires a [CqMouseEvent] when an `onMouseUp` or an `onTouchEnd` event
+  * is fired.
+  */
+ Stream&lt;CqMouseEvent&gt; get onMouseUp {
+   Stream&lt;UIEvent&gt; stream;
+   if (_mobile) {
+     stream = _canvas.onTouchEnd;
+   } else {
+     stream = _canvas.onMouseUp;
+   }
+   return stream.map((e) =&gt; new CqMouseEvent(_mousePosition(e), e.button));
+ }
+
+ /**
+  * Returns a [Stream] of swipe direction.
+  */
+ Stream&lt;String&gt; onSwipe({num threshold: 35, num timeout: 350}) {
+   var controller = new StreamController&lt;String&gt;();
+   var swipeSP = 0;
+   var swipeST = 0;
+   var swipeEP = 0;
+   var swipeET = 0;
+
+   swipeStart(e) {
+     e.preventDefault();
+     swipeSP = _mousePosition(e);
+     swipeST = window.performance.now();
+   }
+
+   swipeUpdate(e) {
+     e.preventDefault();
+     swipeEP = _mousePosition(e);
+     swipeET = window.performance.now();
+   }
+
+   swipeEnd(e) {
+     e.preventDefault();
+
+     var xDif = (swipeSP.x - swipeEP.x);
+     var yDif = (swipeSP.y - swipeEP.y);
+     var x = (xDif * xDif);
+     var y = (yDif * yDif);
+     var swipeDist = sqrt(x + y);
+     var swipeTime = (swipeET - swipeST);
+     var swipeDir = null;
+
+     if(swipeDist &gt; threshold &amp;&amp; swipeTime &lt; timeout) {
+       if(xDif.abs() &gt; yDif.abs()) {
+         if(xDif &gt; 0) {
+           swipeDir = "left";
+         } else {
+           swipeDir = "right";
+         }
+       } else {
+         if(yDif &gt; 0) {
+           swipeDir = "up";
+         } else {
+           swipeDir = "down";
+         }
+       }
+       controller.add(swipeDir);
+     }
+   }
+   if (_mobile) {
+     _canvas.onTouchStart.listen((e) =&gt; swipeStart(e));
+     _canvas.onTouchMove.listen((e) =&gt; swipeUpdate(e));
+     _canvas.onTouchEnd.listen((e) =&gt; swipeEnd(e));
+   } else {
+     _canvas.onMouseDown.listen((e) =&gt; swipeStart(e));
+     _canvas.onMouseMove.listen((e) =&gt; swipeUpdate(e));
+     _canvas.onMouseUp.listen((e) =&gt; swipeEnd(e));
+   }
+   return controller.stream;
+ }
+
+ /**
+  * Returns a stream of [KeyCode].
+  */
+ Stream&lt;int&gt; get onKeyDown =&gt; document.onKeyDown.map((e) =&gt; e.keyCode);
+ /**
+  * Returns a stream of [KeyCode].
+  */
+ Stream&lt;int&gt; get onKeyUp =&gt; document.onKeyUp.map((e) =&gt; e.keyCode);
+ /**
+  * Returns a Stream of [Rect] for the new size of the window.
+  */
+ Stream&lt;Rect&gt; get onResize =&gt; window.onResize.map((_) =&gt; new Rect(0, 0, window.innerWidth, window.innerHeight));
+ /**
+  * Returns a [Stream} of dropped [ImageElement].
+  */
+ Stream&lt;ImageElement&gt; get onDropImage {
+   var controller = new StreamController&lt;ImageElement&gt;();
+   document.onDrop.listen((MouseEvent e) {
+     e.stopPropagation();
+     e.preventDefault();
+
+     var file = e.dataTransfer.files[0];
+
+     if (!file.type.startsWith('image/')) {
+       controller.addError('unexpected filetype, "${file.name}" is not an image');
+       return;
+     }
+     var reader = new FileReader();
+
+     reader.onLoad.listen((ProgressEvent pe) {
+       var image = new ImageElement();
+
+       image.onLoad.listen((e3) {
+         controller.add(image);
+       });
+
+       image.src = reader.result;
+     });
+
+     reader.readAsDataUrl(file);
+
+   });
+
+   document.onDragOver.listen((e) {
+     e.preventDefault();
+   });
+   return controller.stream;
+ }
+}
+</pre>
+</div>
+<div>
+<h3>Properties</h3>
+<div class="field"><h4 id="cqWrapper">
+<button class="show-code">Code</button>
+final <a href="../canvas_query/CqWrapper.html">CqWrapper</a>         <strong>cqWrapper</strong> <a class="anchor-link"
+            href="#cqWrapper"
+            title="Permalink to CqFramework.cqWrapper">#</a>
+        </h4>
+        <div class="doc">
+<pre class="source">
+cqWrapper
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="onDropImage">
+<button class="show-code">Code</button>
+final Stream&lt;ImageElement&gt;         <strong>onDropImage</strong> <a class="anchor-link"
+            href="#onDropImage"
+            title="Permalink to CqFramework.onDropImage">#</a>
+        </h4>
+        <div class="doc">
+<p>Returns a [Stream} of dropped <code>ImageElement</code>.</p>
+<pre class="source">
+Stream&lt;ImageElement&gt; get onDropImage {
+ var controller = new StreamController&lt;ImageElement&gt;();
+ document.onDrop.listen((MouseEvent e) {
+   e.stopPropagation();
+   e.preventDefault();
+
+   var file = e.dataTransfer.files[0];
+
+   if (!file.type.startsWith('image/')) {
+     controller.addError('unexpected filetype, "${file.name}" is not an image');
+     return;
+   }
+   var reader = new FileReader();
+
+   reader.onLoad.listen((ProgressEvent pe) {
+     var image = new ImageElement();
+
+     image.onLoad.listen((e3) {
+       controller.add(image);
+     });
+
+     image.src = reader.result;
+   });
+
+   reader.readAsDataUrl(file);
+
+ });
+
+ document.onDragOver.listen((e) {
+   e.preventDefault();
+ });
+ return controller.stream;
+}
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="onKeyDown">
+<button class="show-code">Code</button>
+final Stream&lt;int&gt;         <strong>onKeyDown</strong> <a class="anchor-link"
+            href="#onKeyDown"
+            title="Permalink to CqFramework.onKeyDown">#</a>
+        </h4>
+        <div class="doc">
+<p>Returns a stream of <code>KeyCode</code>.</p>
+<pre class="source">
+Stream&lt;int&gt; get onKeyDown =&gt; document.onKeyDown.map((e) =&gt; e.keyCode);
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="onKeyUp">
+<button class="show-code">Code</button>
+final Stream&lt;int&gt;         <strong>onKeyUp</strong> <a class="anchor-link"
+            href="#onKeyUp"
+            title="Permalink to CqFramework.onKeyUp">#</a>
+        </h4>
+        <div class="doc">
+<p>Returns a stream of <code>KeyCode</code>.</p>
+<pre class="source">
+Stream&lt;int&gt; get onKeyUp =&gt; document.onKeyUp.map((e) =&gt; e.keyCode);
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="onMouseDown">
+<button class="show-code">Code</button>
+final Stream&lt;<a href="../canvas_query/CqMouseEvent.html">CqMouseEvent</a>&gt;         <strong>onMouseDown</strong> <a class="anchor-link"
+            href="#onMouseDown"
+            title="Permalink to CqFramework.onMouseDown">#</a>
+        </h4>
+        <div class="doc">
+<p>Fires a <a class="crossref" href="../canvas_query/CqMouseEvent.html">CqMouseEvent</a> when an <code>onMouseDown</code> or an <code>onTouchSouch</code> event
+is fired.</p>
+<pre class="source">
+Stream&lt;CqMouseEvent&gt; get onMouseDown {
+ var controller = new StreamController&lt;CqMouseEvent&gt;();
+ Stream&lt;UIEvent&gt; stream;
+ if (_mobile) {
+   stream = _canvas.onTouchStart;
+ } else {
+   stream = _canvas.onMouseDown;
+ }
+ stream.listen((e) {
+   e.preventDefault();
+   controller.add(new CqMouseEvent(_mousePosition(e), e.button));
+ });
+ return controller.stream;
+}
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="onMouseMove">
+<button class="show-code">Code</button>
+final Stream&lt;Point&gt;         <strong>onMouseMove</strong> <a class="anchor-link"
+            href="#onMouseMove"
+            title="Permalink to CqFramework.onMouseMove">#</a>
+        </h4>
+        <div class="doc">
+<p>Fires a <a class="crossref" href="../canvas_query/CqMouseEvent.html">CqMouseEvent</a> when an <code>onMouseMove</code> or an <code>onTouchMove</code> event
+is fired.</p>
+<pre class="source">
+Stream&lt;Point&gt; get onMouseMove {
+ Stream&lt;UIEvent&gt; stream;
+ if (_mobile) {
+   stream = _canvas.onTouchMove;
+ } else {
+   stream = _canvas.onMouseMove;
+ }
+ return stream.map((e) =&gt; _mousePosition(e));
+}
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="onMouseUp">
+<button class="show-code">Code</button>
+final Stream&lt;<a href="../canvas_query/CqMouseEvent.html">CqMouseEvent</a>&gt;         <strong>onMouseUp</strong> <a class="anchor-link"
+            href="#onMouseUp"
+            title="Permalink to CqFramework.onMouseUp">#</a>
+        </h4>
+        <div class="doc">
+<p>Fires a <a class="crossref" href="../canvas_query/CqMouseEvent.html">CqMouseEvent</a> when an <code>onMouseUp</code> or an <code>onTouchEnd</code> event
+is fired.</p>
+<pre class="source">
+Stream&lt;CqMouseEvent&gt; get onMouseUp {
+ Stream&lt;UIEvent&gt; stream;
+ if (_mobile) {
+   stream = _canvas.onTouchEnd;
+ } else {
+   stream = _canvas.onMouseUp;
+ }
+ return stream.map((e) =&gt; new CqMouseEvent(_mousePosition(e), e.button));
+}
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="onRender">
+<button class="show-code">Code</button>
+final Stream&lt;<a href="../canvas_query/CqStepEvent.html">CqStepEvent</a>&gt;         <strong>onRender</strong> <a class="anchor-link"
+            href="#onRender"
+            title="Permalink to CqFramework.onRender">#</a>
+        </h4>
+        <div class="doc">
+<p>Fires a <a class="crossref" href="../canvas_query/CqStepEvent.html">CqStepEvent</a> when <code>window.animationFrame</code>'s future executes.</p>
+<p>Can be used for rendering. Will not fire events while the browser tab is
+inactive.</p>
+<pre class="source">
+Stream&lt;CqStepEvent&gt; get onRender {
+ var controller = new StreamController&lt;CqStepEvent&gt;();
+ var lastTick = window.performance.now();
+
+ step(_) {
+   var delta = window.performance.now() - lastTick;
+   lastTick = window.performance.now();
+   window.animationFrame.then(step);
+   controller.add(new CqStepEvent(delta, lastTick));
+ };
+
+ window.animationFrame.then(step);
+ return controller.stream;
+}
+</pre>
+</div>
+</div>
+<div class="field"><h4 id="onResize">
+<button class="show-code">Code</button>
+final Stream&lt;Rect&gt;         <strong>onResize</strong> <a class="anchor-link"
+            href="#onResize"
+            title="Permalink to CqFramework.onResize">#</a>
+        </h4>
+        <div class="doc">
+<p>Returns a Stream of <code>Rect</code> for the new size of the window.</p>
+<pre class="source">
+Stream&lt;Rect&gt; get onResize =&gt; window.onResize.map((_) =&gt; new Rect(0, 0, window.innerWidth, window.innerHeight));
+</pre>
+</div>
+</div>
+</div>
+<div>
+<h3>Methods</h3>
+<div class="method"><h4 id="onStep">
+<button class="show-code">Code</button>
+Stream&lt;<a href="../canvas_query/CqStepEvent.html">CqStepEvent</a>&gt; <strong>onStep</strong>(Duration interval) <a class="anchor-link" href="#onStep"
+              title="Permalink to CqFramework.onStep">#</a></h4>
+<div class="doc">
+<p>Fires a <a class="crossref" href="../canvas_query/CqStepEvent.html">CqStepEvent</a> every time 
+<span class="param">interval</span> has passed.</p>
+<p>Can be used for game logic. Will fire new events even if the browser
+tab is inactive.</p>
+<pre class="source">
+Stream&lt;CqStepEvent&gt; onStep(Duration interval) {
+ var controller = new StreamController&lt;CqStepEvent&gt;();
+ var lastTick = window.performance.now();
+
+ new Timer.periodic(interval, (_) {
+   var delta = window.performance.now() - lastTick;
+   lastTick = window.performance.now();
+   controller.add(new CqStepEvent(delta, lastTick));
+ });
+ return controller.stream;
+}
+</pre>
+</div>
+</div>
+<div class="method"><h4 id="onSwipe">
+<button class="show-code">Code</button>
+Stream&lt;String&gt; <strong>onSwipe</strong>({num threshold: 35, num timeout: 350}) <a class="anchor-link" href="#onSwipe"
+              title="Permalink to CqFramework.onSwipe">#</a></h4>
+<div class="doc">
+<p>Returns a <code>Stream</code> of swipe direction.</p>
+<pre class="source">
+Stream&lt;String&gt; onSwipe({num threshold: 35, num timeout: 350}) {
+ var controller = new StreamController&lt;String&gt;();
+ var swipeSP = 0;
+ var swipeST = 0;
+ var swipeEP = 0;
+ var swipeET = 0;
+
+ swipeStart(e) {
+   e.preventDefault();
+   swipeSP = _mousePosition(e);
+   swipeST = window.performance.now();
+ }
+
+ swipeUpdate(e) {
+   e.preventDefault();
+   swipeEP = _mousePosition(e);
+   swipeET = window.performance.now();
+ }
+
+ swipeEnd(e) {
+   e.preventDefault();
+
+   var xDif = (swipeSP.x - swipeEP.x);
+   var yDif = (swipeSP.y - swipeEP.y);
+   var x = (xDif * xDif);
+   var y = (yDif * yDif);
+   var swipeDist = sqrt(x + y);
+   var swipeTime = (swipeET - swipeST);
+   var swipeDir = null;
+
+   if(swipeDist &gt; threshold &amp;&amp; swipeTime &lt; timeout) {
+     if(xDif.abs() &gt; yDif.abs()) {
+       if(xDif &gt; 0) {
+         swipeDir = "left";
+       } else {
+         swipeDir = "right";
+       }
+     } else {
+       if(yDif &gt; 0) {
+         swipeDir = "up";
+       } else {
+         swipeDir = "down";
+       }
+     }
+     controller.add(swipeDir);
+   }
+ }
+ if (_mobile) {
+   _canvas.onTouchStart.listen((e) =&gt; swipeStart(e));
+   _canvas.onTouchMove.listen((e) =&gt; swipeUpdate(e));
+   _canvas.onTouchEnd.listen((e) =&gt; swipeEnd(e));
+ } else {
+   _canvas.onMouseDown.listen((e) =&gt; swipeStart(e));
+   _canvas.onMouseMove.listen((e) =&gt; swipeUpdate(e));
+   _canvas.onMouseUp.listen((e) =&gt; swipeEnd(e));
+ }
+ return controller.stream;
+}
+</pre>
+</div>
+</div>
+</div>
+        </div>
+        <div class="clear"></div>
+        </div>
+        <div class="footer">
+          <div>This page was generated at 2013-04-06 18:44:28.847</div>
+        </div>
+        <script async src="../client-live-nav.js"></script>
+        </body></html>
+        

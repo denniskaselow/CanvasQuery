@@ -1,0 +1,1 @@
+{"name":"dart:","dependencies":[],"description":"Dart System Libraries","libraries":[{"name":"package:canvas_query/blend_functions.dart","refId":"blend_functions"},{"refId":"canvas_query"},{"name":"package:canvas_query/color_tools.dart","refId":"color_tools"},{"refId":"metadata"}],"revision":"0"}
