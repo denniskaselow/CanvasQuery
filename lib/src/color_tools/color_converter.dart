@@ -1,15 +1,27 @@
 part of color_tools;
 
+/**
+ * Converts a hexadecimal presentation of a color (#123456) into a list of RGB-values.
+ */
 List<int> hexToRgb(String hex) {
   return [int.parse('0x${hex[1]}${hex[2]}'), int.parse('0x${hex[3]}${hex[4]}'), int.parse('0x${hex[5]}${hex[6]}')];
 }
 
+/**
+ * Converts RGB values to a hexadecimal string.
+ */
 String rgbToHex(int r, int g, int b) {
   return '#${((1 << 24) + (r << 16) + (g << 8) + b).toRadixString(16).substring(1, 7)}';
 }
 
 /* author: http://mjijackson.com/ */
+/**
+ * Converts RGB values to HSL values.
+ */
 List<double> rgbListToHsl(List<int> rgb) => rgbToHsl(rgb[0], rgb[1], rgb[2]);
+/**
+ * Converts RGB values to HSL values.
+ */
 List<double> rgbToHsl(int red, int green, int blue) {
   int maxv = max(max(red, green), blue),
       minv = min(min(red, green), blue);
@@ -36,7 +48,13 @@ List<double> rgbToHsl(int red, int green, int blue) {
   return [h, s, l];
 }
 /* author: http://mjijackson.com/ */
+/**
+ * Converts HSL values to RGB values.
+ */
 List<int> hslListToRgb(List<num> hsl) => hslToRgb(hsl[0], hsl[1], hsl[2]);
+/**
+ * Converts HSL values to RGB values.
+ */
 List<int> hslToRgb(num hue, num saturation, num lightness) {
   double h = hue.toDouble();
   double s = saturation.toDouble();
@@ -67,8 +85,13 @@ List<int> hslToRgb(num hue, num saturation, num lightness) {
   return [(r * 255 + 0.5).toInt(), (g * 255 + 0.5).toInt(), (b * 255 + 0.5).toInt()];
 }
 
-
+/**
+ * Converts RGB values to HSV values.
+ */
 List<double> rgbListToHsv(List<int> rgb) => rgbToHsv(rgb[0], rgb[1], rgb[2]);
+/**
+ * Converts RGB values to HSV values.
+ */
 List<double> rgbToHsv(int red, int green, int blue) {
   int maxv = max(max(red, green), blue),
       minv = min(min(red, green), blue);
@@ -97,7 +120,13 @@ List<double> rgbToHsv(int red, int green, int blue) {
   return [h, s, v];
 }
 
+/**
+ * Converts HSV values to RGB values.
+ */
 List<int> hsvListToRgb(List<num> hsv) => hsvToRgb(hsv[0], hsv[1], hsv[2]);
+/**
+ * Converts HSV values to RGB values.
+ */
 List<int> hsvToRgb(num hue, num saturation, num value) {
   double h = hue.toDouble();
   double s = saturation.toDouble();

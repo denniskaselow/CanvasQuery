@@ -2,14 +2,21 @@ part of canvas_query;
 
 class CqTools {
 
+  /// Returns if the userAgent of the browser belong to a mobile browser.
   static final bool mobile = window.navigator.userAgent.contains(r'Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone');
 
+  /**
+   * Blends [below] with [above] using [blendingFunction].
+   */
   static void blend(CanvasElement below, var above, BlendFunction blendingFunction, [num mix = 1]) {
     _initBlend(below, above, mix, (pixels, belowPixels, abovePixels, mix) {
       _blend(pixels, belowPixels, abovePixels, mix, blendingFunction);
     });
   }
 
+  /**
+   * Blends [below] with [above] using [blendingFunction].
+   */
   static void blendSpecial(CanvasElement below, var above, SpecialBlendFunction blendingFunction, [num mix = 1]) {
     _initBlend(below, above, mix, (pixels, belowPixels, abovePixels, mix) {
       _blendSpecial(pixels, belowPixels, abovePixels, mix, blendingFunction);
@@ -56,18 +63,27 @@ class CqTools {
     }
   }
 
+  /**
+   * Draws an [img] on a [CanvasElement] and returns the canvas.
+   */
   static CanvasElement createCanvas(ImageElement img) {
     var result = new CanvasElement(width: img.width, height: img.height);
     result.context2d.drawImage(img, 0, 0);
     return result;
   }
 
+  /**
+   * Creates an [ImageData] object for the size of [width] and [height].
+   */
   static ImageData createImageData(int width, int height) {
     return new CanvasElement().context2d.createImageData(width, height);
   }
 
-  /* https://gist.github.com/3781251 */
-
+  /**
+   * Calculates the position of the mouse.
+   *
+   * See <https://gist.github.com/3781251>
+   */
   static Point mousePosition(UIEvent event) {
     var totalOffsetX = 0,
         totalOffsetY = 0,

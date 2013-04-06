@@ -1,75 +1,105 @@
 part of canvas_query;
 
+/**
+ * A simple framework for easy access to events created by the canvas.
+ */
 class CqFramework {
-  CqWrapper cqWrapper;
+  /// The [CqWrapper] of this object.
+  final CqWrapper cqWrapper;
   CqFramework._(this.cqWrapper);
-  CanvasElement get canvas => cqWrapper.canvas;
-  Point mousePosition(UIEvent e) => CqTools.mousePosition(e);
-  bool get mobile => CqTools.mobile;
+  CanvasElement get _canvas => cqWrapper.canvas;
+  Point _mousePosition(UIEvent e) => CqTools.mousePosition(e);
+  bool get _mobile => CqTools.mobile;
 
-  Stream<CqStep> onStep(Duration interval) {
-    var controller = new StreamController<CqStep>();
+  /**
+   * Fires a [CqStepEvent] every time [interval] has passed.
+   *
+   * Can be used for game logic. Will fire new events even if the browser
+   * tab is inactive.
+   */
+  Stream<CqStepEvent> onStep(Duration interval) {
+    var controller = new StreamController<CqStepEvent>();
     var lastTick = window.performance.now();
 
     new Timer.periodic(interval, (_) {
       var delta = window.performance.now() - lastTick;
       lastTick = window.performance.now();
-      controller.add(new CqStep(delta, lastTick));
+      controller.add(new CqStepEvent(delta, lastTick));
     });
     return controller.stream;
   }
 
-  Stream<CqStep> get onRender {
-    var controller = new StreamController<CqStep>();
+  /**
+   * Fires a [CqStepEvent] when `window.animationFrame`'s future executes.
+   *
+   * Can be used for rendering. Will not fire events while the browser tab is
+   * inactive.
+   */
+  Stream<CqStepEvent> get onRender {
+    var controller = new StreamController<CqStepEvent>();
     var lastTick = window.performance.now();
 
     step(_) {
       var delta = window.performance.now() - lastTick;
       lastTick = window.performance.now();
       window.animationFrame.then(step);
-      controller.add(new CqStep(delta, lastTick));
+      controller.add(new CqStepEvent(delta, lastTick));
     };
 
     window.animationFrame.then(step);
     return controller.stream;
   }
 
+  /**
+   * Fires a [CqMouseEvent] when an `onMouseMove` or an `onTouchMove` event
+   * is fired.
+   */
   Stream<Point> get onMouseMove {
     Stream<UIEvent> stream;
-    if (mobile) {
-      stream = canvas.onTouchMove;
+    if (_mobile) {
+      stream = _canvas.onTouchMove;
     } else {
-      stream = canvas.onMouseMove;
+      stream = _canvas.onMouseMove;
     }
-    return stream.map((e) => mousePosition(e));
+    return stream.map((e) => _mousePosition(e));
   }
 
+  /**
+   * Fires a [CqMouseEvent] when an `onMouseDown` or an `onTouchSouch` event
+   * is fired.
+   */
   Stream<CqMouseEvent> get onMouseDown {
     var controller = new StreamController<CqMouseEvent>();
     Stream<UIEvent> stream;
-    if (mobile) {
-      stream = canvas.onTouchStart;
+    if (_mobile) {
+      stream = _canvas.onTouchStart;
     } else {
-      stream = canvas.onMouseDown;
+      stream = _canvas.onMouseDown;
     }
     stream.listen((e) {
       e.preventDefault();
-      controller.add(new CqMouseEvent(mousePosition(e), e.button));
+      controller.add(new CqMouseEvent(_mousePosition(e), e.button));
     });
     return controller.stream;
   }
 
+  /**
+   * Fires a [CqMouseEvent] when an `onMouseUp` or an `onTouchEnd` event
+   * is fired.
+   */
   Stream<CqMouseEvent> get onMouseUp {
     Stream<UIEvent> stream;
-    if (mobile) {
-      stream = canvas.onTouchEnd;
+    if (_mobile) {
+      stream = _canvas.onTouchEnd;
     } else {
-      stream = canvas.onMouseUp;
+      stream = _canvas.onMouseUp;
     }
-    return stream.map((e) => new CqMouseEvent(mousePosition(e), e.button));
+    return stream.map((e) => new CqMouseEvent(_mousePosition(e), e.button));
   }
 
-  /** Returns a [Stream] of swipe direction. */
+  /**
+   * Returns a [Stream] of swipe direction.
+   */
   Stream<String> onSwipe({num threshold: 35, num timeout: 350}) {
     var controller = new StreamController<String>();
     var swipeSP = 0;
@@ -79,13 +109,13 @@ class CqFramework {
 
     swipeStart(e) {
       e.preventDefault();
-      swipeSP = mousePosition(e);
+      swipeSP = _mousePosition(e);
       swipeST = window.performance.now();
     }
 
     swipeUpdate(e) {
       e.preventDefault();
-      swipeEP = mousePosition(e);
+      swipeEP = _mousePosition(e);
       swipeET = window.performance.now();
     }
 
@@ -117,25 +147,33 @@ class CqFramework {
         controller.add(swipeDir);
       }
     }
-    if (mobile) {
-      canvas.onTouchStart.listen((e) => swipeStart(e));
-      canvas.onTouchMove.listen((e) => swipeUpdate(e));
-      canvas.onTouchEnd.listen((e) => swipeEnd(e));
+    if (_mobile) {
+      _canvas.onTouchStart.listen((e) => swipeStart(e));
+      _canvas.onTouchMove.listen((e) => swipeUpdate(e));
+      _canvas.onTouchEnd.listen((e) => swipeEnd(e));
     } else {
-      canvas.onMouseDown.listen((e) => swipeStart(e));
-      canvas.onMouseMove.listen((e) => swipeUpdate(e));
-      canvas.onMouseUp.listen((e) => swipeEnd(e));
+      _canvas.onMouseDown.listen((e) => swipeStart(e));
+      _canvas.onMouseMove.listen((e) => swipeUpdate(e));
+      _canvas.onMouseUp.listen((e) => swipeEnd(e));
     }
     return controller.stream;
   }
 
-  /** Returns a stream of [KeyCode]. */
+  /**
+   * Returns a stream of [KeyCode].
+   */
   Stream<int> get onKeyDown => document.onKeyDown.map((e) => e.keyCode);
-  /** Returns a stream of [KeyCode]. */
+  /**
+   * Returns a stream of [KeyCode].
+   */
   Stream<int> get onKeyUp => document.onKeyUp.map((e) => e.keyCode);
-  /** Returns a Stream of [Rect] for the new size of the window. */
+  /**
+   * Returns a Stream of [Rect] for the new size of the window.
+   */
   Stream<Rect> get onResize => window.onResize.map((_) => new Rect(0, 0, window.innerWidth, window.innerHeight));
-  /** Returns a [Stream} of dropped [ImageElement]. */
+  /**
+   * Returns a [Stream} of dropped [ImageElement].
+   */
   Stream<ImageElement> get onDropImage {
     var controller = new StreamController<ImageElement>();
     document.onDrop.listen((MouseEvent e) {
@@ -171,13 +209,26 @@ class CqFramework {
   }
 }
 
+/**
+ * Event that is produced by some of the Streams in [CqFramework] with basic
+ * information about a mouse event.
+ */
 class CqMouseEvent {
+  /// Position of the mouse when the event was triggered.
   final Point position;
+  /// Button that was used when the event was triggered.
   final int button;
   CqMouseEvent(this.position, this.button);
 }
 
-class CqStep {
-  final double delta, lastTick;
-  CqStep(this.delta, this.lastTick);
+/**
+ * Event that is produced by some of the Streams in [CqFramework] with timing
+ * data.
+ */
+class CqStepEvent {
+  /// Milliseconds since the last [CqStepEvent].
+  final double delta;
+  /// Tick of the current [CqStepEvent].
+  final double lastTick;
+  CqStepEvent(this.delta, this.lastTick);
 }
