@@ -31,7 +31,7 @@ class Color {
   /**
    * Creates a RGBA string.
    */
-  String toRgba() => "rgb($r,$g,$b,$a)";
+  String toRgba() => "rgba($r,$g,$b,$a)";
   /**
    * Creates a hex string.
    */

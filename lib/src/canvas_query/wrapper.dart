@@ -215,10 +215,13 @@ class CqWrapper implements CanvasRenderingContext2D {
    * Trims the canvas using [color] as the transparent color. If no [color] is
    * provided transparent pixels will be used to determine the size of the
    * trimmed canvas.
+   *
+   * Returns a [Rect] with the trim boundaries or null if nothing was trimmed.
    */
-  void trim({String color}) {
+  Rect trim({String color}) {
     bool transparent;
     List<int> targetColor;
+    var boundary;
 
     if (color != null) {
       targetColor = new Color.fromHex(color).toArray();
@@ -246,8 +249,11 @@ class CqWrapper implements CanvasRenderingContext2D {
 
     if (bound[2] == 0 || bound[3] == 0) {
     } else {
+      boundary = new Rect(bound[0], bound[1], bound[2] - bound[0], bound[3] - bound[1]);
+
       crop(bound[0], bound[1], bound[2] - bound[0] + 1, bound[3] - bound[1] + 1);
     }
+    return boundary;
   }
 
   /**
@@ -658,14 +664,19 @@ class CqWrapper implements CanvasRenderingContext2D {
 
   /**
    * Writes [text] at [x], [y] and wraps at [maxWidth].
+   *
+   * The [nlCallback] will be called before a line is written.
    */
-  void wrappedText(String text, int x, int y, [num maxWidth]) {
+  void wrappedText(String text, int x, int y, num maxWidth, {NewlineCallback nlCallback}) {
     var regexp = new RegExp(r"(\d+)");
     var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
     var lines = getLines(text, maxWidth);
 
     for(var i = 0; i < lines.length; i++) {
       var oy = (y + i * h * 0.6).toInt();
+      if (null != nlCallback) {
+        nlCallback(x, oy);
+      }
       var line = lines[i];
       _context.fillText(line, x, oy);
     }
@@ -876,3 +887,5 @@ class CqWrapper implements CanvasRenderingContext2D {
     _context.putImageData(data, 0, 0);
   }
 }
+
+typedef void NewlineCallback(int x, int y);
