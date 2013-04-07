@@ -1,9 +1,9 @@
 name: canvas_query
-version: 0.1.0
+version: 0.1.1-dev
 author: Dennis Kaselow <Dennis.Kaselow+canvasquery@gmail.com>
 description: A wrapper library for the HTML5 Canvas element which adds a lot of common use image manipulation methods mainly convenient for gamedevelopers.
 homepage: https://github.com/denniskaselow/CanvasQuery.git
 dependencies:
-  browser: ">=0.4.4"
+  browser: any
 dev_dependencies:
-  unittest: ">=0.4.4"
+  unittest: any

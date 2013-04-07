@@ -24,8 +24,8 @@ class CqTools {
   }
 
   static CanvasElement _initBlend(CanvasElement below, var above, num mix, Function blendingFunction(Uint8ClampedArray pixels, Uint8ClampedArray belowPixels, Uint8ClampedArray abovePixels, num mix)) {
-    var belowCtx = below.context2d;
-    var aboveCtx = cq(above).canvas.context2d;
+    var belowCtx = below.context2D;
+    var aboveCtx = cq(above).canvas.context2D;
 
     var belowData = belowCtx.getImageData(0, 0, below.width, below.height);
     var aboveData = aboveCtx.getImageData(0, 0, above.width, above.height);
@@ -34,7 +34,7 @@ class CqTools {
 
     blendingFunction(imageData.data, belowData.data, aboveData.data, mix);
 
-    below.context2d.putImageData(imageData, 0, 0);
+    below.context2D.putImageData(imageData, 0, 0);
   }
 
   static _blendSpecial(List<int> pixels, List<int> belowPixels, List<int> abovePixels, num mix, SpecialBlendFunction blendingFunction) {
@@ -68,7 +68,7 @@ class CqTools {
    */
   static CanvasElement createCanvas(ImageElement img) {
     var result = new CanvasElement(width: img.width, height: img.height);
-    result.context2d.drawImage(img, 0, 0);
+    result.context2D.drawImage(img, 0, 0);
     return result;
   }
 
@@ -76,7 +76,7 @@ class CqTools {
    * Creates an [ImageData] object for the size of [width] and [height].
    */
   static ImageData createImageData(int width, int height) {
-    return new CanvasElement().context2d.createImageData(width, height);
+    return new CanvasElement().context2D.createImageData(width, height);
   }
 
   /**

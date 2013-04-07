@@ -48,7 +48,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    * Wrap an existing [CanvasElement].
    */
   CqWrapper(this._canvas) {
-    _context = _canvas.context2d;
+    _context = _canvas.context2D;
     _framework = new CqFramework._(this);
   }
   /**
@@ -56,7 +56,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   CqWrapper.forWindow() {
     _canvas = new CanvasElement(width: window.innerWidth, height: window.innerHeight);
-    _context = _canvas.context2d;
+    _context = _canvas.context2D;
     window.onResize.listen((e) {
       _canvas.width = window.innerWidth;
       _canvas.height = window.innerHeight;
@@ -133,8 +133,8 @@ class CqWrapper implements CanvasRenderingContext2D {
   void blendSpecialColor(String color, SpecialBlendFunction mode, [num mix = 1]) => blendSpecial(_createCanvas(color), mode, mix);
 
   CanvasElement _createCanvas(String color) => new CanvasElement(width: _canvas.width, height: _canvas.height)
-                                                                ..context2d.fillStyle = color
-                                                                ..context2d.fillRect(0, 0, _canvas.width, _canvas.height);
+                                                                ..context2D.fillStyle = color
+                                                                ..context2D.fillRect(0, 0, _canvas.width, _canvas.height);
 
   /**
    * Calls [stroke()] if [strokeStyle] is set.
@@ -173,7 +173,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   void crop(int x, int y, int width, int height) {
     var canvas = new CanvasElement(width: width, height: height);
-    var context = canvas.context2d;
+    var context = canvas.context2D;
 
     context.drawImageScaledFromSource(_canvas, x, y, width, height, 0, 0, width, height);
     _canvas.width = width;
@@ -264,7 +264,7 @@ class CqWrapper implements CanvasRenderingContext2D {
     var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
     var canvas = new CanvasElement(width: _canvas.width * pixelSize, height: _canvas.height * pixelSize);
-    var context = canvas.context2d;
+    var context = canvas.context2D;
 
     for(var i = 0, len = sourcePixels.length; i < len; i += 4) {
       if(sourcePixels[i + 3] == 0) continue;
@@ -506,7 +506,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   CanvasElement copy() {
     var result = new CanvasElement(width: _canvas.width, height: _canvas.height);
-    result.context2d.drawImage(_canvas, 0, 0);
+    result.context2D.drawImage(_canvas, 0, 0);
     return result;
   }
 
