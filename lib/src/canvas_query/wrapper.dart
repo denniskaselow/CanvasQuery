@@ -78,7 +78,7 @@ class CqWrapper implements CanvasRenderingContext2D {
   /**
    * Delegates to the wrapped [CanvasRenderingContext2D].
    */
-  dynamic noSuchMethod(InvocationMirror im) => im.invokeOn(_context);
+  dynamic noSuchMethod(Invocation im) => im.invokeOn(_context);
 
   /**
    * Appends the canvas to [element].
