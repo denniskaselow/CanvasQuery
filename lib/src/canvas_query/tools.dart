@@ -23,7 +23,7 @@ class CqTools {
     });
   }
 
-  static CanvasElement _initBlend(CanvasElement below, var above, num mix, Function blendingFunction(Uint8ClampedArray pixels, Uint8ClampedArray belowPixels, Uint8ClampedArray abovePixels, num mix)) {
+  static CanvasElement _initBlend(CanvasElement below, var above, num mix, Function blendingFunction(List<int> pixels, List<int> belowPixels, List<int> abovePixels, num mix)) {
     var belowCtx = below.context2D;
     var aboveCtx = cq(above).canvas.context2D;
 
