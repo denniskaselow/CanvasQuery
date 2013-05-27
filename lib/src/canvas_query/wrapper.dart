@@ -41,7 +41,7 @@ class CqWrapper implements CanvasRenderingContext2D {
   /// The wrapped [CanvasElement].
   CanvasElement get canvas => _canvas;
   /// The wrapped [CanvasRenderingContext2D].
-  CanvasRenderingContext2D get context2d => _context;
+  CanvasRenderingContext2D get context2D => _context;
   /// The [CqFramework] to access several Event-[Stream]s.
   CqFramework get framework => _framework;
   /**
@@ -94,7 +94,7 @@ class CqWrapper implements CanvasRenderingContext2D {
   void replaceWith(CqWrapper other) {
     _canvas.replaceWith(other.canvas);
     _canvas = other.canvas;
-    _context = other.context2d;
+    _context = other.context2D;
   }
 
   /**
