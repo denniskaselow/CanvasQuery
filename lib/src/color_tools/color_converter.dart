@@ -32,16 +32,12 @@ List<double> rgbToHsl(int red, int green, int blue) {
   } else {
     num d = maxv - minv;
     s = l > 0.5 ? d / (2*255 - maxv - minv) : d / (maxv + minv);
-    switch(maxv) {
-      case red:
+    if (maxv == red) {
         h = (green - blue) / d + (green < blue ? 6 : 0);
-        break;
-      case green:
+    } else if (maxv == green) {
         h = (blue - red) / d + 2;
-        break;
-      case blue:
+    } else if (maxv == blue) {
         h = (red - green) / d + 4;
-        break;
     }
     h /= 6.0;
   }
@@ -103,16 +99,12 @@ List<double> rgbToHsv(int red, int green, int blue) {
   if(maxv == minv) {
     h = 0.0; // achromatic
   } else {
-    switch(maxv) {
-      case red:
+    if (maxv == red) {
         h = (green - blue) / d + (green < blue ? 6 : 0);
-        break;
-      case green:
+    } else if (maxv == green) {
         h = (blue - red) / d + 2;
-        break;
-      case blue:
+    } else if (maxv == blue) {
         h = (red - green) / d + 4;
-        break;
     }
     h /= 6.0;
   }

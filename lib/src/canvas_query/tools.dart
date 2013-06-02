@@ -105,13 +105,6 @@ class CqTools {
       mouseX = event.page.x;
       mouseY = event.page.y;
     }
-    // IE8 and below doesn't support event.pageX
-    else if (event is MouseEvent) {
-      if (null != event.client.x || null != event.client.y) {
-        mouseX = event.client.x + document.body.scrollLeft + document.documentElement.scrollLeft;
-        mouseY = event.client.y + document.body.scrollTop + document.documentElement.scrollTop;
-      }
-    }
     // Subtract the offset from the mouse coordinates
     coordX = mouseX - totalOffsetX;
     coordY = mouseY - totalOffsetY;
