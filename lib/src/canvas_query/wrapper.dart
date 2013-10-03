@@ -645,7 +645,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   void gradientText(String text, int x, int y, List gradient, [num maxWidth]) {
     var regexp = new RegExp(r"(\d+)");
-    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+    var h = int.parse(regexp.firstMatch(_context.font).group(0)) * 2;
     var lines = getLines(text, maxWidth);
     var oldFillStyle = _context.fillStyle;
 
@@ -669,7 +669,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   void wrappedText(String text, int x, int y, num maxWidth, {NewlineCallback nlCallback}) {
     var regexp = new RegExp(r"(\d+)");
-    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+    var h = int.parse(regexp.firstMatch(_context.font).group(0)) * 2;
     var lines = getLines(text, maxWidth);
 
     for(var i = 0; i < lines.length; i++) {
@@ -688,7 +688,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   Rect textBoundaries(String text, [num maxWidth]) {
     var regexp = new RegExp(r"(\d+)");
-    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
+    var h = int.parse(regexp.firstMatch(_context.font).group(0)) * 2;
     List<String> lines = getLines(text, maxWidth);
     if (null == maxWidth) {
       maxWidth = _context.measureText(text).width;
