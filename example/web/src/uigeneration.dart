@@ -9,7 +9,7 @@ void uigeneration(DivElement parent) {
     ..fillStyle = 'black'
     ..font = '16px Verdana';
 
-  var uitext = query('#uitext');
+  var uitext = query('textarea#uitext');
   var text;
   text = uitext.value;
   uitext.onKeyUp.listen((data) {

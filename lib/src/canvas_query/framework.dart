@@ -51,7 +51,7 @@ class CqFramework {
   }
 
   /**
-   * Fires a [CqMouseEvent] when an `onMouseMove` or an `onTouchMove` event
+   * Fires a [CqUiEvent] when an `onMouseMove` or an `onTouchMove` event
    * is fired.
    */
   Stream<Point> get onMouseMove {
@@ -65,36 +65,36 @@ class CqFramework {
   }
 
   /**
-   * Fires a [CqMouseEvent] when an `onMouseDown` or an `onTouchSouch` event
+   * Fires a [CqUiEvent] when an `onMouseDown` or an `onTouchSouch` event
    * is fired.
    */
-  Stream<CqMouseEvent> get onMouseDown {
-    var controller = new StreamController<CqMouseEvent>();
+  Stream<CqUiEvent> get onMouseDown {
+    var controller = new StreamController<CqUiEvent>();
     Stream<UIEvent> stream;
     if (_mobile) {
       stream = _canvas.onTouchStart;
     } else {
       stream = _canvas.onMouseDown;
     }
-    stream.listen((e) {
+    stream.listen((UIEvent e) {
       e.preventDefault();
-      controller.add(new CqMouseEvent(_mousePosition(e), e.button));
+      controller.add(new CqUiEvent(_mousePosition(e), e.which));
     });
     return controller.stream;
   }
 
   /**
-   * Fires a [CqMouseEvent] when an `onMouseUp` or an `onTouchEnd` event
+   * Fires a [CqUiEvent] when an `onMouseUp` or an `onTouchEnd` event
    * is fired.
    */
-  Stream<CqMouseEvent> get onMouseUp {
+  Stream<CqUiEvent> get onMouseUp {
     Stream<UIEvent> stream;
     if (_mobile) {
       stream = _canvas.onTouchEnd;
     } else {
       stream = _canvas.onMouseUp;
     }
-    return stream.map((e) => new CqMouseEvent(_mousePosition(e), e.button));
+    return stream.map((e) => new CqUiEvent(_mousePosition(e), e.which));
   }
 
   /**
@@ -102,9 +102,9 @@ class CqFramework {
    */
   Stream<String> onSwipe({num threshold: 35, num timeout: 350}) {
     var controller = new StreamController<String>();
-    var swipeSP = 0;
+    Point swipeSP;
     var swipeST = 0;
-    var swipeEP = 0;
+    Point swipeEP;
     var swipeET = 0;
 
     swipeStart(e) {
@@ -213,12 +213,12 @@ class CqFramework {
  * Event that is produced by some of the Streams in [CqFramework] with basic
  * information about a mouse event.
  */
-class CqMouseEvent {
+class CqUiEvent {
   /// Position of the mouse when the event was triggered.
   final Point position;
   /// Button that was used when the event was triggered.
-  final int button;
-  CqMouseEvent(this.position, this.button);
+  final int which;
+  CqUiEvent(this.position, this.which);
 }
 
 /**

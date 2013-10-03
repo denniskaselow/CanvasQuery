@@ -31,12 +31,12 @@ void framework(DivElement parent) {
     }
   });
   framework.onMouseDown.listen((e) {
-    if (0 == e.button) {
+    if (1 == e.which) {
       draw = true;
     }
   });
   framework.onMouseUp.listen((e) {
-    if (0 == e.button) {
+    if (1 == e.which) {
       draw = false;
     }
   });
