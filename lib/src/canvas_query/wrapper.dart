@@ -216,9 +216,9 @@ class CqWrapper implements CanvasRenderingContext2D {
    * provided transparent pixels will be used to determine the size of the
    * trimmed canvas.
    *
-   * Returns a [Rect] with the trim boundaries or null if nothing was trimmed.
+   * Returns a [Rectangle] with the trim boundaries or null if nothing was trimmed.
    */
-  Rect trim({String color}) {
+  Rectangle trim({String color}) {
     bool transparent;
     List<int> targetColor;
     var boundary;
@@ -249,7 +249,7 @@ class CqWrapper implements CanvasRenderingContext2D {
 
     if (bound[2] == 0 || bound[3] == 0) {
     } else {
-      boundary = new Rect(bound[0], bound[1], bound[2] - bound[0], bound[3] - bound[1]);
+      boundary = new Rectangle(bound[0], bound[1], bound[2] - bound[0], bound[3] - bound[1]);
 
       crop(bound[0], bound[1], bound[2] - bound[0] + 1, bound[3] - bound[1] + 1);
     }
@@ -362,8 +362,8 @@ class CqWrapper implements CanvasRenderingContext2D {
 
     var scale = (_canvas.width / size) / _canvas.width;
     var temp = new CqWrapper.forSize(_canvas.width, _canvas.height);
-    var normal = new Rect(0, 0, _canvas.width, _canvas.height);
-    var shrunk = new Rect(0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt());
+    var normal = new Rectangle(0, 0, _canvas.width, _canvas.height);
+    var shrunk = new Rectangle(0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt());
 
     temp._context.drawImageToRect(_canvas, shrunk, sourceRect: normal);
     clear();
@@ -683,17 +683,17 @@ class CqWrapper implements CanvasRenderingContext2D {
   }
 
   /**
-   * Returns a [Rect] with the size of a given [text]. If [maxWidth]
+   * Returns a [Rectangle] with the size of a given [text]. If [maxWidth]
    * is given, the [text] will be wrapped.
    */
-  Rect textBoundaries(String text, [num maxWidth]) {
+  Rectangle textBoundaries(String text, [num maxWidth]) {
     var regexp = new RegExp(r"(\d+)");
     var h = int.parse(regexp.firstMatch(_context.font).group(0)) * 2;
     List<String> lines = getLines(text, maxWidth);
     if (null == maxWidth) {
       maxWidth = _context.measureText(text).width;
     }
-    return new Rect(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
+    return new Rectangle(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
   }
 
   /**

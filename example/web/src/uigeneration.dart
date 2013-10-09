@@ -22,8 +22,8 @@ void uigeneration(DivElement parent) {
   var maxWidth = 400;
   var buttonWidth = 300;
   var buttonHeight = 40;
-  var sgButtonRect = new Rect(100, 20, buttonWidth, buttonHeight);
-  var instrButtonRect = new Rect(100, 70, buttonWidth, buttonHeight);
+  var sgButtonRect = new Rectangle(100, 20, buttonWidth, buttonHeight);
+  var instrButtonRect = new Rectangle(100, 70, buttonWidth, buttonHeight);
   var sgSize = ui.textBoundaries(startGameText);
   var instrSize = ui.textBoundaries(instructionsText);
   var showSelection = false;

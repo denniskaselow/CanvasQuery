@@ -168,9 +168,9 @@ class CqFramework {
    */
   Stream<int> get onKeyUp => document.onKeyUp.map((e) => e.keyCode);
   /**
-   * Returns a Stream of [Rect] for the new size of the window.
+   * Returns a Stream of [Rectangle] for the new size of the window.
    */
-  Stream<Rect> get onResize => window.onResize.map((_) => new Rect(0, 0, window.innerWidth, window.innerHeight));
+  Stream<Rectangle> get onResize => window.onResize.map((_) => new Rectangle(0, 0, window.innerWidth, window.innerHeight));
   /**
    * Returns a [Stream} of dropped [ImageElement].
    */

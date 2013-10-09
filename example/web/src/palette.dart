@@ -14,7 +14,7 @@ var imageData = {'dawnbringer' : {'name': 'Dawnbringer', 'res': 'dawnbringermock
 void palette(DivElement parent) {
   SelectElement paletteSelect = query('#paletteselect');
   SelectElement imageSelect = query('#imageselect');
-  paletteSelect.append(new OptionElement('None', '', true, true));
+  paletteSelect.append(new OptionElement(data: 'None', value: '', defaultSelected: true, selected: true));
 
   var loader = new List<Future<ImageElement>>();
   loader.addAll(initDropdown(paletteSelect, paletteData));
@@ -60,7 +60,7 @@ initDropdown(SelectElement dropdown, Map<String, Map<String, dynamic>> data) {
     futures.add(completer.future);
     loadImage(item['res']).then((image) {
       item['img'] = image;
-      dropdown.append(new OptionElement(item['name'], key, false, false));
+      dropdown.append(new OptionElement(data: item['name'], value: key));
       completer.complete(image);
     });
   });
