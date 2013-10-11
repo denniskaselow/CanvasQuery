@@ -518,9 +518,9 @@ class CqWrapper implements CanvasRenderingContext2D {
    * Sets the [hue], [saturation] and [lightness] of the image.
    */
   void setHsl({num hue, num saturation, num lightness}) {
-    double hIn = null == hue ? null : hue.toDouble();
-    double sIn = null == saturation ? null : saturation.toDouble();
-    double lIn = null == lightness ? null : lightness.toDouble();
+    double hIn = null == hue ? null : limitValue(hue, 0, 1).toDouble();
+    double sIn = null == saturation ? null : limitValue(saturation, 0, 1).toDouble();
+    double lIn = null == lightness ? null : limitValue(lightness, 0, 1).toDouble();
 
     var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
     var pixels = data.data;
@@ -531,9 +531,9 @@ class CqWrapper implements CanvasRenderingContext2D {
     for(var i = 0, len = pixels.length; i < len; i += 4) {
       hsl = rgbToHsl(pixels[i + 0], pixels[i + 1], pixels[i + 2]);
 
-      h = hIn == null ? hsl[0] : limitValue(hIn, 0, 1);
-      s = sIn == null ? hsl[1] : limitValue(sIn, 0, 1);
-      l = lIn == null ? hsl[2] : limitValue(lIn, 0, 1);
+      h = hIn == null ? hsl[0] : hIn;
+      s = sIn == null ? hsl[1] : sIn;
+      l = lIn == null ? hsl[2] : lIn;
 
       newPixel = hslToRgb(h, s, l);
 
@@ -590,7 +590,8 @@ class CqWrapper implements CanvasRenderingContext2D {
     for(var i = 0, len = pixels.length; i < len; i += 4) {
       hsl = rgbToHsl(pixels[i + 0], pixels[i + 1], pixels[i + 2]);
 
-      if ((hsl[0] - src).abs() < 0.05) h = wrapValue(dst, 0, 1); else h = hsl[0];
+      if ((hsl[0] - src).abs() < 0.05) h = wrapValue(dst, 0, 1);
+      else h = hsl[0];
 
       newPixel = hslToRgb(h, hsl[1], hsl[2]);
 
