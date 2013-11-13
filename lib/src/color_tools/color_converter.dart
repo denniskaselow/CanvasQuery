@@ -1,10 +1,17 @@
 part of color_tools;
 
 /**
- * Converts a hexadecimal presentation of a color (#123456) into a list of RGB-values.
+ * Converts a hexadecimal presentation of a color (#123456 or #123) into a list of RGB-values.
  */
 List<int> hexToRgb(String hex) {
-  return [int.parse('0x${hex[1]}${hex[2]}'), int.parse('0x${hex[3]}${hex[4]}'), int.parse('0x${hex[5]}${hex[6]}')];
+  switch (hex.length) {
+    case 7:
+      return [int.parse('0x${hex[1]}${hex[2]}'), int.parse('0x${hex[3]}${hex[4]}'), int.parse('0x${hex[5]}${hex[6]}')];
+    case 4:
+      return [int.parse('0x${hex[1]}${hex[1]}'), int.parse('0x${hex[2]}${hex[2]}'), int.parse('0x${hex[3]}${hex[3]}')];
+    default:
+      throw 'invalid hexadecimal presentation of color: $hex';
+  }
 }
 
 /**
@@ -153,4 +160,15 @@ List<int> hsvToRgb(num hue, num saturation, num value) {
   }
 
   return [(r * 255 + 0.5).toInt(), (g * 255 + 0.5).toInt(), (b * 255 + 0.5).toInt()];
+}
+
+num limitValue(num value, num min, num max) => value < min ? min : value > max ? max : value;
+num mixIt(num a, num b, num ammount) => a + (b - a) * ammount;
+num wrapValue(num value, num min, num max) {
+  if(value < min) {
+    value = max + (value - min);
+  } else if(value > max) {
+    value = min + (value - max);
+  }
+  return value;
 }
