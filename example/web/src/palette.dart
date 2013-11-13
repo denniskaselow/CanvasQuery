@@ -12,9 +12,9 @@ var imageData = {'dawnbringer' : {'name': 'Dawnbringer', 'res': 'dawnbringermock
                  'farming': {'name': 'Farming', 'res': 'farminglpc.png', 'url': 'http://opengameart.org/content/farming-tilesets-magic-animations-and-ui-elements'}};
 
 void palette(DivElement parent) {
-  SelectElement paletteSelect = query('#paletteselect');
-  SelectElement imageSelect = query('#imageselect');
-  paletteSelect.append(new OptionElement(data: 'None', value: '', defaultSelected: true, selected: true));
+  SelectElement paletteSelect = querySelector('#paletteselect');
+  SelectElement imageSelect = querySelector('#imageselect');
+  paletteSelect.append(new OptionElement(data: 'None', value: '', selected: true));
 
   var loader = new List<Future<ImageElement>>();
   loader.addAll(initDropdown(paletteSelect, paletteData));

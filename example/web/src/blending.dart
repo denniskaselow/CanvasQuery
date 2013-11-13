@@ -6,10 +6,10 @@ void blending(DivElement parent) {
   loadImages(['below.png', 'above.png']).then((images) {
     below = images[0];
     above = images[1];
-    InputElement mixSlider = query("#mix");
+    InputElement mixSlider = querySelector("#mix");
     blendAll(mixSlider, below, above, parent);
     mixSlider.onChange.listen((_) {
-      parent.queryAll("canvas").forEach((canvas) => canvas.remove());
+      parent.querySelectorAll("canvas").forEach((canvas) => canvas.remove());
       blendAll(mixSlider, below, above, parent);
     });
   });

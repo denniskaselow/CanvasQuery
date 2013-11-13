@@ -18,7 +18,7 @@ CqWrapper cq([var selector, int height]) {
     height = (height != null ? height : window.innerHeight);
     canvas = new CanvasElement(width: width, height: height);
   } else if (selector is String) {
-    canvas = query(selector);
+    canvas = querySelector(selector);
   } else if (selector is ImageElement) {
     canvas = CqTools.createCanvas(selector);
   } else if (selector is CqWrapper) {
@@ -65,7 +65,7 @@ class CqWrapper implements CanvasRenderingContext2D {
   /**
    * Queries a {CanvasElement] from the DOM and wraps it.
    */
-  CqWrapper.query(String selector) : this(query(selector));
+  CqWrapper.query(String selector) : this(querySelector(selector));
   /**
    * Creates and wraps a [CanvasElement] with the given [width] and [height].
    */

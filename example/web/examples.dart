@@ -21,20 +21,17 @@ var showcases = {'coloring': coloring, 'blending': blending,
                  'uigeneration': uigeneration};
 
 void main() {
-
-  window.setImmediate(() {
-    showcases.forEach((key, value) => showShowcase(key, value));
-  });
+  showcases.forEach((key, value) => showShowcase(key, value));
 }
 
 void showShowcase(String showcase, Function showcaseFunction) {
-  Element navEntry = query("#show_$showcase");
+  Element navEntry = querySelector("#show_$showcase");
   navEntry.onClick.listen((_) {
     showcases.keys.forEach((section) {
-      query("#$section").style.display = 'none';
-      query("#show_$section").classes.remove('highlight');
+      querySelector("#$section").style.display = 'none';
+      querySelector("#show_$section").classes.remove('highlight');
     });
-    var parent = query("div#$showcase");
+    var parent = querySelector("div#$showcase");
     parent.style.display = 'block';
     navEntry.classes.add('highlight');
     if ('true' != parent.dataset['init']) {

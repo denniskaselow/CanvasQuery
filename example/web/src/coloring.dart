@@ -5,9 +5,9 @@ void coloring(DivElement parent) {
     var current = cq(image)..canvas.classes.add('example');
     current.appendTo(parent);
 
-    InputElement hueSlider = query("#hue");
-    InputElement saturationSlider = query("#saturation");
-    InputElement lightnessSlider = query("#lightness");
+    InputElement hueSlider = querySelector("#hue");
+    InputElement saturationSlider = querySelector("#saturation");
+    InputElement lightnessSlider = querySelector("#lightness");
     hueSlider.onChange.listen((_) =>  updateHsl(image, hueSlider, saturationSlider, lightnessSlider, current));
     saturationSlider.onChange.listen((_) => updateHsl(image, hueSlider, saturationSlider, lightnessSlider, current));
     lightnessSlider.onChange.listen((_) => updateHsl(image, hueSlider, saturationSlider, lightnessSlider, current));
