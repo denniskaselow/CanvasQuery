@@ -82,11 +82,6 @@ class CqWrapper implements CanvasRenderingContext2D {
   CqWrapper.forImage(ImageElement img) : this(CqTools.createCanvas(img));
 
   /**
-   * Delegates to the wrapped [CanvasRenderingContext2D].
-   */
-  dynamic noSuchMethod(Invocation invocation) => reflect(_context).delegate(invocation);
-
-  /**
    * Appends the canvas to [element].
    */
   void appendTo(Element element) {
@@ -151,16 +146,16 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   void strokeAndFill({String strokeStyle, String fillStyle}) {
     if (null != strokeStyle) {
-      var tmp = _context.strokeStyle;
-      _context..strokeStyle = strokeStyle
-              ..stroke()
-              ..strokeStyle = tmp;
+      var tmp = this.strokeStyle;
+      this.strokeStyle = strokeStyle;
+      stroke();
+      this.strokeStyle = tmp;
     }
     if (null != fillStyle) {
-      var tmp = _context.fillStyle;
-      _context..fillStyle = fillStyle
-              ..fill()
-              ..fillStyle = tmp;
+      var tmp = this.fillStyle;
+      this.fillStyle = fillStyle;
+      fill();
+      this.fillStyle = tmp;
     }
   }
 
@@ -168,9 +163,9 @@ class CqWrapper implements CanvasRenderingContext2D {
    * Draws a circls at [x], [y] with [radius].
    */
   void circle(num x, num y, num radius, {String strokeStyle, String fillStyle}) {
-    _context.beginPath();
-    _context.arc(x, y, radius, 0, PI * 2, true);
-    _context.closePath();
+    beginPath();
+    arc(x, y, radius, 0, PI * 2, true);
+    closePath();
     strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
   }
 
@@ -185,7 +180,7 @@ class CqWrapper implements CanvasRenderingContext2D {
     _canvas.width = width;
     _canvas.height = height;
     clear();
-    _context.drawImage(canvas, 0, 0);
+    drawImage(canvas, 0, 0);
   }
 
   /**
@@ -234,7 +229,7 @@ class CqWrapper implements CanvasRenderingContext2D {
       transparent = targetColor[4] == 255 ? true : false;
     } else transparent = true;
 
-    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourceData = getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
     var bound = [_canvas.width, _canvas.height, 0, 0];
@@ -267,7 +262,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   void resizePixel(int pixelSize) {
 
-    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourceData = getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
     var canvas = new CanvasElement(width: _canvas.width * pixelSize, height: _canvas.height * pixelSize);
     var context = canvas.context2D;
@@ -307,7 +302,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    * Reduces the colors of the image to the colors in the [palette].
    */
   void matchPalette(List<String> palette) {
-    var imgData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var imgData = getImageData(0, 0, _canvas.width, _canvas.height);
 
     var rgbPalette = new List<Color>(palette.length);
     for(var i = 0; i < palette.length; i++) {
@@ -337,7 +332,7 @@ class CqWrapper implements CanvasRenderingContext2D {
       imgData.data[i + 2] = paletteRgb[2];
     }
 
-    _context.putImageData(imgData, 0, 0);
+    putImageData(imgData, 0, 0);
   }
 
   /**
@@ -345,7 +340,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   List<String> getPalette() {
     var palette = new List<String>();
-    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourceData = getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
     for(var i = 0; i < sourcePixels.length; i += 4) {
@@ -363,19 +358,19 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   void pixelize([int size = 4]) {
     if (_canvas.width < size) size = _canvas.width;
-    var imageSmoothingEnabled = _context.imageSmoothingEnabled;
-    _context.imageSmoothingEnabled = false;
+    var tmp = imageSmoothingEnabled;
+    imageSmoothingEnabled = false;
 
     var scale = (_canvas.width / size) / _canvas.width;
     var temp = new CqWrapper.forSize(_canvas.width, _canvas.height);
     var normal = new Rectangle(0, 0, _canvas.width, _canvas.height);
     var shrunk = new Rectangle(0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt());
 
-    temp._context.drawImageToRect(_canvas, shrunk, sourceRect: normal);
+    temp.drawImageToRect(_canvas, shrunk, sourceRect: normal);
     clear();
-    _context.drawImageToRect(temp.canvas, normal, sourceRect: shrunk);
+    drawImageToRect(temp.canvas, normal, sourceRect: shrunk);
 
-    _context.imageSmoothingEnabled = imageSmoothingEnabled;
+    imageSmoothingEnabled = tmp;
   }
 
   /**
@@ -384,7 +379,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   List<bool> colorToMask(String hexColor, {bool inverted: false}) {
     Color color = new Color.fromHex(hexColor);
-    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourceData = getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
     var mask = new List<bool>(sourcePixels.length ~/ 4);
@@ -402,7 +397,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    * will be the average of the RGB-values.
    */
   List<int> grayscaleToMask() {
-    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourceData = getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
     var mask = new List<int>(sourcePixels.length ~/ 4);
@@ -419,7 +414,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    * Light pixels become opaque. Dark pixels become transparent.
    */
   void grayscaleToAlpha() {
-    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourceData = getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
     for(var i = 0, len = sourcePixels.length; i < len; i += 4) {
@@ -428,7 +423,7 @@ class CqWrapper implements CanvasRenderingContext2D {
       sourcePixels[i + 0] = sourcePixels[i + 1] = sourcePixels[i + 2] = 255;
     }
 
-    _context.putImageData(sourceData, 0, 0);
+    putImageData(sourceData, 0, 0);
   }
 
   /**
@@ -437,7 +432,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    * For a grayscalemask of [int] values, black will turn a pixel transparent.
    */
   void applyMask(List mask) {
-    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourceData = getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
     var mode = mask is List<bool> ? "bool" : "byte";
@@ -449,7 +444,7 @@ class CqWrapper implements CanvasRenderingContext2D {
       else sourcePixels[i + 3] = value;
     }
 
-    _context.putImageData(sourceData, 0, 0);
+    putImageData(sourceData, 0, 0);
   }
 
   /**
@@ -459,7 +454,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   void fillMask(List mask, String hexColor, [String hexColorGradient]) {
 
-    var sourceData = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var sourceData = getImageData(0, 0, _canvas.width, _canvas.height);
     var sourcePixels = sourceData.data;
 
     var maskType = mask is List<bool> ? "bool" : "byte";
@@ -492,7 +487,7 @@ class CqWrapper implements CanvasRenderingContext2D {
       }
     }
 
-    _context.putImageData(sourceData, 0, 0);
+    putImageData(sourceData, 0, 0);
   }
 
   /**
@@ -500,10 +495,10 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   void clear({String color}) {
     if(null != color) {
-      _context.fillStyle = color;
-      _context.fillRect(0, 0, _canvas.width, _canvas.height);
+      fillStyle = color;
+      fillRect(0, 0, _canvas.width, _canvas.height);
     } else {
-      _context.clearRect(0, 0, _canvas.width, _canvas.height);
+      clearRect(0, 0, _canvas.width, _canvas.height);
     }
   }
 
@@ -528,7 +523,7 @@ class CqWrapper implements CanvasRenderingContext2D {
     double sIn = null == saturation ? null : limitValue(saturation, 0, 1).toDouble();
     double lIn = null == lightness ? null : limitValue(lightness, 0, 1).toDouble();
 
-    var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var data = getImageData(0, 0, _canvas.width, _canvas.height);
     var pixels = data.data;
     double h, s, l;
     List<double> hsl;
@@ -548,7 +543,7 @@ class CqWrapper implements CanvasRenderingContext2D {
       pixels[i + 2] = newPixel[2];
     }
 
-    _context.putImageData(data, 0, 0);
+    putImageData(data, 0, 0);
   }
 
   /**
@@ -563,7 +558,7 @@ class CqWrapper implements CanvasRenderingContext2D {
     double sIn = null == saturation ? null : saturation.toDouble();
     double lIn = null == lightness ? null : lightness.toDouble();
 
-    var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var data = getImageData(0, 0, _canvas.width, _canvas.height);
     var pixels = data.data;
     double h, s, l;
     List<double> hsl;
@@ -582,14 +577,14 @@ class CqWrapper implements CanvasRenderingContext2D {
       pixels[i + 1] = newPixel[1];
       pixels[i + 2] = newPixel[2];
     }
-    _context.putImageData(data, 0, 0);
+    putImageData(data, 0, 0);
   }
 
   /**
    * Replaces the hue of 0<=[src]<=1 with 0<=[dst]<=1.
    */
   void replaceHue(num src, num dst) {
-    var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var data = getImageData(0, 0, _canvas.width, _canvas.height);
     var pixels = data.data;
     var h, hsl, newPixel;
 
@@ -606,14 +601,14 @@ class CqWrapper implements CanvasRenderingContext2D {
       pixels[i + 2] = newPixel[2];
     }
 
-    _context.putImageData(data, 0, 0);
+    putImageData(data, 0, 0);
   }
 
   /**
    * Inverts the colors of the image.
    */
   void invert() {
-    var data = _context.getImageData(0, 0, _canvas.width, _canvas.height);
+    var data = getImageData(0, 0, _canvas.width, _canvas.height);
     var pixels = data.data;
 
     for(var i = 0, len = pixels.length; i < len; i += 4) {
@@ -622,24 +617,24 @@ class CqWrapper implements CanvasRenderingContext2D {
       pixels[i + 2] = 255 - pixels[i + 2];
     }
 
-    _context.putImageData(data, 0, 0);
+    putImageData(data, 0, 0);
   }
 
   /**
    * Creates a rect with rounded corners.
    */
   void roundRect(num x, num y, num width, num height, num radius, {String strokeStyle, String fillStyle}) {
-    _context..beginPath()
-      ..moveTo(x + radius, y)
-      ..lineTo(x + width - radius, y)
-      ..quadraticCurveTo(x + width, y, x + width, y + radius)
-      ..lineTo(x + width, y + height - radius)
-      ..quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
-      ..lineTo(x + radius, y + height)
-      ..quadraticCurveTo(x, y + height, x, y + height - radius)
-      ..lineTo(x, y + radius)
-      ..quadraticCurveTo(x, y, x + radius, y)
-      ..closePath();
+    beginPath();
+    moveTo(x + radius, y);
+    lineTo(x + width - radius, y);
+    quadraticCurveTo(x + width, y, x + width, y + radius);
+    lineTo(x + width, y + height - radius);
+    quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    lineTo(x + radius, y + height);
+    quadraticCurveTo(x, y + height, x, y + height - radius);
+    lineTo(x, y + radius);
+    quadraticCurveTo(x, y, x + radius, y);
+    closePath();
     strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
   }
 
@@ -652,21 +647,21 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   void gradientText(String text, int x, int y, List gradient, [num maxWidth]) {
     var regexp = new RegExp(r"(\d+)");
-    var h = int.parse(regexp.firstMatch(_context.font).group(0)) * 2;
+    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
     var lines = getLines(text, maxWidth);
-    var oldFillStyle = _context.fillStyle;
+    var oldFillStyle = fillStyle;
 
     for(var i = 0; i < lines.length; i++) {
       var oy = (y + i * h * 0.6).toInt();
-      var lingrad = _context.createLinearGradient(0, oy, 0, (oy + h * 0.6).toInt());
+      var lingrad = createLinearGradient(0, oy, 0, (oy + h * 0.6).toInt());
 
       for(var j = 0; j < gradient.length; j += 2) {
         lingrad.addColorStop(gradient[j], gradient[j + 1]);
       }
-      _context..fillStyle = lingrad
-              ..fillText(lines[i], x, oy);
+      fillStyle = lingrad;
+      fillText(lines[i], x, oy);
     }
-    _context.fillStyle = oldFillStyle;
+    fillStyle = oldFillStyle;
   }
 
   /**
@@ -676,7 +671,7 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   void wrappedText(String text, int x, int y, num maxWidth, {NewlineCallback nlCallback}) {
     var regexp = new RegExp(r"(\d+)");
-    var h = int.parse(regexp.firstMatch(_context.font).group(0)) * 2;
+    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
     var lines = getLines(text, maxWidth);
 
     for(var i = 0; i < lines.length; i++) {
@@ -685,7 +680,7 @@ class CqWrapper implements CanvasRenderingContext2D {
         nlCallback(x, oy);
       }
       var line = lines[i];
-      _context.fillText(line, x, oy);
+      fillText(line, x, oy);
     }
   }
 
@@ -695,10 +690,10 @@ class CqWrapper implements CanvasRenderingContext2D {
    */
   Rectangle textBoundaries(String text, [num maxWidth]) {
     var regexp = new RegExp(r"(\d+)");
-    var h = int.parse(regexp.firstMatch(_context.font).group(0)) * 2;
+    var h = int.parse(regexp.firstMatch(font).group(0)) * 2;
     List<String> lines = getLines(text, maxWidth);
     if (null == maxWidth) {
-      maxWidth = _context.measureText(text).width;
+      maxWidth = measureText(text).width;
     }
     return new Rectangle(0, 0, maxWidth, (lines.length * h * 0.6).toInt());
   }
@@ -713,13 +708,13 @@ class CqWrapper implements CanvasRenderingContext2D {
     var oy = 0;
 
     var lines = new List<String>.from([""]);
-    var spaceWidth = _context.measureText(" ").width;
+    var spaceWidth = measureText(" ").width;
     if (null != maxWidth) {
       maxWidth += spaceWidth;
       var line = 0;
       for(var i = 0; i < words.length; i++) {
         var word = "${words[i]} ";
-        var wordWidth = _context.measureText(word).width;
+        var wordWidth = measureText(word).width;
 
         if(ox + wordWidth > maxWidth) {
           lines.add("");
@@ -740,13 +735,13 @@ class CqWrapper implements CanvasRenderingContext2D {
    * Creates a paper bag shaped path.
    */
   void paperBag(num x, num y, num width, num height, num blowX, num blowY, {String strokeStyle, String fillStyle}) {
-    _context..beginPath()
-      ..moveTo(x, y)
-      ..quadraticCurveTo(x + width / 2, y + height * blowY, x + width, y)
-      ..quadraticCurveTo(x + width - width * blowX, y + height / 2, x + width, y + height)
-      ..quadraticCurveTo(x + width / 2, y + height - height * blowY, x, y + height)
-      ..quadraticCurveTo(x + width * blowX, y + height / 2, x, y)
-      ..closePath();
+    beginPath();
+    moveTo(x, y);
+    quadraticCurveTo(x + width / 2, y + height * blowY, x + width, y);
+    quadraticCurveTo(x + width - width * blowX, y + height / 2, x + width, y + height);
+    quadraticCurveTo(x + width / 2, y + height - height * blowY, x, y + height);
+    quadraticCurveTo(x + width * blowX, y + height / 2, x, y);
+    closePath();
     strokeAndFill(strokeStyle: strokeStyle, fillStyle: fillStyle);
   }
 
@@ -757,34 +752,126 @@ class CqWrapper implements CanvasRenderingContext2D {
    * [image].
    */
   void borderImage(var image, num x, num y, num width, num height, num top, num right, num bottom, num left, {bool fill: false, String fillStyle}) {
-    _context
-      /* top */
-      ..drawImageScaledFromSource(image, left, 0, image.width - left - right, top, x + left, y, width - left - right, top)
-      /* bottom */
-      ..drawImageScaledFromSource(image, left, image.height - bottom, image.width - left - right, bottom, x + left, y + height - bottom, width - left - right, bottom)
-      /* left */
-      ..drawImageScaledFromSource(image, 0, top, left, image.height - bottom - top, x, y + top, left, height - bottom - top)
-      /* right */
-      ..drawImageScaledFromSource(image, image.width - right, top, right, image.height - bottom - top, x + width - right, y + top, right, height - bottom - top)
-      /* top-left */
-      ..drawImageScaledFromSource(image, 0, 0, left, top, x, y, left, top)
-      /* top-right */
-      ..drawImageScaledFromSource(image, image.width - right, 0, right, top, x + width - right, y, right, top)
-      /* bottom-right */
-      ..drawImageScaledFromSource(image, image.width - right, image.height - bottom, right, bottom, x + width - right, y + height - bottom, right, bottom)
-      /* bottom-left */
-      ..drawImageScaledFromSource(image, 0, image.height - bottom, left, bottom, x, y + height - bottom, left, bottom);
+    /* top */
+    drawImageScaledFromSource(image, left, 0, image.width - left - right, top, x + left, y, width - left - right, top);
+    /* bottom */
+    drawImageScaledFromSource(image, left, image.height - bottom, image.width - left - right, bottom, x + left, y + height - bottom, width - left - right, bottom);
+    /* left */
+    drawImageScaledFromSource(image, 0, top, left, image.height - bottom - top, x, y + top, left, height - bottom - top);
+    /* right */
+    drawImageScaledFromSource(image, image.width - right, top, right, image.height - bottom - top, x + width - right, y + top, right, height - bottom - top);
+    /* top-left */
+    drawImageScaledFromSource(image, 0, 0, left, top, x, y, left, top);
+    /* top-right */
+    drawImageScaledFromSource(image, image.width - right, 0, right, top, x + width - right, y, right, top);
+    /* bottom-right */
+    drawImageScaledFromSource(image, image.width - right, image.height - bottom, right, bottom, x + width - right, y + height - bottom, right, bottom);
+    /* bottom-left */
+    drawImageScaledFromSource(image, 0, image.height - bottom, left, bottom, x, y + height - bottom, left, bottom);
 
     if (null != fillStyle) {
-      var oldFillStyle = _context.fillStyle;
-      _context..fillStyle = fillStyle
-              ..fillRect(x + left, y + top, width - left - right, height - top - bottom)
-              ..fillStyle = oldFillStyle;
+      var oldFillStyle = this.fillStyle;
+      this.fillStyle = fillStyle;
+      fillRect(x + left, y + top, width - left - right, height - top - bottom);
+      this.fillStyle = oldFillStyle;
     } else if (fill) {
-      _context.drawImageScaledFromSource(image, left, top, image.width - right - left, image.height - bottom - top, x + left, y + top, width - left - right, height - top - bottom);
+      drawImageScaledFromSource(image, left, top, image.width - right - left, image.height - bottom - top, x + left, y + top, width - left - right, height - top - bottom);
     }
   }
 
+  // properties and functions of [CanvasRenderingContext2D]
+  // not using noSuchMethod for smaller and faster code
+  double get backingStorePixelRatio => _context.backingStorePixelRatio;
+  Path get currentPath => _context.currentPath;
+  get fillStyle =>  _context.fillStyle;
+  String get font =>  _context.font;
+  num get globalAlpha => _context.globalAlpha;
+  String get globalCompositeOperation => _context.globalCompositeOperation;
+  bool get imageSmoothingEnabled => _context.imageSmoothingEnabled;
+  String get lineCap => _context.lineCap;
+  num get lineDashOffset => _context.lineDashOffset;
+  String get lineJoin => _context.lineJoin;
+  num get lineWidth => _context.lineWidth;
+  num get miterLimit => _context.miterLimit;
+  num get shadowBlur => _context.shadowBlur;
+  String get shadowColor => _context.shadowColor;
+  num get shadowOffsetX => _context.shadowOffsetX;
+  num get shadowOffsetY => _context.shadowOffsetY;
+  get strokeStyle => _context.strokeStyle;
+  String get textAlign => _context.textAlign;
+  String get textBaseline => _context.textBaseline;
+
+  void set currentPath(Path value) { _context.currentPath = value; }
+  void set fillStyle(value) { _context.fillStyle = value; }
+  void set font(String value) { _context.font = value; }
+  void set globalAlpha(num value) { _context.globalAlpha = value; }
+  void set globalCompositeOperation(String value) { _context.globalCompositeOperation = value; }
+  void set imageSmoothingEnabled(bool value) { _context.imageSmoothingEnabled = value; }
+  void set lineCap(String value) { _context.lineCap = value; }
+  void set lineDashOffset(num value) { _context.lineDashOffset = value; }
+  void set lineJoin(String value) { _context.lineJoin = value; }
+  void set lineWidth(num value) { _context.lineWidth = value; }
+  void set miterLimit(num value) { _context.miterLimit = value; }
+  void set shadowBlur(num value) { _context.shadowBlur = value; }
+  void set shadowColor(String value) { _context.shadowColor = value; }
+  void set shadowOffsetX(num value) { _context.shadowOffsetX = value; }
+  void set shadowOffsetY(num value) { _context.shadowOffsetY = value; }
+  void set strokeStyle(value) { _context.strokeStyle = value; }
+  void set textAlign(String value) { _context.textAlign = value; }
+  void set textBaseline(String value) { _context.textBaseline = value; }
+
+  void arc(num x, num y, num radius, num startAngle, num endAngle, [bool anticlockwise = false]) => _context.arc(x, y, radius, startAngle, endAngle);
+  void arcTo(num x1, num y1, num x2, num y2, num radius) => _context.arcTo(x1, y1, x2, y2, radius);
+  void beginPath() => _context.beginPath();
+  void bezierCurveTo(num cp1x, num cp1y, num cp2x, num cp2y, num x, num y) => _context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+  void clearRect(num x, num y, num width, num height) => _context.clearRect(x, y, width, height);
+  void clip([String winding]) => _context.clip(winding);
+  void closePath() => _context.closePath();
+  ImageData createImageData(num sw, num sh) => _context.createImageData(sw, sh);
+  ImageData createImageDataFromImageData(ImageData imagedata) => _context.createImageDataFromImageData(imagedata);
+  CanvasGradient createLinearGradient(num x0, num y0, num x1, num y1) => _context.createLinearGradient(x0, y0, x1, y1);
+  CanvasPattern createPattern(CanvasElement canvas, String repetitionType) =>  _context.createPattern(canvas, repetitionType);
+  CanvasPattern createPatternFromImage(ImageElement image, String repetitionType) => _context.createPatternFromImage(image, repetitionType);
+  CanvasGradient createRadialGradient(num x0, num y0, num r0, num x1, num y1, num r1) => _context.createRadialGradient(x0, y0, r0, x1, y1, r1);
+  bool drawCustomFocusRing(Element element) => _context.drawCustomFocusRing(element);
+  void drawImage(CanvasImageSource source, num destX, num destY) => _context.drawImage(source, destX, destY);
+  void drawImageScaled(CanvasImageSource source, num destX, num destY, num destWidth, num destHeight) => _context.drawImageScaled(source, destX, destY, destWidth, destHeight);
+  void drawImageScaledFromSource(CanvasImageSource source, num sourceX, num sourceY, num sourceWidth, num sourceHeight, num destX, num destY, num destWidth, num destHeight) => _context.drawImageScaledFromSource(source, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight);
+  void drawImageToRect(CanvasImageSource source, Rectangle destRect, {Rectangle sourceRect}) => _context.drawImageToRect(source, destRect, sourceRect: sourceRect);
+  void drawSystemFocusRing(Element element) => _context.drawSystemFocusRing(element);
+  void ellipse(num x, num y, num radiusX, num radiusY, num rotation, num startAngle, num endAngle, bool anticlockwise) => _context.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
+  void fill([String winding]) => _context.fill(winding);
+  void fillRect(num x, num y, num width, num height) => _context.fillRect(x, y, width, height);
+  void fillText(String text, num x, num y, [num maxWidth]) => _context.fillText(text, x, y, maxWidth);
+  Canvas2DContextAttributes getContextAttributes() => _context.getContextAttributes();
+  ImageData getImageData(num sx, num sy, num sw, num sh) => _context.getImageData(sx, sy, sw, sh);
+  ImageData getImageDataHD(num sx, num sy, num sw, num sh) => _context.getImageDataHD(sx, sy, sw, sh);
+  List<num> getLineDash() => _context.getLineDash();
+  bool isPointInPath(num x, num y, [String winding]) => _context.isPointInPath(x, y, winding);
+  bool isPointInStroke(num x, num y) => _context.isPointInStroke(x, y);
+  void lineTo(num x, num y) => _context.lineTo(x, y);
+  TextMetrics measureText(String text) => _context.measureText(text);
+  void moveTo(num x, num y) => _context.moveTo(x, y);
+  void putImageData(ImageData imagedata, num dx, num dy, [num dirtyX, num dirtyY, num dirtyWidth, num dirtyHeight]) => _context.putImageData(imagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+  void putImageDataHD(ImageData imagedata, num dx, num dy, [num dirtyX, num dirtyY, num dirtyWidth, num dirtyHeight]) => _context.putImageDataHD(imagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+  void quadraticCurveTo(num cpx, num cpy, num x, num y) => _context.quadraticCurveTo(cpx, cpy, x, y);
+  void rect(num x, num y, num width, num height) => _context.rect(x, y, width, height);
+  void resetTransform() => _context.resetTransform();
+  void restore() => _context.restore();
+  void rotate(num angle) => _context.rotate(angle);
+  void save() => _context.save();
+  void scale(num sx, num sy) => _context.scale(sx, sy);
+  void setFillColorHsl(int h, num s, num l, [num a = 1]) => _context.setFillColorHsl(h, s, l, a);
+  void setFillColorRgb(int r, int g, int b, [num a = 1]) => _context.setFillColorRgb(r, g, b, a);
+  void setLineDash(List<num> dash) => _context.setLineDash(dash);
+  void setStrokeColorHsl(int h, num s, num l, [num a = 1]) => _context.setStrokeColorHsl(h, s, l, a);
+  void setStrokeColorRgb(int r, int g, int b, [num a = 1]) => _context.setStrokeColorRgb(r, g, b, a);
+  void setTransform(num m11, num m12, num m21, num m22, num dx, num dy) => _context.setTransform(m11, m12, m21, m22, dx, dy);
+  void stroke() => _context.stroke();
+  void strokeRect(num x, num y, num width, num height) => _context.strokeRect(x, y, width, height);
+  void strokeText(String text, num x, num y, [num maxWidth]) => _context.strokeText(text, x, y, maxWidth);
+  void transform(num m11, num m12, num m21, num m22, num dx, num dy) => _context.transform(m11, m12, m21, m22, dx, dy);
+  void translate(num tx, num ty) => _context.translate(tx, ty);
 }
 
 typedef void NewlineCallback(int x, int y);
