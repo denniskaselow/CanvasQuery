@@ -1,7 +1,7 @@
 part of canvas_query;
 
 class Effects {
-  CqWrapper cq;
+  CanvasQuery cq;
 
   Effects(this.cq);
 

@@ -23,9 +23,9 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
 
   /**
    * Replaces the wrapped [CanvasElement] and [CanvasRenderingContext2D] in this
-   * [CqWrapper] object and in the DOM.
+   * [CanvasQuery] object and in the DOM.
    */
-  void replaceWith(CqWrapper other) {
+  void replaceWith(CanvasQuery other) {
     _canvas.replaceWith(other.canvas);
     _canvas = other.canvas;
     _context = other.context2D;
@@ -36,7 +36,7 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
    */
   void blendOn(CanvasElement what, BlendFunction mode, [num mix = 1]) => CqTools.blend(what, this.canvas, mode, mix);
   /**
-   * Blends the object [what] ([CqWrapper], [CanvasElement], [ImageElement] or
+   * Blends the object [what] ([CanvasQuery], [CanvasElement], [ImageElement] or
    * color) onto this canvas using [mode] and [mix].
    */
   void blend(var what, BlendFunction mode, [num mix = 1]) {
@@ -51,7 +51,7 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
    */
   void blendColor(String color, BlendFunction mode, [num mix = 1]) => blend(_createCanvas(color), mode, mix);
   /**
-   * Blends the object [what] ([CqWrapper], [CanvasElement], [ImageElement] or
+   * Blends the object [what] ([CanvasQuery], [CanvasElement], [ImageElement] or
    * color) onto this canvas using [mode] and [mix].
    */
   void blendSpecial(var what, SpecialBlendFunction mode, [num mix = 1]) {
@@ -140,7 +140,7 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
       }
     }
 
-    var resized = new CqWrapper.forSize(w, h)..drawImageScaledFromSource(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
+    var resized = new CanvasQuery.forSize(w, h)..drawImageScaledFromSource(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, w, h);
     _canvas = resized._canvas;
     _context = resized._context;
   }
@@ -295,7 +295,7 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
     imageSmoothingEnabled = false;
 
     var scale = (_canvas.width / size) / _canvas.width;
-    var temp = new CqWrapper.forSize(_canvas.width, _canvas.height);
+    var temp = new CanvasQuery.forSize(_canvas.width, _canvas.height);
     var normal = new Rectangle(0, 0, _canvas.width, _canvas.height);
     var shrunk = new Rectangle(0, 0, (_canvas.width * scale).toInt(), (_canvas.height * scale).toInt());
 

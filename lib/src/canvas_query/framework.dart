@@ -4,10 +4,10 @@ part of canvas_query;
  * A simple framework for easy access to events created by the canvas.
  */
 class CqFramework {
-  /// The [CqWrapper] of this object.
-  final CqWrapper cqWrapper;
-  CqFramework._(this.cqWrapper);
-  CanvasElement get _canvas => cqWrapper.canvas;
+  /// The [CanvasQuery] of this object.
+  final CanvasQuery cq;
+  CqFramework._(this.cq);
+  CanvasElement get _canvas => cq.canvas;
   Point _mousePosition(UIEvent e) => CqTools.mousePosition(e);
   bool get _mobile => CqTools.mobile;
 

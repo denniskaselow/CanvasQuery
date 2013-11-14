@@ -2,7 +2,8 @@
 ##0.2.0
 ### API
 * added functionality to `Color`
-* removed convolution effects from `CqWrapper`, added new method `effects` that
+* renamed `CqWrapper` to `CanvasQuery`
+* removed convolution effects from `CanvasQuery`, added new method `effects` that
 can be used to access them
 ### Internal
 * added version constraint for release of Dart

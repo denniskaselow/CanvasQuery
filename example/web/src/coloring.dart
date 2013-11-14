@@ -14,7 +14,7 @@ void coloring(DivElement parent) {
   });
 }
 
-void updateHsl(ImageElement image, InputElement hueSlider, InputElement saturationSlider, InputElement lightnessSlider, CqWrapper current) {
+void updateHsl(ImageElement image, InputElement hueSlider, InputElement saturationSlider, InputElement lightnessSlider, CanvasQuery current) {
   var hue = hueSlider.value;
   var sat = saturationSlider.value;
   var light = lightnessSlider.value;
