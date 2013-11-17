@@ -759,7 +759,13 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
   void beginPath() => _context.beginPath();
   void bezierCurveTo(num cp1x, num cp1y, num cp2x, num cp2y, num x, num y) => _context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
   void clearRect(num x, num y, num width, num height) => _context.clearRect(x, y, width, height);
-  void clip([String winding]) => _context.clip(winding);
+  void clip([String winding]) {
+    if (null == winding) {
+      _context.clip();
+    } else {
+      _context.clip(winding);
+    }
+  }
   void closePath() => _context.closePath();
   ImageData createImageData(num sw, num sh) => _context.createImageData(sw, sh);
   ImageData createImageDataFromImageData(ImageData imagedata) => _context.createImageDataFromImageData(imagedata);
@@ -774,14 +780,26 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
   void drawImageToRect(CanvasImageSource source, Rectangle destRect, {Rectangle sourceRect}) => _context.drawImageToRect(source, destRect, sourceRect: sourceRect);
   void drawSystemFocusRing(Element element) => _context.drawSystemFocusRing(element);
   void ellipse(num x, num y, num radiusX, num radiusY, num rotation, num startAngle, num endAngle, bool anticlockwise) => _context.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
-  void fill([String winding]) => _context.fill(winding);
+  void fill([String winding]) {
+    if (null == winding) {
+      _context.fill();
+    } else {
+      _context.fill(winding);
+    }
+  }
   void fillRect(num x, num y, num width, num height) => _context.fillRect(x, y, width, height);
   void fillText(String text, num x, num y, [num maxWidth]) => _context.fillText(text, x, y, maxWidth);
   Canvas2DContextAttributes getContextAttributes() => _context.getContextAttributes();
   ImageData getImageData(num sx, num sy, num sw, num sh) => _context.getImageData(sx, sy, sw, sh);
   ImageData getImageDataHD(num sx, num sy, num sw, num sh) => _context.getImageDataHD(sx, sy, sw, sh);
   List<num> getLineDash() => _context.getLineDash();
-  bool isPointInPath(num x, num y, [String winding]) => _context.isPointInPath(x, y, winding);
+  bool isPointInPath(num x, num y, [String winding]) {
+    if (null == winding) {
+      _context.isPointInPath(x, y);
+    } else {
+      _context.isPointInPath(x, y, winding);
+    }
+  }
   bool isPointInStroke(num x, num y) => _context.isPointInStroke(x, y);
   void lineTo(num x, num y) => _context.lineTo(x, y);
   TextMetrics measureText(String text) => _context.measureText(text);

@@ -1,4 +1,7 @@
 # Changelog
+##0.2.1
+### Bugfix
+* fixed bug for functions that expect a CanvasWindingRule as optional parameter
 ##0.2.0
 ### API
 * added functionality to `Color`
