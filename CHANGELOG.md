@@ -1,4 +1,7 @@
 # Changelog
+##0.2.2
+### Bugfix
+* fixed bug when trim is used with a color
 ##0.2.1
 ### Bugfix
 * fixed bug for functions that expect a CanvasWindingRule as optional parameter

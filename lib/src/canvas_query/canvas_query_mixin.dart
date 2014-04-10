@@ -159,7 +159,7 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
 
     if (color != null) {
       targetColor = new Color.fromHex(color).toArray();
-      transparent = targetColor[4] == 255 ? true : false;
+      transparent = targetColor[3] == 1.0 ? false : true;
     } else transparent = true;
 
     var sourceData = getImageData(0, 0, _canvas.width, _canvas.height);
@@ -170,7 +170,7 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
     for(var i = 0, len = sourcePixels.length; i < len; i += 4) {
       if(transparent) {
         if(sourcePixels[i + 3] == 0) continue;
-      } else if(sourcePixels[i + 0] == color[0] && sourcePixels[i + 1] == color[1] && sourcePixels[i + 2] == color[2]) continue;
+      } else if(sourcePixels[i + 0] == targetColor[0] && sourcePixels[i + 1] == targetColor[1] && sourcePixels[i + 2] == targetColor[2]) continue;
       var x = (i ~/ 4) % _canvas.width;
       var y = (i ~/ 4) ~/ _canvas.width;
 
