@@ -3,6 +3,7 @@ library canvas_query;
 import 'dart:async';
 import 'dart:math';
 import 'dart:html';
+import 'dart:svg' show Matrix;
 
 import 'package:canvas_query/blend_functions.dart';
 export 'package:canvas_query/blend_functions.dart';

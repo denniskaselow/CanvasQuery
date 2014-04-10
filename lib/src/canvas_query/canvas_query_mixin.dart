@@ -717,6 +717,7 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
   double get backingStorePixelRatio => _context.backingStorePixelRatio;
   CanvasElement get canvas => _canvas;
   Path get currentPath => _context.currentPath;
+  Matrix get currentTransform => _context.currentTransform;
   get fillStyle =>  _context.fillStyle;
   String get font =>  _context.font;
   num get globalAlpha => _context.globalAlpha;
@@ -736,6 +737,7 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
   String get textBaseline => _context.textBaseline;
 
   void set currentPath(Path value) { _context.currentPath = value; }
+  void set currentTransform(Matrix value) { _context.currentTransform = value; }
   void set fillStyle(value) { _context.fillStyle = value; }
   void set font(String value) { _context.font = value; }
   void set globalAlpha(num value) { _context.globalAlpha = value; }
@@ -795,10 +797,9 @@ class CanvasQueryMixin implements CanvasRenderingContext2D {
   List<num> getLineDash() => _context.getLineDash();
   bool isPointInPath(num x, num y, [String winding]) {
     if (null == winding) {
-      _context.isPointInPath(x, y);
-    } else {
-      _context.isPointInPath(x, y, winding);
+      return _context.isPointInPath(x, y);
     }
+    return _context.isPointInPath(x, y, winding);
   }
   bool isPointInStroke(num x, num y) => _context.isPointInStroke(x, y);
   void lineTo(num x, num y) => _context.lineTo(x, y);

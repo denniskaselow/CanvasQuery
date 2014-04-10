@@ -3,7 +3,6 @@ library examples;
 import 'dart:async';
 import 'dart:html';
 import 'dart:math';
-import 'dart:collection';
 
 import 'package:canvas_query/canvas_query.dart';
 
