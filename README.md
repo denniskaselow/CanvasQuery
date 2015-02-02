@@ -1,4 +1,4 @@
-Canvas Query
+Canvas Query [Dart version no longer maintained]
 ============
 
 [![Build Status](https://drone.io/github.com/denniskaselow/CanvasQuery/status.png)](https://drone.io/github.com/denniskaselow/CanvasQuery/latest)
